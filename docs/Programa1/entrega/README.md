@@ -71,6 +71,22 @@ Cada `main.typ` produce un PDF junto a sí mismo (`main.pdf`). El target
 `just bundle` (opcional) concatena todos en un solo PDF para la entrega
 final.
 
+## Mantener sincronizado con las fuentes en inglés
+
+Cuando se edita `CONTEXT.md`, un ADR, `implementation_plan.md` o se hace
+una nueva sesión de grilling, los entregables aquí derivan información de
+esos archivos y se vuelven obsoletos. Para resincronizar:
+
+```
+/entrega-sync
+```
+
+Es un skill local del proyecto (vive en `.claude/skills/entrega-sync/`)
+que detecta el drift, propone los cambios, pregunta solo sobre
+traducciones ambiguas, aplica las ediciones y verifica que el árbol
+`entrega/` siga compilando. Hacer la llamada en una sesión fresca de
+Claude funciona — el skill carga el contexto que necesita.
+
 ## Fuente canónica de información
 
 Los entregables citan y reproducen información que vive en otros lados
