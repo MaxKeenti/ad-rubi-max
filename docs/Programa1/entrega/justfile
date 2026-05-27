@@ -1,0 +1,65 @@
+# Build entregables. Run from this directory.
+#   just              # default: build all
+#   just build        # build all
+#   just one 03-arquitectura   # build one
+#   just bundle       # concat all PDFs into entrega-completa.pdf (needs qpdf or pdftk)
+#   just clean        # remove all generated PDFs
+
+default: build
+
+# --root .. makes the entrega/ directory the Typst project root so that
+# main.typ files can import /shared/style.typ (absolute path).
+
+# Compile every entregable's main.typ to PDF.
+build:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ROOT="$(pwd)"
+    for dir in 0*/; do
+      if [ -f "$dir/main.typ" ]; then
+        echo "→ Compilando $dir"
+        (cd "$dir" && typst compile --root "$ROOT" main.typ)
+      fi
+    done
+    echo "✓ Listo. Revisa los main.pdf en cada subcarpeta."
+
+# Compile a single entregable: `just one 03-arquitectura`
+one DIR:
+    cd {{DIR}} && typst compile --root "$(cd .. && pwd)" main.typ
+
+# Watch one entregable, recompile on save: `just watch 03-arquitectura`
+watch DIR:
+    cd {{DIR}} && typst watch --root "$(cd .. && pwd)" main.typ
+
+# Concatenate all PDFs into a single bundle. Requires qpdf.
+bundle: build
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if ! command -v qpdf >/dev/null; then
+      echo "qpdf no instalado. brew install qpdf"
+      exit 1
+    fi
+    pdfs=()
+    for dir in 0*/; do
+      if [ -f "$dir/main.pdf" ]; then pdfs+=("$dir/main.pdf"); fi
+    done
+    qpdf --empty --pages "${pdfs[@]}" -- entrega-completa.pdf
+    echo "✓ entrega-completa.pdf generado"
+
+# Render all Mermaid sources in shared/diagrams to SVG. Requires mmdc.
+diagrams:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if ! command -v mmdc >/dev/null; then
+      echo "mmdc no instalado. npm install -g @mermaid-js/mermaid-cli"
+      echo "Alternativa: pegar el .mmd en https://mermaid.live y exportar SVG manualmente."
+      exit 1
+    fi
+    for mmd in shared/diagrams/*.mmd; do
+      svg="${mmd%.mmd}.svg"
+      echo "→ $mmd → $svg"
+      mmdc -i "$mmd" -o "$svg" -b transparent
+    done
+
+clean:
+    rm -f 0*/main.pdf entrega-completa.pdf
