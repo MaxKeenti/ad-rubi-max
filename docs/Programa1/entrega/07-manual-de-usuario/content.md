@@ -9,7 +9,7 @@
 
 ### Requisitos del dispositivo
 
-- Android 8.0 (API 26) o superior.
+- Android 16 (API 36) o superior.
 - Conexión a internet **solo para el primer inicio de sesión** y para
   sincronizar las capturas. Las operaciones cotidianas funcionan offline.
 - Espacio libre: ~50 MB.

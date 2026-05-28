@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "302527247449",
+    "project_id": "mangos-372bd",
+    "storage_bucket": "mangos-372bd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:302527247449:android:e3853497321a039a4ead48",
+        "android_client_info": {
+          "package_name": "com.example.mangos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgrcIMrf3WWAca4K122aT-PlSTklBVnm8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

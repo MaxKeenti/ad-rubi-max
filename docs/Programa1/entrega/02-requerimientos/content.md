@@ -72,8 +72,8 @@ la consola de Firebase; no hay auto-registro en la app.
 
 ### 4.1 Plataforma y stack
 
-- **Android** ≥ API 26 (Android 8.0 Oreo) — Compose require 21+; subimos
-  el mínimo para alinear con Material 3.
+- **Android** ≥ API 36 (Android 16) — el proyecto actual define
+  `minSdk = 36`, `targetSdk = 36` y compila con Android 16 API 36.1.
 - **Kotlin** + Jetpack Compose + Material 3.
 - **Backend:** Firebase Firestore + Firebase Authentication.
 
