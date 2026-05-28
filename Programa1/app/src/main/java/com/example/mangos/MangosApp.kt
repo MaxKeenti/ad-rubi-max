@@ -8,6 +8,6 @@ import dagger.hilt.android.HiltAndroidApp
 class MangosApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        Log.i("MangosApp", "Mangos USA — bootstrap OK")
+        Log.i("MangosApp", "Mangos USA - bootstrap OK")
     }
 }

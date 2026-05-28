@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
 fun BootstrapPlaceholder(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
-            text = "Mangos USA — bootstrap OK",
+            text = "Mangos USA - bootstrap OK",
             style = MaterialTheme.typography.headlineSmall,
         )
     }
