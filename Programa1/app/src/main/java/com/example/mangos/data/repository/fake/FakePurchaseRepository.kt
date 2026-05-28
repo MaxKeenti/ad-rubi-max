@@ -2,9 +2,9 @@ package com.example.mangos.data.repository.fake
 
 import com.example.mangos.data.model.Purchase
 import com.example.mangos.data.repository.PurchaseRepository
+import com.example.mangos.data.util.toDateKey
+import com.example.mangos.data.util.todayDateKey
 import com.google.firebase.Timestamp
-import java.time.LocalDate
-import java.time.ZoneId
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -58,8 +58,7 @@ class FakePurchaseRepository @Inject constructor() : PurchaseRepository {
     override suspend fun add(purchase: Purchase): Result<String> {
         val newId = if (purchase.id.isBlank()) UUID.randomUUID().toString() else purchase.id
         val now = Timestamp.now()
-        // TODO(task 11): replace inline LocalDate call with DateKey.toDateKey(purchase.date)
-        val computedDateKey = LocalDate.now(ZoneId.of("America/Mexico_City")).toString()
+        val computedDateKey = purchase.date?.toDateKey() ?: todayDateKey()
         val toInsert = purchase.copy(
             id = newId,
             enteredAt = now,
