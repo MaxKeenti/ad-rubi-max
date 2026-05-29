@@ -23,6 +23,7 @@ import com.example.mangos.ui.auth.LoginScreen
 import com.example.mangos.ui.dashboard.DashboardScreen
 import com.example.mangos.ui.purchases.AddEditPurchaseScreen
 import com.example.mangos.ui.purchases.PurchaseHistoryScreen
+import com.example.mangos.ui.suppliers.SupplierListScreen
 
 @Composable
 fun MangosNavGraph(
@@ -88,7 +89,14 @@ private fun AuthedGraph(
                 )
             }
             composable(Screen.Suppliers.route) {
-                PlaceholderScreen("Proveedores")
+                SupplierListScreen(
+                    onAddSupplierClick = {
+                        navController.navigate(Screen.AddEditSupplier().route)
+                    },
+                    onSupplierClick = { supplierId ->
+                        navController.navigate(Screen.AddEditSupplier(supplierId).route)
+                    },
+                )
             }
             composable(Screen.Reports.route) {
                 PlaceholderScreen("Reportes")
