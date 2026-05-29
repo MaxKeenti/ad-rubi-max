@@ -21,6 +21,7 @@ import androidx.navigation.navArgument
 import com.example.mangos.data.model.User
 import com.example.mangos.ui.auth.LoginScreen
 import com.example.mangos.ui.dashboard.DashboardScreen
+import com.example.mangos.ui.purchases.AddEditPurchaseScreen
 
 @Composable
 fun MangosNavGraph(
@@ -96,15 +97,10 @@ private fun AuthedGraph(
                         defaultValue = null
                     },
                 ),
-            ) { backStackEntry ->
-                val purchaseId = backStackEntry.arguments
-                    ?.getString(Screen.AddEditPurchase.ARG_PURCHASE_ID)
-                PlaceholderScreen(
-                    text = if (purchaseId == null) {
-                        "Registrar compra"
-                    } else {
-                        "Editar compra"
-                    },
+            ) {
+                AddEditPurchaseScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
                 )
             }
             composable(

@@ -2,9 +2,8 @@ package com.example.mangos.data.repository.fake
 
 import com.example.mangos.data.model.Purchase
 import com.example.mangos.data.repository.PurchaseRepository
+import com.example.mangos.data.util.toDateKey
 import com.google.firebase.Timestamp
-import java.time.LocalDate
-import java.time.ZoneId
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,6 +15,9 @@ import kotlinx.coroutines.flow.map
 class FakePurchaseRepository @Inject constructor() : PurchaseRepository {
 
     private val _purchases = MutableStateFlow<List<Purchase>>(emptyList())
+
+    override fun observeById(id: String): Flow<Purchase?> =
+        _purchases.map { list -> list.firstOrNull { it.id == id && it.deletedAt == null } }
 
     override fun observeByDateKey(dateKey: String): Flow<List<Purchase>> =
         _purchases.map { list ->
@@ -58,13 +60,10 @@ class FakePurchaseRepository @Inject constructor() : PurchaseRepository {
     override suspend fun add(purchase: Purchase): Result<String> {
         val newId = if (purchase.id.isBlank()) UUID.randomUUID().toString() else purchase.id
         val now = Timestamp.now()
-        // TODO(task 11): replace inline LocalDate call with DateKey.toDateKey(purchase.date)
-        val computedDateKey = LocalDate.now(ZoneId.of("America/Mexico_City")).toString()
         val toInsert = purchase.copy(
             id = newId,
-            enteredAt = now,
             serverWrittenAt = now,
-            dateKey = computedDateKey,
+            dateKey = purchase.date.toDateKey(),
         )
         _purchases.value = _purchases.value + toInsert
         return Result.success(newId)

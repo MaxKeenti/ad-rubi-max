@@ -4,6 +4,8 @@ import com.example.mangos.data.model.Purchase
 import kotlinx.coroutines.flow.Flow
 
 interface PurchaseRepository {
+    fun observeById(id: String): Flow<Purchase?>
+
     fun observeByDateKey(dateKey: String): Flow<List<Purchase>>
 
     fun observeBySupplier(supplierId: String, limit: Int = 50): Flow<List<Purchase>>
