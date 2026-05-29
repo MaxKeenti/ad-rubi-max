@@ -12,7 +12,7 @@ private val MXN_FORMAT: DecimalFormat = DecimalFormat(
 )
 
 fun Long?.centavosToMxnString(): String {
-    if (this == null) return "-"
+    if (this == null) return "—"
     val pesos = BigDecimal(this).movePointLeft(2)
     return "$" + MXN_FORMAT.format(pesos) + " MXN"
 }
