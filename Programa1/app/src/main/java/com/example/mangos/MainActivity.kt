@@ -37,6 +37,7 @@ fun BootstrapPlaceholder(modifier: Modifier = Modifier) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(
             text = "Mangos USA - bootstrap OK",
+            color = MaterialTheme.colorScheme.primary,
             style = MaterialTheme.typography.headlineSmall,
         )
     }
