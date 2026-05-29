@@ -23,6 +23,7 @@ import com.example.mangos.ui.auth.LoginScreen
 import com.example.mangos.ui.dashboard.DashboardScreen
 import com.example.mangos.ui.purchases.AddEditPurchaseScreen
 import com.example.mangos.ui.purchases.PurchaseHistoryScreen
+import com.example.mangos.ui.suppliers.AddEditSupplierScreen
 import com.example.mangos.ui.suppliers.SupplierListScreen
 
 @Composable
@@ -125,15 +126,10 @@ private fun AuthedGraph(
                         defaultValue = null
                     },
                 ),
-            ) { backStackEntry ->
-                val supplierId = backStackEntry.arguments
-                    ?.getString(Screen.AddEditSupplier.ARG_SUPPLIER_ID)
-                PlaceholderScreen(
-                    text = if (supplierId == null) {
-                        "Registrar proveedor"
-                    } else {
-                        "Editar proveedor"
-                    },
+            ) {
+                AddEditSupplierScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onSaved = { navController.popBackStack() },
                 )
             }
         }
