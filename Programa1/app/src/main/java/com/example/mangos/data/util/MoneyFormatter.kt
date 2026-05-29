@@ -1,5 +1,7 @@
 package com.example.mangos.data.util
 
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -9,21 +11,29 @@ private val MXN_FORMAT: DecimalFormat = DecimalFormat(
     DecimalFormatSymbols(Locale.US),
 )
 
-/** Formats Long centavos as "$1,234.56 MXN". Null → "—". */
 fun Long?.centavosToMxnString(): String {
-    if (this == null) return "—"
-    val pesos = this / 100.0
+    if (this == null) return "-"
+    val pesos = BigDecimal(this).movePointLeft(2)
     return "$" + MXN_FORMAT.format(pesos) + " MXN"
 }
 
-/**
- * Parses "1234.56" or "1,234.56" → 123456L. Empty/blank → null.
- * Invalid → throws IllegalArgumentException.
- */
 fun String.parseMxnToCentavos(): Long? {
-    if (this.isBlank()) return null
-    val cleaned = this.trim().removePrefix("$").trim().replace(",", "")
-    val parsed = cleaned.toBigDecimalOrNull()
-        ?: throw IllegalArgumentException("Invalid money string: '$this'")
-    return parsed.movePointRight(2).toLong()
+    val normalized = trim()
+        .replace("$", "")
+        .replace("MXN", "", ignoreCase = true)
+        .replace(",", "")
+        .trim()
+
+    if (normalized.isBlank()) return null
+
+    return try {
+        BigDecimal(normalized)
+            .setScale(2, RoundingMode.HALF_UP)
+            .movePointRight(2)
+            .longValueExact()
+    } catch (e: ArithmeticException) {
+        throw IllegalArgumentException("Precio invalido", e)
+    } catch (e: NumberFormatException) {
+        throw IllegalArgumentException("Precio invalido", e)
+    }
 }

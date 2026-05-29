@@ -19,7 +19,7 @@ class FakeSupplierRepository @Inject constructor() : SupplierRepository {
         listOf(
             Supplier(
                 id = Supplier.UNREGISTERED_ID,
-                name = Supplier.UNREGISTERED_NAME,
+                name = "Proveedor no registrado",
                 phone = "",
                 email = "",
                 location = "",
@@ -76,7 +76,6 @@ class FakeSupplierRepository @Inject constructor() : SupplierRepository {
         val newId = if (supplier.id.isBlank()) UUID.randomUUID().toString() else supplier.id
         val toInsert = supplier.copy(
             id = newId,
-            createdAt = supplier.createdAt ?: Timestamp.now(),
         )
         _suppliers.value = _suppliers.value + toInsert
         return Result.success(newId)
@@ -108,7 +107,11 @@ class FakeSupplierRepository @Inject constructor() : SupplierRepository {
         if (_suppliers.value.none { it.id == Supplier.UNREGISTERED_ID }) {
             _suppliers.value = _suppliers.value + Supplier(
                 id = Supplier.UNREGISTERED_ID,
-                name = Supplier.UNREGISTERED_NAME,
+                name = "Proveedor no registrado",
+                phone = "",
+                email = "",
+                location = "",
+                mangoVariety = "",
                 isActive = true,
                 createdAt = Timestamp.now(),
                 createdBy = "system",
