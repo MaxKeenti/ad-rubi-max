@@ -22,6 +22,7 @@ import com.example.mangos.data.model.User
 import com.example.mangos.ui.auth.LoginScreen
 import com.example.mangos.ui.dashboard.DashboardScreen
 import com.example.mangos.ui.purchases.AddEditPurchaseScreen
+import com.example.mangos.ui.purchases.PurchaseHistoryScreen
 
 @Composable
 fun MangosNavGraph(
@@ -80,7 +81,11 @@ private fun AuthedGraph(
                 )
             }
             composable(Screen.Purchases.route) {
-                PlaceholderScreen("Compras")
+                PurchaseHistoryScreen(
+                    onPurchaseClick = { purchaseId ->
+                        navController.navigate(Screen.AddEditPurchase(purchaseId).route)
+                    },
+                )
             }
             composable(Screen.Suppliers.route) {
                 PlaceholderScreen("Proveedores")
