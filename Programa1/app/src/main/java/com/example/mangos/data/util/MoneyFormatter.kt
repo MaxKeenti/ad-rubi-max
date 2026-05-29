@@ -2,16 +2,19 @@ package com.example.mangos.data.util
 
 import java.math.BigDecimal
 import java.math.RoundingMode
-import java.text.NumberFormat
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.util.Locale
 
-private val MX_LOCALE: Locale = Locale.forLanguageTag("es-MX")
+private val MXN_FORMAT: DecimalFormat = DecimalFormat(
+    "#,##0.00",
+    DecimalFormatSymbols(Locale.US),
+)
 
 fun Long?.centavosToMxnString(): String {
     if (this == null) return "-"
     val pesos = BigDecimal(this).movePointLeft(2)
-    val formatted = NumberFormat.getCurrencyInstance(MX_LOCALE).format(pesos)
-    return "$formatted MXN"
+    return "$" + MXN_FORMAT.format(pesos) + " MXN"
 }
 
 fun String.parseMxnToCentavos(): Long? {
@@ -29,8 +32,8 @@ fun String.parseMxnToCentavos(): Long? {
             .movePointRight(2)
             .longValueExact()
     } catch (e: ArithmeticException) {
-        throw IllegalArgumentException("Precio inválido", e)
+        throw IllegalArgumentException("Precio invalido", e)
     } catch (e: NumberFormatException) {
-        throw IllegalArgumentException("Precio inválido", e)
+        throw IllegalArgumentException("Precio invalido", e)
     }
 }
