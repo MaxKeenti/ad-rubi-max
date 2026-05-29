@@ -5,15 +5,10 @@ enum class UserRole {
     OPERATOR;
 
     companion object {
-        fun fromWire(value: String?): UserRole = when (value) {
+        fun fromFirestoreString(s: String?): UserRole = when (s) {
             "admin" -> ADMIN
             "operator" -> OPERATOR
             else -> OPERATOR
         }
-    }
-
-    fun toWire(): String = when (this) {
-        ADMIN -> "admin"
-        OPERATOR -> "operator"
     }
 }

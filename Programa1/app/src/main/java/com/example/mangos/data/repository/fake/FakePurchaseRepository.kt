@@ -20,14 +20,14 @@ class FakePurchaseRepository @Inject constructor() : PurchaseRepository {
     override fun observeByDateKey(dateKey: String): Flow<List<Purchase>> =
         _purchases.map { list ->
             list.filter { it.dateKey == dateKey && it.deletedAt == null }
-                .sortedByDescending { it.enteredAt?.seconds ?: 0L }
+                .sortedByDescending { it.enteredAt.seconds }
         }
 
     override fun observeBySupplier(supplierId: String, limit: Int): Flow<List<Purchase>> =
         _purchases.map { list ->
             list.asSequence()
                 .filter { it.supplierId == supplierId && it.deletedAt == null }
-                .sortedByDescending { it.enteredAt?.seconds ?: 0L }
+                .sortedByDescending { it.enteredAt.seconds }
                 .take(limit)
                 .toList()
         }
@@ -36,7 +36,7 @@ class FakePurchaseRepository @Inject constructor() : PurchaseRepository {
         _purchases.map { list ->
             list.asSequence()
                 .filter { it.deletedAt == null }
-                .sortedByDescending { it.enteredAt?.seconds ?: 0L }
+                .sortedByDescending { it.enteredAt.seconds }
                 .take(limit)
                 .toList()
         }
