@@ -8,6 +8,8 @@ interface PurchaseRepository {
 
     fun observeByDateKey(dateKey: String): Flow<List<Purchase>>
 
+    fun observeByDateRange(startDateKeyInclusive: String, endDateKeyExclusive: String): Flow<List<Purchase>>
+
     fun observeBySupplier(supplierId: String, limit: Int = 50): Flow<List<Purchase>>
 
     fun observeRecent(limit: Int = 5): Flow<List<Purchase>>

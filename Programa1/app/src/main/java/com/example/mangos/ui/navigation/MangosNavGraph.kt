@@ -1,16 +1,11 @@
 package com.example.mangos.ui.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -23,6 +18,7 @@ import com.example.mangos.ui.auth.LoginScreen
 import com.example.mangos.ui.dashboard.DashboardScreen
 import com.example.mangos.ui.purchases.AddEditPurchaseScreen
 import com.example.mangos.ui.purchases.PurchaseHistoryScreen
+import com.example.mangos.ui.reports.ReportsScreen
 import com.example.mangos.ui.suppliers.AddEditSupplierScreen
 import com.example.mangos.ui.suppliers.SupplierListScreen
 
@@ -100,7 +96,7 @@ private fun AuthedGraph(
                 )
             }
             composable(Screen.Reports.route) {
-                PlaceholderScreen("Reportes")
+                ReportsScreen()
             }
             composable(
                 route = Screen.AddEditPurchase.ROUTE_PATTERN,
@@ -133,22 +129,5 @@ private fun AuthedGraph(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.primary,
-            style = MaterialTheme.typography.headlineSmall,
-        )
     }
 }

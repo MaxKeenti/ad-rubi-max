@@ -25,6 +25,21 @@ class FakePurchaseRepository @Inject constructor() : PurchaseRepository {
                 .sortedByDescending { it.enteredAt.seconds }
         }
 
+    override fun observeByDateRange(
+        startDateKeyInclusive: String,
+        endDateKeyExclusive: String,
+    ): Flow<List<Purchase>> =
+        _purchases.map { list ->
+            list.asSequence()
+                .filter {
+                    it.deletedAt == null &&
+                        it.dateKey >= startDateKeyInclusive &&
+                        it.dateKey < endDateKeyExclusive
+                }
+                .sortedByDescending { it.enteredAt.seconds }
+                .toList()
+        }
+
     override fun observeBySupplier(supplierId: String, limit: Int): Flow<List<Purchase>> =
         _purchases.map { list ->
             list.asSequence()
