@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.mangos.data.model.User
 import com.example.mangos.ui.auth.LoginScreen
+import com.example.mangos.ui.dashboard.DashboardScreen
 
 @Composable
 fun MangosNavGraph(
@@ -71,7 +72,11 @@ private fun AuthedGraph(
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(Screen.Dashboard.route) {
-                PlaceholderScreen("Inicio")
+                DashboardScreen(
+                    onAddPurchaseClick = {
+                        navController.navigate(Screen.AddEditPurchase().route)
+                    },
+                )
             }
             composable(Screen.Purchases.route) {
                 PlaceholderScreen("Compras")
