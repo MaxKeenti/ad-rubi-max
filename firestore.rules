@@ -11,6 +11,38 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
     }
 
+    function isOwnerWithinPurchaseEditWindow() {
+      return isSignedIn()
+        && resource.data.createdBy == request.auth.uid
+        && resource.data.deletedAt == null
+        && request.time - resource.data.serverWrittenAt < duration.value(24, 'h');
+    }
+
+    function purchaseCreateIsByCaller() {
+      return isSignedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.serverWrittenAt == request.time
+        && request.resource.data.deletedAt == null
+        && request.resource.data.deletedBy == null;
+    }
+
+    function purchaseOwnerAllowedChanges() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return changed.hasOnly([
+          "supplierId",
+          "supplierNoteFreeform",
+          "quantityTons",
+          "pricePerTonCentavos",
+          "date",
+          "dateKey",
+          "deletedAt",
+          "deletedBy"
+        ])
+        && (!changed.hasAny(["deletedAt", "deletedBy"])
+          || (request.resource.data.deletedAt == request.time
+            && request.resource.data.deletedBy == request.auth.uid));
+    }
+
     match /users/{uid} {
       allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
       allow create: if isAdmin();
@@ -28,12 +60,12 @@ service cloud.firestore {
 
     match /purchases/{id} {
       allow read: if isSignedIn();
-      allow create: if isSignedIn()
-        && request.resource.data.createdBy == request.auth.uid;
-      allow update, delete: if isAdmin()
-        || (isSignedIn()
-          && resource.data.createdBy == request.auth.uid
-          && request.time - resource.data.serverWrittenAt < duration.value(24, 'h'));
+      allow create: if purchaseCreateIsByCaller();
+      allow update: if isAdmin()
+        || (isOwnerWithinPurchaseEditWindow()
+          && purchaseOwnerAllowedChanges());
+      allow delete: if isAdmin()
+        || isOwnerWithinPurchaseEditWindow();
     }
   }
 }
