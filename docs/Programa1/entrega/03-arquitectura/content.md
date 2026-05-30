@@ -141,16 +141,34 @@ match /suppliers/{id} {
 match /purchases/{id} {
   allow read:   request.auth != null;
   allow create: request.auth != null
-                && request.resource.data.createdBy == request.auth.uid;
-  allow update, delete:
-                isAdmin()
+                && request.resource.data.createdBy == request.auth.uid
+                && request.resource.data.serverWrittenAt == request.time
+                && request.resource.data.deletedAt == null
+                && request.resource.data.deletedBy == null;
+  allow update: isAdmin()
                 || (resource.data.createdBy == request.auth.uid
+                    && resource.data.deletedAt == null
+                    && request.time - resource.data.serverWrittenAt
+                       < duration.value(24, 'h')
+                    && affectedKeys.hasOnly([
+                         "supplierId", "supplierNoteFreeform",
+                         "quantityTons", "pricePerTonCentavos",
+                         "date", "dateKey",
+                         "deletedAt", "deletedBy"
+                       ])
+                    && (!affectedKeys.hasAny(["deletedAt", "deletedBy"])
+                        || (request.resource.data.deletedAt == request.time
+                            && request.resource.data.deletedBy
+                               == request.auth.uid)));
+  allow delete: isAdmin()
+                || (resource.data.createdBy == request.auth.uid
+                    && resource.data.deletedAt == null
                     && request.time - resource.data.serverWrittenAt
                        < duration.value(24, 'h'));
 }
 ```
 
-Tres propiedades garantizadas por esta política:
+Cuatro propiedades garantizadas por esta política:
 
 1. **Ningún usuario puede ascenderse a admin** — la regla en `users/{uid}`
    exige que `role` no cambie.
@@ -159,6 +177,22 @@ Tres propiedades garantizadas por esta política:
 3. **La ventana de edición de 24 horas se mide contra el reloj del
    servidor**, no el del cliente. Esto resuelve correctamente el caso de
    escrituras encoladas offline durante el fin de semana (ver ADR-0002).
+   El `serverWrittenAt` se fija como `request.time` en la creación, así
+   que un cliente no puede forjar un valor antiguo para extender la
+   ventana.
+4. **El rastro de auditoría de una compra no es editable.** En `update`
+   por el Operador, los `affectedKeys` deben ser un subconjunto de los
+   campos operativos (`supplierId`, `supplierNoteFreeform`,
+   `quantityTons`, `pricePerTonCentavos`, `date`, `dateKey`,
+   `deletedAt`, `deletedBy`). Esto bloquea reescribir `createdBy`,
+   `createdByName`, `enteredAt`, `serverWrittenAt`, o el
+   `supplierName` denormalizado — la política de "denormalización sin
+   retro-relleno" (ver entregable 06 / glosario) queda enforzada por las
+   reglas, no por convención. Adicionalmente, cuando los `affectedKeys`
+   incluyen `deletedAt` o `deletedBy`, la regla exige
+   `deletedAt == request.time` y `deletedBy == request.auth.uid`: el
+   Operador solo puede borrar como sí mismo y en ese instante, no
+   estampar la eliminación con el `uid` de otro usuario ni retroactivarla.
 
 ## 6. Decisiones arquitectónicas formales
 

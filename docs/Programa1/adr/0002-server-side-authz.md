@@ -40,14 +40,42 @@ authorization. Client UI checks roles for ergonomics only.
   - write: admin only
 - `purchases/{id}`
   - read: any signed-in user
-  - create: any signed-in user, `createdBy == request.auth.uid`
-  - update/delete: admin, OR (`createdBy == request.auth.uid` AND `request.time - resource.data.serverWrittenAt < duration.value(24, 'h')`)
+  - create: any signed-in user, AND
+    - `createdBy == request.auth.uid`
+    - `serverWrittenAt == request.time` (the server clock is the only
+      acceptable value — the client cannot forge an older `serverWrittenAt`
+      to extend the 24h edit window)
+    - `deletedAt == null` AND `deletedBy == null` (cannot create a
+      pre-deleted document)
+  - update: admin (no restrictions), OR owner within window, defined as:
+    - `createdBy == request.auth.uid`
+    - `resource.data.deletedAt == null` (cannot edit a soft-deleted purchase)
+    - `request.time - resource.data.serverWrittenAt < duration.value(24, 'h')`
+    - AND the affected keys are a subset of
+      `{supplierId, supplierNoteFreeform, quantityTons,
+        pricePerTonCentavos, date, dateKey, deletedAt, deletedBy}` — i.e.
+      the owner may revise the operational fields and perform a soft
+      delete but cannot rewrite the audit trail (`createdBy`,
+      `createdByName`, `enteredAt`, `serverWrittenAt`, `supplierName`)
+    - AND if `deletedAt`/`deletedBy` are among the affected keys, then
+      `deletedAt == request.time` AND `deletedBy == request.auth.uid` —
+      the owner can only soft-delete *as themselves, now*, not stamp the
+      deletion with another user's id or backdate it.
+  - delete: admin, OR owner within the same 24h / not-already-deleted window
 
   Note: the 24h window is measured against `serverWrittenAt`, not the
   client-set `enteredAt`. This is deliberate — see CONTEXT.md →
   "Three timestamps, three purposes." Offline-queued writes get a 24h
   edit window starting from when the server accepts the write, not from
   when the Operator hit save on the device.
+
+  The owner-side field whitelist on update closes a gap that would
+  otherwise allow an Operator to rewrite the denormalized `supplierName`
+  or `createdByName` snapshot, or push `enteredAt` forward to disguise
+  when a record was actually captured. Denormalized display fields are
+  by policy frozen at write time (see CONTEXT.md → "Denormalization, no
+  back-fill"); the rule makes that policy structural rather than
+  conventional.
 
 ## Consequences
 

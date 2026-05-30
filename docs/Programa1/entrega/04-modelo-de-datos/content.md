@@ -126,9 +126,15 @@ múltiples campos no contiguos. Los necesarios para v1:
 
 | Consulta | Campos del índice |
 |---|---|
-| Compras del día | `dateKey ASC, deletedAt ASC` |
+| Compras del día | `dateKey ASC, deletedAt ASC, enteredAt DESC` |
 | Historial por proveedor | `supplierId ASC, deletedAt ASC, date DESC` |
 | Compras del Operador para ventana de edición | `createdBy ASC, deletedAt ASC, serverWrittenAt DESC` |
+
+El tercer campo del índice "Compras del día" (`enteredAt DESC`) refleja
+que la consulta del dashboard ordena los recibos del día por orden
+inverso de captura — el camión más recientemente registrado aparece
+arriba. Sin ese tercer campo, Firestore rechazaría el `orderBy` en una
+consulta ya filtrada por `dateKey` y `deletedAt`.
 
 Se declaran en `firestore.indexes.json` y se despliegan junto a las reglas
 con la CLI de Firebase.
