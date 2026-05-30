@@ -159,6 +159,10 @@ erDiagram
 - Si un proveedor se desactiva (`isActive = false`), las compras
   históricas que lo referencian siguen siendo válidas — el nombre del
   proveedor se preserva en `supplierName` denormalizado en cada compra.
+- Si un Operador corrige `supplierId` dentro de la ventana de 24 horas,
+  `supplierName` no se reescribe: el campo denormalizado conserva el
+  nombre capturado originalmente y la relación actual queda en
+  `supplierId` / `supplierNoteFreeform`.
 
 ## 5. Dinero: `Long centavos`
 

@@ -1,9 +1,11 @@
 package com.example.mangos.ui.reports
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.mangos.data.model.Purchase
 import com.example.mangos.data.model.Supplier
 import com.example.mangos.data.repository.PurchaseRepository
+import com.example.mangos.data.repository.toTodaySummary
 import com.example.mangos.data.util.todayDateKey
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
@@ -13,7 +15,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import androidx.lifecycle.viewModelScope
 
 data class ReportsUiState(
     val todaySummary: PurchaseRepository.TodaySummary = PurchaseRepository.TodaySummary(
@@ -47,7 +48,9 @@ class ReportsViewModel @Inject constructor(
         .observeByDateRange(monthStartKey, nextMonthStartKey)
         .map { monthPurchases ->
             ReportsUiState(
-                todaySummary = purchaseRepository.getTodaySummary(todayKey),
+                todaySummary = monthPurchases
+                    .filter { it.dateKey == todayKey }
+                    .toTodaySummary(),
                 topSuppliers = monthPurchases.toTopSuppliers(),
             )
         }

@@ -36,3 +36,17 @@ interface PurchaseRepository {
         val isPending: Boolean,
     )
 }
+
+fun Iterable<Purchase>.toTodaySummary(): PurchaseRepository.TodaySummary {
+    val livePurchases = filter { it.deletedAt == null }
+    val totalSpendCentavos = livePurchases
+        .filter { it.pricePerTonCentavos != null }
+        .sumOf { (it.pricePerTonCentavos!! * it.quantityTons).toLong() }
+
+    return PurchaseRepository.TodaySummary(
+        totalTons = livePurchases.sumOf { it.quantityTons },
+        totalSpendCentavos = totalSpendCentavos,
+        purchaseCount = livePurchases.size,
+        purchasesWithoutPrice = livePurchases.count { it.pricePerTonCentavos == null },
+    )
+}

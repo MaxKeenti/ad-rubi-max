@@ -15,8 +15,9 @@ indicators, a FAB to add a purchase, and the logout overflow.
 - `docs/Programa1/entrega/02-requerimientos/content.md` § 3.4 (RF-DASH-01..04)
 - `docs/Programa1/entrega/04-modelo-de-datos/content.md` § 2.3 (Purchase fields, `dateKey`)
 - `docs/Programa1/entrega/07-manual-de-usuario/content.md` § 3
-- Repository: `PurchaseRepository.observeByDateKey()`, `observeRecent()`, `getTodaySummary()`, `SupplierRepository.observeActive()`, `AuthRepository.currentUser` + `signOut()`
-- Util: `DateKey.todayDateKey()`, `MoneyFormatter`
+- Repository: `PurchaseRepository.observeByDateKey()`, `observeRecentWithPending()`, `SupplierRepository.observeActive()`, `AuthRepository.currentUser` + `signOut()`
+- Summary helper: `Iterable<Purchase>.toTodaySummary()`
+- Util: `todayDateKey()`, `MoneyFormatter`
 
 ## Outputs
 
@@ -25,7 +26,7 @@ indicators, a FAB to add a purchase, and the logout overflow.
   - 3 summary cards: total toneladas hoy, número de compras hoy, proveedores activos
   - "Últimas 5 compras" list — supplier, tons, time (from `enteredAt`), **pending-sync badge** if Firestore says `hasPendingWrites`
   - FAB: "+" navigates to AddEditPurchase
-- `ui/dashboard/DashboardViewModel.kt` — combines `getTodaySummary()` + `observeRecent(5)` + `observeActive()` into a single `uiState`.
+- `ui/dashboard/DashboardViewModel.kt` — combines `observeByDateKey(today).map { it.toTodaySummary() }` + `observeRecentWithPending(5)` + `observeActive()` into a single `uiState`.
 
 ## Acceptance criteria
 

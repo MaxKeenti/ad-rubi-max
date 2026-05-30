@@ -8,6 +8,7 @@ import com.example.mangos.data.model.User
 import com.example.mangos.data.repository.AuthRepository
 import com.example.mangos.data.repository.PurchaseRepository
 import com.example.mangos.data.repository.SupplierRepository
+import com.example.mangos.data.repository.toTodaySummary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.LocalDate
 import java.time.ZoneId
@@ -15,6 +16,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -47,12 +49,13 @@ class DashboardViewModel @Inject constructor(
 
     val uiState: StateFlow<DashboardUiState> = combine(
         authRepository.currentUser,
+        purchaseRepository.observeByDateKey(todayDateKey).map { it.toTodaySummary() },
         purchaseRepository.observeRecentWithPending(limit = 5),
         supplierRepository.observeActive(),
-    ) { user, recentPurchases, activeSuppliers ->
+    ) { user, todaySummary, recentPurchases, activeSuppliers ->
         DashboardUiState(
             user = user,
-            todaySummary = purchaseRepository.getTodaySummary(todayDateKey),
+            todaySummary = todaySummary,
             activeSupplierCount = activeSuppliers.count { it.id != Supplier.UNREGISTERED_ID },
             recentPurchases = recentPurchases.map { entry ->
                 DashboardPurchaseUi(

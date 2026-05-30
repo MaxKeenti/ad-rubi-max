@@ -2,6 +2,7 @@ package com.example.mangos.data.repository.fake
 
 import com.example.mangos.data.model.Purchase
 import com.example.mangos.data.repository.PurchaseRepository
+import com.example.mangos.data.repository.toTodaySummary
 import com.example.mangos.data.util.toDateKey
 import com.google.firebase.Timestamp
 import java.util.UUID
@@ -65,16 +66,7 @@ class FakePurchaseRepository @Inject constructor() : PurchaseRepository {
 
     override suspend fun getTodaySummary(dateKey: String): PurchaseRepository.TodaySummary {
         val todays = _purchases.value.filter { it.dateKey == dateKey && it.deletedAt == null }
-        val totalTons = todays.sumOf { it.quantityTons }
-        val totalSpendCentavos = todays
-            .filter { it.pricePerTonCentavos != null }
-            .sumOf { (it.pricePerTonCentavos!! * it.quantityTons).toLong() }
-        return PurchaseRepository.TodaySummary(
-            totalTons = totalTons,
-            totalSpendCentavos = totalSpendCentavos,
-            purchaseCount = todays.size,
-            purchasesWithoutPrice = todays.count { it.pricePerTonCentavos == null },
-        )
+        return todays.toTodaySummary()
     }
 
     override suspend fun add(purchase: Purchase): Result<String> {

@@ -57,7 +57,7 @@ A Kotlin/Jetpack Compose Android application for **Mangos USA** corporation to d
 | Offline | Firestore built-in offline persistence |
 | Navigation | Jetpack Navigation Compose |
 | DI | Hilt (Dagger) |
-| Charts | Vico (Compose-native charting library) |
+| Reports | Text-only summary cards; charts deferred |
 | State Management | StateFlow + Compose State |
 
 ---
@@ -119,7 +119,7 @@ All read queries default to `where deletedAt == null`. See `CONTEXT.md` → "Thr
 - Add Google services plugin and Hilt plugin
 
 #### [MODIFY] [build.gradle.kts](file:///Users/moonstone/Source/UPIICSA/Plan%202021/2026%202/6NM61%20Programaci%C3%B3n%20m%C3%B3vil/ad-rubi-max/Programa1/app/build.gradle.kts) (app-level)
-- Add dependencies: Firebase (BOM, Firestore, Auth), Hilt, Navigation Compose, Vico charts
+- Add dependencies: Firebase (BOM, Firestore, Auth), Hilt, Navigation Compose
 - Apply Google services and Hilt plugins
 
 #### [NEW] google-services.json
@@ -174,7 +174,7 @@ All read queries default to `where deletedAt == null`. See `CONTEXT.md` → "Thr
 
 #### [NEW] `data/repository/AuthRepository.kt`
 - Interface + Implementation
-- Methods: `login()`, `logout()`, `getCurrentUser()`, `getUserRole()`
+- Surface: `currentUser`, `signIn()`, `signOut()`, `getUserRole()`
 - **No `register()`** — accounts are created by Admin in Firebase Console
 - Wraps Firebase Auth + Firestore user document
 
@@ -185,7 +185,7 @@ All read queries default to `where deletedAt == null`. See `CONTEXT.md` → "Thr
 
 #### [NEW] `data/repository/PurchaseRepository.kt`
 - Interface + Implementation
-- Methods: `observeByDateKey(key)`, `observeBySupplier(id)`, `observeRecent(limit)`, `getTodaySummary()`, `add()`, `update()`, `softDelete()`
+- Surface: `observeById()`, `observeByDateKey()`, `observeByDateRange()`, `observeBySupplier()`, `observeRecent()`, `observeRecentWithPending()`, `getTodaySummary()`, `add()`, `update()`, `softDelete()`
 - All read methods filter `deletedAt == null` by default
 - `add()` populates `dateKey`, `enteredAt`, `serverWrittenAt`, denormalized names atomically
 - Wraps Firestore `purchases` collection
@@ -252,7 +252,7 @@ All read queries default to `where deletedAt == null`. See `CONTEXT.md` → "Thr
 
 ### Component 7: UI Layer — Suppliers (Admin Only)
 
-Server-side authorization is enforced by Firestore Security Rules (see Component 12). Hiding the bottom-nav tab for Operators is ergonomics only.
+Server-side authorization is enforced by Firestore Security Rules (see Component 11). Hiding the bottom-nav tab for Operators is ergonomics only.
 
 #### [NEW] `ui/suppliers/SupplierListScreen.kt`
 - List of all suppliers with name, location, variety, active badge
@@ -337,26 +337,29 @@ Authorization is enforced server-side. Without this, the admin/operator role spl
 
 ### Component 12: Documentation (for professor deliverables)
 
-#### [NEW] `docs/requirements.md`
+#### [NEW] `docs/Programa1/entrega/02-requerimientos/content.md`
 - Functional requirements document in Spanish
-- Organized by module: Auth, Purchases, Suppliers, Reports
-- Includes user stories, acceptance criteria
+- Organized by module: Auth, Purchases, Suppliers, Dashboard, Reports
 - Calls out explicit deferred features (Settings, self-registration, charts, date-range filter)
 
-#### [NEW] `docs/architecture.md`
+#### [NEW] `docs/Programa1/entrega/03-arquitectura/content.md`
 - Architecture justification document in Spanish
-- MVVM + Clean Architecture explanation
-- Scalability justification
+- MVVM + layered architecture explanation, package structure, Firebase flow, offline behavior
 - **Security section:** server-side Firestore rules as authorization SoT (cites ADR-0002)
-- **At-the-dock workflow section:** offline writes, three timestamps, `dateKey` strategy (cites CONTEXT.md)
-- Component diagram (Mermaid)
-- Data flow diagram
 
-#### [NEW] `docs/data_model.md`
+#### [NEW] `docs/Programa1/entrega/04-modelo-de-datos/content.md`
 - Firestore data model documentation
 - Collection schemas, relationships, indexes
 - Soft-delete and denormalization conventions
-- Reference the canonical glossary in `CONTEXT.md`
+
+#### [NEW] `docs/Programa1/entrega/06-glosario/content.md`
+- Canonical Spanish glossary for domain terms, roles, timestamps, money, and authorization policy
+
+#### [NEW] `docs/Programa1/entrega/07-manual-de-usuario/content.md`
+- User-facing manual for login, dashboard, purchase capture, supplier administration, and reports
+
+#### [NEW] `docs/Programa1/entrega/08-plan-de-pruebas/content.md`
+- Manual test plan mapped to the implemented flows and Firestore security cases
 
 ---
 
@@ -409,8 +412,6 @@ com.example.mangos/
 │       ├── Color.kt
 │       ├── Theme.kt
 │       └── Type.kt
-└── util/
-    └── Constants.kt
 ```
 
 ---
@@ -429,7 +430,7 @@ com.example.mangos/
 | 8 | Supplier Screens (CRUD, deactivate-not-delete) | ~1.5 hours |
 | 9 | Reports Screen (text-only — today's tons, today's spend, top-5 suppliers) | ~1 hour |
 | 10 | **Firestore Security Rules + indexes + emulator test** | ~2 hours |
-| 11 | Documentation (requirements, architecture, data_model in Spanish) | ~2 hours |
+| 11 | Documentation (`entrega/` requirements, architecture, data model, glossary, user manual, test plan) | ~2 hours |
 | 12 | Testing & Polish (incl. offline scenarios, edit-window) | ~2 hours |
 | **Total** | | **~20.5 hours** |
 

@@ -77,3 +77,27 @@ Run with `node scripts/seed.mjs`. **Add `scripts/service-account-key.json` to `.
 - **The service-account key is a secret** — different from `google-services.json`. Real secret. Never commit. `.gitignore` it.
 - **Path A is faster for one-off demo seeding.** Path B is reproducible. Pick A unless you'll re-seed multiple times.
 - **Sample data should be realistic** — Mexican supplier names, real states (Veracruz, Oaxaca, Sinaloa, Nayarit), real mango varieties (Ataulfo, Manila, Tommy Atkins, Kent, Haden).
+
+## Verificación (2026-05-30)
+
+La siembra se hizo como corrida única contra el proyecto Firebase
+`mangos-372bd` usando la sesión OAuth local de Firebase CLI y la API REST
+de Firestore. No se agregó `scripts/seed.mjs` porque no se eligió la ruta
+reproducible con service account; tampoco se guardó ningún secreto en el
+repo.
+
+Estado verificado en Firestore:
+
+- `users/{adminUid}` para `admin@admin.com` existe con `role = "admin"` y
+  `accountCreatedAt`.
+- `suppliers/UNREGISTERED` existe con
+  `name = "Proveedor no registrado"` e `isActive = true`.
+- Proveedores determinísticos agregados:
+  - `hernandez-y-hermanos` activo
+  - `mangos-del-pacifico` activo
+  - `frutas-selectas-sa` inactivo
+
+Conteo actual de proveedores en Firestore: 5 activos, 1 inactivo, 6 en
+total. El login real de `admin@admin.com` no se reintentó desde la app
+porque la contraseña no vive en el repo; se verificó el estado de Auth y
+el perfil Firestore necesario para ese usuario.

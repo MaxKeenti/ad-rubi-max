@@ -4,6 +4,7 @@ import com.example.mangos.data.model.Purchase
 import com.example.mangos.data.repository.AuthRepository
 import com.example.mangos.data.repository.PurchaseRepository
 import com.example.mangos.data.repository.SupplierRepository
+import com.example.mangos.data.repository.toTodaySummary
 import com.example.mangos.data.util.toDateKey
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
@@ -95,17 +96,7 @@ class PurchaseRepositoryFirestoreImpl @Inject constructor(
             .whereEqualTo("deletedAt", null)
             .get()
             .await()
-        val purchases = snap.documents.mapNotNull { it.toPurchase() }
-        val totalTons = purchases.sumOf { it.quantityTons }
-        val totalSpendCentavos = purchases
-            .filter { it.pricePerTonCentavos != null }
-            .sumOf { (it.pricePerTonCentavos!! * it.quantityTons).toLong() }
-        return PurchaseRepository.TodaySummary(
-            totalTons = totalTons,
-            totalSpendCentavos = totalSpendCentavos,
-            purchaseCount = purchases.size,
-            purchasesWithoutPrice = purchases.count { it.pricePerTonCentavos == null },
-        )
+        return snap.documents.mapNotNull { it.toPurchase() }.toTodaySummary()
     }
 
     override suspend fun add(purchase: Purchase): Result<String> = runCatching {
