@@ -3,6 +3,7 @@ package com.example.mangos.ui.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mangos.data.model.Purchase
+import com.example.mangos.data.model.Supplier
 import com.example.mangos.data.model.User
 import com.example.mangos.data.repository.AuthRepository
 import com.example.mangos.data.repository.PurchaseRepository
@@ -52,7 +53,7 @@ class DashboardViewModel @Inject constructor(
         DashboardUiState(
             user = user,
             todaySummary = purchaseRepository.getTodaySummary(todayDateKey),
-            activeSupplierCount = activeSuppliers.size,
+            activeSupplierCount = activeSuppliers.count { it.id != Supplier.UNREGISTERED_ID },
             recentPurchases = recentPurchases.map { purchase ->
                 DashboardPurchaseUi(purchase = purchase)
             },
