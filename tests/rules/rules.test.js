@@ -195,6 +195,38 @@ describe("purchases", () => {
     );
   });
 
+  test("operator cannot rewrite createdBy on own purchase within 24h", async () => {
+    const operatorDb = await db("op1", "operator");
+    await seed(
+      "purchases/purchase-1",
+      purchaseData({
+        serverWrittenAt: Timestamp.fromMillis(Date.now() - 23 * 3600 * 1000),
+      }),
+    );
+
+    await assertFails(
+      updateDoc(doc(operatorDb, "purchases/purchase-1"), {
+        createdBy: "op2",
+      }),
+    );
+  });
+
+  test("operator cannot rewrite enteredAt on own purchase within 24h", async () => {
+    const operatorDb = await db("op1", "operator");
+    await seed(
+      "purchases/purchase-1",
+      purchaseData({
+        serverWrittenAt: Timestamp.fromMillis(Date.now() - 23 * 3600 * 1000),
+      }),
+    );
+
+    await assertFails(
+      updateDoc(doc(operatorDb, "purchases/purchase-1"), {
+        enteredAt: Timestamp.fromMillis(Date.now()),
+      }),
+    );
+  });
+
   test("admin can edit any purchase anytime", async () => {
     const adminDb = await db("admin1", "admin");
     await seed(

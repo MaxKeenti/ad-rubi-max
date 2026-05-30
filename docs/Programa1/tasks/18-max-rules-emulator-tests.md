@@ -98,14 +98,17 @@ termina con `Script exited successfully (code 0)` y el reporter de
 `node --test` reporta:
 
 ```
-ℹ tests 15
-ℹ pass 15
+ℹ tests 17
+ℹ pass 17
 ℹ fail 0
 ```
 
-15 casos cubren las 4 ramas de `/users`, las 4 ramas de `/suppliers` y
-las 7 ramas relevantes de `/purchases` (8 mínimos exigidos; entregamos
-casi el doble).
+17 casos cubren las 4 ramas de `/users`, las 4 ramas de `/suppliers` y
+las 7 ramas relevantes de `/purchases` — incluidos dos tests que
+ejercitan el sub-criterio de field-whitelist
+(`purchaseOwnerAllowedChanges`) introducido en `e5baa46`: dentro de la
+ventana de 24h, un Operador no puede reescribir `createdBy` ni
+`enteredAt`. 8 mínimos exigidos; entregamos más del doble.
 
 ### Hallazgos / decisiones de implementación
 
@@ -155,6 +158,15 @@ casi el doble).
     exige `deletedBy == request.auth.uid`.
   - `operator cannot hard delete purchase after 24h` — cubre la rama
     `allow delete` post-ventana.
+  - `operator cannot rewrite createdBy on own purchase within 24h` y
+    `operator cannot rewrite enteredAt on own purchase within 24h` —
+    agregados tras el hardening de `e5baa46`. Verifican el
+    `affectedKeys.hasOnly([...])` dentro de
+    `purchaseOwnerAllowedChanges`: aunque la ventana de 24h esté
+    abierta, el Operador no puede tocar campos de auditoría
+    (`createdBy`, `createdByName`, `enteredAt`, `serverWrittenAt`,
+    `supplierName`). Sin estos dos casos la inmutabilidad del rastro
+    de auditoría que documenta ADR-0002 § Rules quedaba sin probar.
 - **CP-09 (auto-promoción denegada)** trazado por `users › operator
   cannot promote self to admin`. CP-10 (escritura no autorizada en
   `suppliers`) trazado por `suppliers › operator cannot write
