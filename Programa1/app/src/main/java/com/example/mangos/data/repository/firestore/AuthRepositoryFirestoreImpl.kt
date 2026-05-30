@@ -5,7 +5,9 @@ import com.example.mangos.data.model.UserRole
 import com.example.mangos.data.repository.AuthRepository
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.FirebaseFirestore
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,7 +43,15 @@ class AuthRepositoryFirestoreImpl @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     override val currentUser: StateFlow<User?> = authStateFlow
         .mapLatest { fbUser ->
-            if (fbUser == null) null else loadUserDoc(fbUser.uid)
+            if (fbUser == null) {
+                null
+            } else {
+                runCatching { loadUserDoc(fbUser.uid) }
+                    .getOrElse {
+                        auth.signOut()
+                        null
+                    }
+            }
         }
         .stateIn(
             scope = scope,
@@ -51,10 +61,20 @@ class AuthRepositoryFirestoreImpl @Inject constructor(
 
     override suspend fun signIn(email: String, password: String): Result<User> {
         return runCatching {
-            val authResult = auth.signInWithEmailAndPassword(email, password).await()
+            val authResult = try {
+                auth.signInWithEmailAndPassword(email, password).await()
+            } catch (error: FirebaseAuthException) {
+                throw IllegalStateException(authErrorMessage(error), error)
+            }
             val uid = authResult.user?.uid
                 ?: error("Inicio de sesión sin usuario.")
-            loadUserDoc(uid) ?: run {
+            val user = try {
+                loadUserDoc(uid)
+            } catch (error: Exception) {
+                auth.signOut()
+                throw IllegalStateException(profileLoadErrorMessage(uid, error), error)
+            }
+            user ?: run {
                 auth.signOut()
                 error("Esta cuenta no tiene perfil en Firestore. Contacta al administrador.")
             }
@@ -80,6 +100,31 @@ class AuthRepositoryFirestoreImpl @Inject constructor(
             role = UserRole.fromFirestoreString(snap.getString("role")),
             accountCreatedAt = snap.getTimestamp("accountCreatedAt") ?: Timestamp.now(),
         )
+    }
+
+    private fun authErrorMessage(error: FirebaseAuthException): String = when (error.errorCode) {
+        "ERROR_INVALID_EMAIL" -> "El correo electrónico no es válido."
+        "ERROR_USER_DISABLED" -> "Esta cuenta está deshabilitada. Contacta al administrador."
+        "ERROR_USER_NOT_FOUND",
+        "ERROR_WRONG_PASSWORD",
+        "ERROR_INVALID_CREDENTIAL",
+        "ERROR_INVALID_LOGIN_CREDENTIALS" ->
+            "Correo o contraseña incorrectos."
+        "ERROR_TOO_MANY_REQUESTS" ->
+            "Demasiados intentos fallidos. Espera unos minutos antes de volver a intentar."
+        "ERROR_NETWORK_REQUEST_FAILED" -> "Sin conexión. Verifica tu red e inténtalo de nuevo."
+        else -> error.localizedMessage ?: "No se pudo iniciar sesión."
+    }
+
+    private fun profileLoadErrorMessage(uid: String, error: Throwable): String {
+        return if (
+            error is FirebaseFirestoreException &&
+            error.code == FirebaseFirestoreException.Code.PERMISSION_DENIED
+        ) {
+            "No se pudo leer tu perfil. Verifica que exista users/$uid para esta cuenta y que las reglas de Firestore permitan leerlo."
+        } else {
+            error.localizedMessage ?: "No se pudo leer tu perfil."
+        }
     }
 
     private companion object {

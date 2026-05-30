@@ -53,3 +53,46 @@ impl transparently.
 - **`callbackFlow` for authStateChanges** is the canonical bridge. Don't poll.
 - **The `users/{uid}` read should be a `snapshots()` flow** internally so displayName/role updates propagate. Or, simpler: re-fetch on every auth state change. For v1, simpler is fine.
 - **Tell Melanie when this lands.** She switches her testing from "any email/password" to real credentials.
+
+## Verificación (2026-05-29, emulador Pixel 10, API 37)
+
+Probado manualmente contra el proyecto Firebase real con tres cuentas de
+prueba: admin, operator y "huérfana" (existe en Auth pero sin
+`users/{uid}` en Firestore).
+
+| Caso | Resultado |
+|---|---|
+| Operador inicia sesión con credenciales válidas | ✓ Aterriza en Dashboard sin pestaña Proveedores |
+| Cerrar sesión desde overflow del Dashboard | ✓ `currentUser` emite `null` y la UI regresa a Login |
+| Admin inicia sesión | ✓ Aterriza en Dashboard con pestaña Proveedores visible |
+| Cuenta huérfana (Auth sin doc Firestore) | ✓ Permanece en Login con mensaje "Esta cuenta no tiene perfil…"; `auth.signOut()` se invoca para no dejar sesión colgada |
+| Contraseña incorrecta | ✓ Mensaje de error desplegado |
+| Caché persistente + modo avión + relanzamiento | ✓ Dashboard hidrata desde caché sin crashear |
+
+### Hallazgos / decisiones de implementación
+
+- **Mensajes de FirebaseAuth no vienen en español.** Se agregó
+  `authErrorMessage(FirebaseAuthException)` en
+  `AuthRepositoryFirestoreImpl` que mapea los códigos comunes
+  (`ERROR_INVALID_CREDENTIAL`, `ERROR_INVALID_LOGIN_CREDENTIALS`,
+  `ERROR_USER_NOT_FOUND`, `ERROR_WRONG_PASSWORD`, `ERROR_USER_DISABLED`,
+  `ERROR_TOO_MANY_REQUESTS`, `ERROR_NETWORK_REQUEST_FAILED`,
+  `ERROR_INVALID_EMAIL`) a strings en español. Los códigos
+  desconocidos caen al `localizedMessage` original como fallback.
+- **`ERROR_INVALID_CREDENTIAL` vs `_LOGIN_CREDENTIALS`.** Firebase
+  consolida usuario-no-existe y password-incorrecto en un solo código
+  (varía por versión del SDK) para evitar enumeración de cuentas; el
+  mensaje en español es genérico "Correo o contraseña incorrectos."
+- **Ruido en Logcat `RecaptchaAction(action=signInWithPassword)`.** Es
+  el log interno de Firebase cuando intenta primero la ruta sin
+  reCAPTCHA y luego cae al fallback. No afecta el comportamiento ni el
+  mensaje al usuario; ignorar.
+- **Carga del perfil falla por permisos.** Si `loadUserDoc` lanza
+  `FirebaseFirestoreException.PERMISSION_DENIED`, `signIn` cierra
+  sesión y devuelve un mensaje que incluye el `uid` y apunta a revisar
+  las reglas — sirve para depurar despliegues de `firestore.rules`
+  incompletos.
+- **`currentUser` self-heals.** Si el listener de auth recibe un user
+  cuyo doc Firestore no se puede leer (perfil borrado, reglas rotas),
+  el flow llama `auth.signOut()` para evitar quedar en un estado
+  inválido (sesión sin perfil).
