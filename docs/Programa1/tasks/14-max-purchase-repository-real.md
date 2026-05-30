@@ -56,3 +56,72 @@ in the project.
 - **Don't use `whereEqualTo("deletedAt", null)`** if Firestore's null-handling bites you — alternative is to omit `deletedAt` entirely on live docs and check field-existence. Test both; the former is cleaner if it works.
 - **Composite indexes** are created in task 16. If your queries fail with "this query requires an index" errors, that means task 16 isn't done yet — the Firebase Console gives you a one-click link to create the missing index, useful for dev.
 - **Tell Melanie when this lands.** This is the cutover that will likely surface bugs in her screens. Plan to be available right after the merge for a debugging session.
+
+## Verificación (2026-05-29)
+
+`./gradlew assembleDebug` termina en BUILD SUCCESSFUL contra el árbol con
+el binding flipeado en `AppModule` a
+`PurchaseRepositoryFirestoreImpl`. La verificación contra Firestore real
+queda condicionada al siguiente arranque conjunto con Melanie (cutover
+acordado para mañana, día 4) — ADRs y reglas (task 15) deben estar
+desplegadas antes de marcar CP-05/CP-06 como pasados de punta a punta.
+
+### Hallazgos / decisiones de implementación
+
+- **Cambio aditivo en la interfaz `PurchaseRepository`** para soportar el
+  badge "pendiente" del Dashboard:
+  - Nueva `data class PendingAware(val purchase: Purchase, val isPending: Boolean)`.
+  - Nuevo método `observeRecentWithPending(limit): Flow<List<PendingAware>>`.
+  - `observeRecent(limit)` se conserva con su firma original
+    (`Flow<List<Purchase>>`) para no romper a `PurchaseHistoryViewModel`.
+  - `FakePurchaseRepository` implementa la nueva firma derivándola de
+    `observeRecent` con `isPending = false` (la pila offline solo es
+    observable contra Firestore real).
+- **`DashboardViewModel` migrado** al nuevo método. Es la única edición
+  fuera de mi carril; justificada porque CP-07 exige el badge y la VM ya
+  exponía el campo `isPendingSync` (Melanie lo dejó preparado en
+  `DashboardPurchaseUi`). `DashboardScreen` ya pinta `PendingSyncBadge()`
+  cuando el flag es true.
+- **`metadata.hasPendingWrites()` por documento** dentro de la query:
+  cada `DocumentSnapshot` del `QuerySnapshot` carga su propio
+  `SnapshotMetadata`. Más fino que el flag agregado del `QuerySnapshot`,
+  que prendería el badge para *todos* los recientes si hay un solo
+  pendiente.
+- **`serverWrittenAt` con fallback a `enteredAt`** en el mapper. Mientras
+  la escritura sigue en cola offline, `FieldValue.serverTimestamp()` se
+  resuelve como `null` en el snapshot local. La ventana de 24h del
+  cliente (`AddEditPurchaseViewModel.canEdit`,
+  `PurchaseHistoryViewModel.canEdit`) compara contra `serverWrittenAt`,
+  así que sin el fallback una compra recién capturada offline se
+  consideraría "ya no editable". Con el fallback, mientras está pendiente
+  se compara contra `enteredAt` (también reciente); cuando el servidor
+  resuelve el timestamp, el siguiente snapshot trae el valor canónico.
+- **`add()` re-denormaliza nombres defensivamente.** Aunque
+  `AddEditPurchaseViewModel` ya populariza `supplierName` y
+  `createdByName`, el repo vuelve a leer
+  `SupplierRepository.getById(supplierId)` y
+  `authRepository.currentUser.value.displayName` y los usa si están
+  disponibles, cayendo al valor del caller en caso contrario. Mantiene el
+  trust boundary en la capa de datos.
+- **`update()` no toca** `serverWrittenAt`, `createdBy`, `createdByName`,
+  `supplierName` ni `enteredAt`. Solo recalcula `dateKey` desde
+  `purchase.date` por si el operador cambió la fecha en una corrección.
+  Por ADR-0002 nunca se debe sobrescribir `serverWrittenAt` — ahí vive el
+  reloj de la ventana de 24h.
+- **`whereEqualTo("deletedAt", null)`** funciona contra el shape de
+  índices ya declarados (`dateKey ASC, deletedAt ASC, enteredAt DESC`,
+  etc.) y `add()` siempre escribe el campo explícitamente como `null`
+  para que la igualdad lo encuentre. El path alternativo (omitir el
+  campo en vivos) queda como plan B si Firestore lo rechaza en
+  producción.
+- **`observeByDateRange` ordena en cliente.** Firestore exige que en
+  consultas con range filter, el primer `orderBy` sea sobre el campo del
+  range. Para no comprometer el sort por `enteredAt DESC` ni declarar un
+  índice nuevo, el repo trae el bucket de días con
+  `whereGreaterThanOrEqualTo` + `whereLessThan` sobre `dateKey` y luego
+  `sortedByDescending { enteredAt.seconds }` en memoria. Conjuntos
+  esperados (≤ 1 mes) caben sin problema.
+- **CP-02, CP-03, CP-04, CP-06, CP-07, CP-11 trazadas en código** —
+  pendientes verificación end-to-end contra emulador Pixel + Firestore
+  real durante el cutover con Melanie. CP-05 lado-cliente trazado;
+  enforcement servidor llega con task 15.

@@ -14,6 +14,8 @@ interface PurchaseRepository {
 
     fun observeRecent(limit: Int = 5): Flow<List<Purchase>>
 
+    fun observeRecentWithPending(limit: Int = 5): Flow<List<PendingAware>>
+
     suspend fun getTodaySummary(dateKey: String): TodaySummary
 
     suspend fun add(purchase: Purchase): Result<String>
@@ -27,5 +29,10 @@ interface PurchaseRepository {
         val totalSpendCentavos: Long,
         val purchaseCount: Int,
         val purchasesWithoutPrice: Int,
+    )
+
+    data class PendingAware(
+        val purchase: Purchase,
+        val isPending: Boolean,
     )
 }

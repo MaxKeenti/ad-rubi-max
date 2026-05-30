@@ -3,8 +3,8 @@ package com.example.mangos.data.di
 import com.example.mangos.data.repository.AuthRepository
 import com.example.mangos.data.repository.PurchaseRepository
 import com.example.mangos.data.repository.SupplierRepository
-import com.example.mangos.data.repository.fake.FakePurchaseRepository
 import com.example.mangos.data.repository.firestore.AuthRepositoryFirestoreImpl
+import com.example.mangos.data.repository.firestore.PurchaseRepositoryFirestoreImpl
 import com.example.mangos.data.repository.firestore.SupplierRepositoryFirestoreImpl
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -42,7 +42,12 @@ abstract class AppModule {
 
     @Binds
     @Singleton
-    abstract fun bindPurchaseRepository(impl: FakePurchaseRepository): PurchaseRepository
+    abstract fun bindPurchaseRepository(impl: PurchaseRepositoryFirestoreImpl): PurchaseRepository
+
+    // Fake kept in the repo for now; binding disabled in favor of the real impl above.
+    // @Binds
+    // @Singleton
+    // abstract fun bindPurchaseRepository(impl: FakePurchaseRepository): PurchaseRepository
 
     companion object {
         @Provides

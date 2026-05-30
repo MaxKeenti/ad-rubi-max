@@ -58,6 +58,11 @@ class FakePurchaseRepository @Inject constructor() : PurchaseRepository {
                 .toList()
         }
 
+    override fun observeRecentWithPending(limit: Int): Flow<List<PurchaseRepository.PendingAware>> =
+        observeRecent(limit).map { list ->
+            list.map { PurchaseRepository.PendingAware(purchase = it, isPending = false) }
+        }
+
     override suspend fun getTodaySummary(dateKey: String): PurchaseRepository.TodaySummary {
         val todays = _purchases.value.filter { it.dateKey == dateKey && it.deletedAt == null }
         val totalTons = todays.sumOf { it.quantityTons }

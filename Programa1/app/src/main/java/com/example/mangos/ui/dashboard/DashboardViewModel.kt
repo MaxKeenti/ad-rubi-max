@@ -47,15 +47,18 @@ class DashboardViewModel @Inject constructor(
 
     val uiState: StateFlow<DashboardUiState> = combine(
         authRepository.currentUser,
-        purchaseRepository.observeRecent(limit = 5),
+        purchaseRepository.observeRecentWithPending(limit = 5),
         supplierRepository.observeActive(),
     ) { user, recentPurchases, activeSuppliers ->
         DashboardUiState(
             user = user,
             todaySummary = purchaseRepository.getTodaySummary(todayDateKey),
             activeSupplierCount = activeSuppliers.count { it.id != Supplier.UNREGISTERED_ID },
-            recentPurchases = recentPurchases.map { purchase ->
-                DashboardPurchaseUi(purchase = purchase)
+            recentPurchases = recentPurchases.map { entry ->
+                DashboardPurchaseUi(
+                    purchase = entry.purchase,
+                    isPendingSync = entry.isPending,
+                )
             },
         )
     }.stateIn(
