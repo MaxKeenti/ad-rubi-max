@@ -64,3 +64,11 @@ $RECYCLE.BIN/
 
 ### JetBrains / Android Studio ###
 .idea/
+
+### Node ###
+node_modules/
+
+### Firebase emulator ###
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
