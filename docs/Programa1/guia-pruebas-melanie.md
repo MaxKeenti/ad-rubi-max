@@ -15,8 +15,7 @@
 - [ ] **Un teléfono Android** con Android 16 (API 36) o superior.
   Si no tienes uno físico, abre el emulador de Android Studio con un
   AVD Pixel-cualquiera, API 36.
-- [ ] **El APK firmado**, archivo `mangos-v1.0.apk`. Te lo paso por
-  Drive antes de que arranques. Si no lo has recibido, escríbeme.
+- [ ] **El APK firmado**, archivo `app-debug.apk`. Lo puedes encontrar en `Programa1/app/build/outputs/apk/debug/app-debug.apk`.
 - [ ] **Tus credenciales de operador**: te las paso por mensaje
   privado (no las pongas en commits). Si no te llegaron, escríbeme.
 - [ ] **Las credenciales de admin**: también por mensaje privado.
