@@ -67,6 +67,10 @@ $RECYCLE.BIN/
 
 ### Node ###
 node_modules/
+functions/lib/
+functions/.env
+functions/.env.*
+!functions/.env.example
 
 ### Firebase emulator ###
 firebase-debug.log

@@ -93,12 +93,21 @@ class AuthRepositoryFirestoreImpl @Inject constructor(
     private suspend fun loadUserDoc(uid: String): User? {
         val snap = firestore.collection(USERS).document(uid).get().await()
         if (!snap.exists()) return null
+        val disabledAt = snap.getTimestamp("disabledAt")
+        val retiredAt = snap.getTimestamp("retiredAt")
+        if (disabledAt != null || retiredAt != null) {
+            throw IllegalStateException("Esta cuenta esta deshabilitada. Contacta al administrador.")
+        }
         return User(
             id = uid,
             email = snap.getString("email").orEmpty(),
             displayName = snap.getString("displayName").orEmpty(),
             role = UserRole.fromFirestoreString(snap.getString("role")),
             accountCreatedAt = snap.getTimestamp("accountCreatedAt") ?: Timestamp.now(),
+            disabledAt = disabledAt,
+            retiredAt = retiredAt,
+            promotedToUid = snap.getString("promotedToUid"),
+            promotedFromUid = snap.getString("promotedFromUid"),
         )
     }
 

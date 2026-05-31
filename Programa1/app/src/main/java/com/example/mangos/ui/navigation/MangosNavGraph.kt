@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.mangos.data.model.User
+import com.example.mangos.data.model.UserRole
 import com.example.mangos.ui.auth.LoginScreen
 import com.example.mangos.ui.dashboard.DashboardScreen
 import com.example.mangos.ui.purchases.AddEditPurchaseScreen
@@ -21,6 +22,7 @@ import com.example.mangos.ui.purchases.PurchaseHistoryScreen
 import com.example.mangos.ui.reports.ReportsScreen
 import com.example.mangos.ui.suppliers.AddEditSupplierScreen
 import com.example.mangos.ui.suppliers.SupplierListScreen
+import com.example.mangos.ui.users.UserManagementScreen
 
 @Composable
 fun MangosNavGraph(
@@ -94,6 +96,11 @@ private fun AuthedGraph(
                         navController.navigate(Screen.AddEditSupplier(supplierId).route)
                     },
                 )
+            }
+            if (currentUser.role == UserRole.ADMIN) {
+                composable(Screen.Users.route) {
+                    UserManagementScreen()
+                }
             }
             composable(Screen.Reports.route) {
                 ReportsScreen()

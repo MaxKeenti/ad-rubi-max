@@ -67,6 +67,18 @@ function purchaseData(overrides = {}) {
 }
 
 describe("users", () => {
+  test("operator cannot create user documents", async () => {
+    const operatorDb = await db("op1", "operator");
+
+    await assertFails(
+      setDoc(doc(operatorDb, "users/op2"), {
+        displayName: "Operador Dos",
+        email: "op2@example.com",
+        role: "operator",
+      }),
+    );
+  });
+
   test("operator cannot promote self to admin", async () => {
     const operatorDb = await db("op1", "operator");
 
@@ -77,12 +89,70 @@ describe("users", () => {
     );
   });
 
+  test("operator cannot write own privileged retirement fields", async () => {
+    const operatorDb = await db("op1", "operator");
+
+    await assertFails(
+      updateDoc(doc(operatorDb, "users/op1"), {
+        disabledAt: Timestamp.fromMillis(Date.now()),
+        retiredAt: Timestamp.fromMillis(Date.now()),
+        promotedToUid: "admin2",
+      }),
+    );
+  });
+
   test("operator can update own displayName", async () => {
     const operatorDb = await db("op1", "operator");
 
     await assertSucceeds(
       updateDoc(doc(operatorDb, "users/op1"), {
         displayName: "Operador Uno",
+      }),
+    );
+  });
+
+  test("retired operator cannot read own user document", async () => {
+    await seedUser("op1", "operator", {
+      retiredAt: Timestamp.fromMillis(Date.now()),
+      disabledAt: Timestamp.fromMillis(Date.now()),
+    });
+    const operatorDb = env.authenticatedContext("op1").firestore();
+
+    await assertFails(getDoc(doc(operatorDb, "users/op1")));
+  });
+
+  test("admin client cannot create user documents directly", async () => {
+    const adminDb = await db("admin1", "admin");
+
+    await assertFails(
+      setDoc(doc(adminDb, "users/op2"), {
+        displayName: "Operador Dos",
+        email: "op2@example.com",
+        role: "operator",
+      }),
+    );
+  });
+
+  test("admin client cannot change user role directly", async () => {
+    const adminDb = await db("admin1", "admin");
+    await seedUser("op1", "operator");
+
+    await assertFails(
+      updateDoc(doc(adminDb, "users/op1"), {
+        role: "admin",
+      }),
+    );
+  });
+
+  test("admin client cannot write promotion audit fields directly", async () => {
+    const adminDb = await db("admin1", "admin");
+    await seedUser("op1", "operator");
+
+    await assertFails(
+      updateDoc(doc(adminDb, "users/op1"), {
+        disabledAt: Timestamp.fromMillis(Date.now()),
+        retiredAt: Timestamp.fromMillis(Date.now()),
+        promotedToUid: "admin2",
       }),
     );
   });
@@ -145,6 +215,21 @@ describe("purchases", () => {
     const operatorDb = await db("op1", "operator");
 
     await assertSucceeds(
+      setDoc(doc(operatorDb, "purchases/purchase-1"), {
+        ...purchaseData(),
+        serverWrittenAt: serverTimestamp(),
+      }),
+    );
+  });
+
+  test("retired operator cannot create purchases with old token", async () => {
+    await seedUser("op1", "operator", {
+      retiredAt: Timestamp.fromMillis(Date.now()),
+      disabledAt: Timestamp.fromMillis(Date.now()),
+    });
+    const operatorDb = env.authenticatedContext("op1").firestore();
+
+    await assertFails(
       setDoc(doc(operatorDb, "purchases/purchase-1"), {
         ...purchaseData(),
         serverWrittenAt: serverTimestamp(),

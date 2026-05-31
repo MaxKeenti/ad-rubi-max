@@ -6,20 +6,35 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
+    function currentUserPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function userIsActive(userData) {
+      return (!userData.keys().hasAny(["disabledAt"]) || userData.disabledAt == null)
+        && (!userData.keys().hasAny(["retiredAt"]) || userData.retiredAt == null);
+    }
+
+    function isActiveUser() {
       return isSignedIn()
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin";
+        && exists(currentUserPath())
+        && userIsActive(get(currentUserPath()).data);
+    }
+
+    function isAdmin() {
+      return isActiveUser()
+        && get(currentUserPath()).data.role == "admin";
     }
 
     function isOwnerWithinPurchaseEditWindow() {
-      return isSignedIn()
+      return isActiveUser()
         && resource.data.createdBy == request.auth.uid
         && resource.data.deletedAt == null
         && request.time - resource.data.serverWrittenAt < duration.value(24, 'h');
     }
 
     function purchaseCreateIsByCaller() {
-      return isSignedIn()
+      return isActiveUser()
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.serverWrittenAt == request.time
         && request.resource.data.deletedAt == null
@@ -43,23 +58,28 @@ service cloud.firestore {
             && request.resource.data.deletedBy == request.auth.uid));
     }
 
+    function userClientAllowedChanges() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+        "displayName"
+      ]);
+    }
+
     match /users/{uid} {
-      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
-      allow create: if isAdmin();
-      allow update: if (isSignedIn()
-          && request.auth.uid == uid
-          && request.resource.data.role == resource.data.role)
-        || isAdmin();
-      allow delete: if isAdmin();
+      allow read: if isActiveUser() && (request.auth.uid == uid || isAdmin());
+      allow create: if false;
+      allow update: if isActiveUser()
+        && (request.auth.uid == uid || isAdmin())
+        && userClientAllowedChanges();
+      allow delete: if false;
     }
 
     match /suppliers/{id} {
-      allow read: if isSignedIn();
+      allow read: if isActiveUser();
       allow write: if isAdmin();
     }
 
     match /purchases/{id} {
-      allow read: if isSignedIn();
+      allow read: if isActiveUser();
       allow create: if purchaseCreateIsByCaller();
       allow update: if isAdmin()
         || (isOwnerWithinPurchaseEditWindow()

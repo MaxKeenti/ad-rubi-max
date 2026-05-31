@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -65,6 +66,7 @@ private fun bottomNavItemsFor(role: UserRole): List<BottomNavItem> {
     return if (role == UserRole.ADMIN) {
         operatorItems.toMutableList().apply {
             add(2, BottomNavItem(Screen.Suppliers, "Proveedores", Icons.Filled.People))
+            add(3, BottomNavItem(Screen.Users, "Usuarios", Icons.Filled.ManageAccounts))
         }
     } else {
         operatorItems

@@ -8,4 +8,8 @@ data class User(
     val displayName: String,
     val role: UserRole,
     val accountCreatedAt: Timestamp,
+    val disabledAt: Timestamp? = null,
+    val retiredAt: Timestamp? = null,
+    val promotedToUid: String? = null,
+    val promotedFromUid: String? = null,
 )

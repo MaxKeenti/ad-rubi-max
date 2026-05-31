@@ -5,6 +5,7 @@ sealed class Screen(val route: String) {
     data object Dashboard : Screen("dashboard")
     data object Purchases : Screen("purchases")
     data object Suppliers : Screen("suppliers")
+    data object Users : Screen("users")
     data object Reports : Screen("reports")
 
     data class AddEditPurchase(val purchaseId: String? = null) : Screen(

@@ -24,7 +24,11 @@ users/{userId}
 ├── email: String
 ├── displayName: String
 ├── role: String            // "admin" | "operator"
-└── accountCreatedAt: Timestamp   // serverTimestamp()
+├── accountCreatedAt: Timestamp   // serverTimestamp()
+├── disabledAt: Timestamp?        // null en cuentas activas
+├── retiredAt: Timestamp?         // null salvo cuentas retiradas por promocion
+├── promotedToUid: String?        // uid admin nuevo, solo en operador retirado
+└── promotedFromUid: String?      // uid operador anterior, solo en admin promovido
 ```
 
 - **Creación:** manual desde la Consola de Firebase por un Administrador
@@ -40,9 +44,14 @@ users/{userId}
   identidad.
 - **Promoción:** al crear una cuenta Admin nueva para un Operador promovido,
   cambia el `userId`/`uid`. Las Compras ya registradas conservan el `createdBy`
-  anterior para mantener la atribución histórica.
+  anterior para mantener la atribución histórica. La cuenta Auth del Operador
+  se deshabilita y su correo Auth se mueve a un marcador interno para liberar
+  el correo original; el documento `users/{oldUid}` se conserva con
+  `disabledAt`, `retiredAt` y `promotedToUid`.
 - **Restricción de seguridad:** un usuario puede escribir su propio
-  documento pero no puede modificar `role`. Ver reglas en entregable 03.
+  `displayName`, pero no puede crear cuentas, modificar `role` ni escribir
+  campos de retiro/promoción. Esos cambios pasan por Cloud Functions con Admin
+  SDK. Ver reglas en entregable 03.
 
 ### 2.2 `suppliers/{supplierId}`
 
