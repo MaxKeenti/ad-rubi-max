@@ -15,8 +15,9 @@ contexto.
   proveedores no registrados, y puede editar o eliminar (suave) cualquier
   compra. También puede registrar compras como un Operador.
 
-No existe un rol intermedio. Los Administradores se crean manualmente en
-la consola de Firebase; no hay auto-registro en la app.
+No existe un rol intermedio. En v1 los Administradores se crean manualmente
+en la consola de Firebase. No hay auto-registro en la app: ni los Operadores
+ni los Administradores pueden darse de alta a sí mismos.
 
 ## 3. Requerimientos funcionales
 
@@ -27,7 +28,22 @@ la consola de Firebase; no hay auto-registro en la app.
 | RF-AUTH-01 | El usuario inicia sesión con correo electrónico y contraseña. | Alta |
 | RF-AUTH-02 | La sesión persiste entre aperturas de la app hasta que el usuario cierra sesión explícitamente. | Alta |
 | RF-AUTH-03 | El usuario puede cerrar sesión desde el menú overflow del Dashboard. | Alta |
-| RF-AUTH-04 | **No existe** pantalla de auto-registro. Las cuentas se crean en la consola de Firebase por el Administrador. | Alta |
+| RF-AUTH-04 | **No existe** pantalla de auto-registro. Ningún Operador ni Administrador puede registrar su propia cuenta. | Alta |
+
+### 3.1.1 Gestión de usuarios (próxima iteración)
+
+| ID | Descripción | Prioridad |
+|---|---|---|
+| RF-USR-01 | El Administrador autenticado puede registrar nuevos Operadores desde una UI administrativa dentro de la app. | Alta |
+| RF-USR-02 | El Administrador autenticado puede consultar, editar y administrar el roster de Operadores desde la app. | Alta |
+| RF-USR-03 | El Administrador autenticado puede registrar otro Administrador desde la app. | Media |
+| RF-USR-04 | Para registrar otro Administrador, el Administrador actuante debe volver a introducir sus credenciales de inicio de sesión como confirmación antes de enviar el alta. | Alta |
+| RF-USR-05 | Un usuario no puede crear ni promover su propia cuenta; todas las altas de usuario ocurren por acción de otro Administrador autenticado. | Alta |
+| RF-USR-06 | El Administrador autenticado puede promover un Operador seleccionándolo desde el roster de Operadores. | Media |
+| RF-USR-07 | Al promover un Operador, el sistema desactiva la cuenta de Operador y crea una nueva cuenta de Administrador usando el mismo correo electrónico. | Alta |
+| RF-USR-08 | Para completar la promoción, el Operador promovido debe volver a introducir su contraseña de inicio de sesión. | Alta |
+| RF-USR-09 | Para completar la promoción, el Administrador actuante debe volver a introducir sus credenciales de inicio de sesión como confirmación final. | Alta |
+| RF-USR-10 | Las compras históricas conservan el `uid` original del Operador promovido para no romper la atribución de auditoría. | Alta |
 
 ### 3.2 Registro de compras (RF-COMPRA)
 
@@ -126,4 +142,6 @@ la consola de Firebase; no hay auto-registro en la app.
   "Money" del glosario.
 - **No se modelan ex-empleados.** Cuando un usuario deja la empresa, el
   Administrador cambia su contraseña en Firebase Auth y baja su rol a
-  operador. No hay `users.isActive`.
+  operador. No hay `users.isActive` en v1. La próxima iteración sí introduce
+  retiro/desactivación de cuenta para el caso específico de promoción de
+  Operador a Administrador.

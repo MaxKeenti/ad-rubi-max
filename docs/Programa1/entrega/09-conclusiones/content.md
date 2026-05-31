@@ -78,7 +78,7 @@ Lo que **no** hace v1, por decisión explícita:
 
 | Limitación | Razón | Disparador para revisitar |
 |---|---|---|
-| Sin pantalla de auto-registro | El Admin provisiona cuentas en la Consola; resuelve el bootstrap del primer admin | Si la operación crece a >50 usuarios donde la provisión manual no escala |
+| Sin pantalla de gestión de usuarios | En v1 el Admin provisiona cuentas en la Consola; resuelve el bootstrap del primer admin sin abrir auto-registro | Próxima iteración: UI Admin para registrar Operadores, gestionar Operadores, registrar otro Admin con re-autenticación y promover Operadores con doble confirmación |
 | Sin tableta compartida en el muelle | Modelo de un teléfono por Operador (ADR-0001) | Si el cliente confirma "vamos a poner tabletas" |
 | Sin gráficos en Reportes | Vico recortado por tiempo; texto es suficiente para v1 | Cuando termine el presupuesto y la app esté estable |
 | Sin filtro por rango de fechas en Historial | Filtro por proveedor cubre el 80% de los casos | Si el Admin reporta que necesita comparar semanas/meses lado a lado |
@@ -94,15 +94,23 @@ En orden de valor descendente:
    asume un workflow ("el operador parado junto a la báscula"); falta
    verificar empíricamente que la UX coincide con cómo realmente
    trabajan.
-2. **Gráficos en Reportes.** Es lo primero que un usuario va a pedir
+2. **Gestión de usuarios desde la app.** Mantener cerrado el
+   auto-registro, pero permitir que un Administrador autenticado registre
+   Operadores, gestione el roster de Operadores y registre otro
+   Administrador. El alta de otro Administrador debe pedir reingresar las
+   credenciales del Admin actuante como confirmación. La promoción de
+   Operador a Administrador debe retirar/desactivar la cuenta de Operador,
+   crear una nueva cuenta Admin con el mismo correo y exigir confirmación
+   tanto del Operador promovido como del Admin actuante.
+3. **Gráficos en Reportes.** Es lo primero que un usuario va a pedir
    después de usar la app un mes. Vico se reincorpora aditivamente.
-3. **Notificaciones push** para Administradores cuando hay compras con
+4. **Notificaciones push** para Administradores cuando hay compras con
    `supplierId == "UNREGISTERED"` pendientes de reconciliar.
-4. **Modo tableta compartida (ADR-0001 opción ii).** Solo si el
+5. **Modo tableta compartida (ADR-0001 opción ii).** Solo si el
    despliegue real lo justifica.
-5. **Exportar a CSV/Excel** para integración con la contabilidad
+6. **Exportar a CSV/Excel** para integración con la contabilidad
    existente.
-6. **Migración de `Long centavos` a `BigDecimal` serializado** si en
+7. **Migración de `Long centavos` a `BigDecimal` serializado** si en
    algún punto se necesita precisión sub-centavo (no es esperable).
 
 ## 5. Reflexión del equipo

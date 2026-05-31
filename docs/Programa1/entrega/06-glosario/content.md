@@ -151,13 +151,28 @@ roles.
 
 ## Creación de cuentas
 
-**No hay auto-registro.** El Administrador crea las cuentas de usuario
+**No hay auto-registro.** Ni los Operadores ni los Administradores pueden
+darse de alta a sí mismos. En v1, el Administrador crea las cuentas de usuario
 manualmente en la Consola de Firebase y asigna el `role` en el documento
 Firestore del usuario. La app expone solo Login.
 
 Esto también resuelve la pregunta de bootstrap "¿quién es el primer
 Administrador?": quien configure el proyecto de Firebase es el primer
 Administrador, por virtud de tener acceso a la Consola.
+
+En la próxima iteración, la creación de cuentas se moverá a una UI
+administrativa dentro de la app: un Administrador autenticado podrá registrar
+Operadores, administrar el roster de Operadores y registrar otro
+Administrador. Para dar de alta otro Administrador deberá reingresar sus
+credenciales como confirmación.
+
+La promoción de Operador a Administrador es un flujo explícito, no una edición
+directa de `role`: el Admin selecciona al Operador, el sistema
+retira/desactiva la cuenta de Operador y crea una nueva cuenta de
+Administrador con el mismo correo electrónico. Para completar el cambio, el
+Operador promovido debe reingresar su contraseña y el Admin actuante debe
+reingresar sus credenciales como confirmación final. Las Compras históricas
+siguen apuntando al `uid` original del Operador.
 
 ## Política de autorización
 

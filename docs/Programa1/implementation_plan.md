@@ -14,7 +14,9 @@ A Kotlin/Jetpack Compose Android application for **Mangos USA** corporation to d
 > [!WARNING]
 > **Scope (post-grilling, 2026-05-26):** Original plan was 16h optimistic; realistic re-estimate after design pass is 22–26h. Cuts and trims applied:
 > - **CUT** Settings screen → logout moves to Dashboard top-bar.
-> - **CUT** Register screen → Admin creates accounts in Firebase Console; app is login-only.
+> - **CUT** public Register screen → Admin creates accounts in Firebase
+>   Console for v1; upcoming work adds authenticated Admin-only account
+>   management inside the app.
 > - **TRIM** Reports → no Vico charts. Today's total tons + top-5 suppliers by tonnage (text). Add charts back if time permits.
 > - **TRIM** Purchase History → single list, newest-first, supplier filter only. No date-range filter.
 > - **KEEP** Edit Purchase / Edit Supplier flows (required by 24h Operator typo-fix window and UNREGISTERED supplier reconciliation).
@@ -74,7 +76,15 @@ users/{userId}
 ├── role: String ("admin" | "operator")
 └── accountCreatedAt: Timestamp   // serverTimestamp()
 ```
-No self-registration. Admin creates these in the Firebase Console.
+No self-registration. Operators cannot register themselves, and Admins cannot
+register themselves as Admins. In v1, Admin creates these in the Firebase
+Console. Upcoming account-management work moves this into an authenticated
+Admin UI: Admins can create/manage Operators, and can create another Admin only
+after re-entering their own login credentials as confirmation. Admins can also
+promote an Operator by selecting them from the roster: retire/deactivate the
+Operator login, create a new Admin login with the same email, then require the
+promoted Operator and the acting Admin to re-enter their credentials before the
+promotion completes. Historical Purchases keep the old Operator `uid`.
 
 ### Collection: `suppliers`
 ```
@@ -175,7 +185,14 @@ All read queries default to `where deletedAt == null`. See `CONTEXT.md` → "Thr
 #### [NEW] `data/repository/AuthRepository.kt`
 - Interface + Implementation
 - Surface: `currentUser`, `signIn()`, `signOut()`, `getUserRole()`
-- **No `register()`** — accounts are created by Admin in Firebase Console
+- **No public `register()` / no self-registration** — accounts are created by
+  Admin in Firebase Console for v1
+- **Upcoming:** authenticated Admin-only account-management surface for
+  creating/managing Operators and creating another Admin with Admin
+  re-authentication
+- **Upcoming:** Operator-to-Admin promotion flow that retires the Operator
+  login, creates a new Admin login with the same email, and requires both
+  Operator password confirmation and acting-Admin re-authentication
 - Wraps Firebase Auth + Firestore user document
 
 #### [NEW] `data/repository/SupplierRepository.kt`
@@ -202,7 +219,8 @@ All read queries default to `where deletedAt == null`. See `CONTEXT.md` → "Thr
 - "Iniciar Sesión" button
 - Loading state, error handling
 - Mango-themed branding at top
-- No "create account" link — admin provisions accounts in Firebase Console
+- No public "create account" link — admin provisions accounts in Firebase
+  Console in v1; upcoming Admin UI handles account creation after login
 
 #### [NEW] `ui/auth/LoginViewModel.kt`
 - Manages login state, calls AuthRepository
@@ -297,7 +315,8 @@ Vico cut for scope. If time permits at end of execution, charts can be added bac
 - Define all routes and navigation graph
 - Conditional navigation based on auth state
 - Bottom nav bar items: Dashboard, Purchases, Suppliers (Admin only), Reports
-- No Register route, no Settings route
+- No public Register route, no Settings route. Upcoming account management
+  should be an authenticated Admin-only route, not self-registration.
 
 #### [NEW] `ui/navigation/Screen.kt`
 - Sealed class defining all screen routes
@@ -340,7 +359,8 @@ Authorization is enforced server-side. Without this, the admin/operator role spl
 #### [NEW] `docs/Programa1/entrega/02-requerimientos/content.md`
 - Functional requirements document in Spanish
 - Organized by module: Auth, Purchases, Suppliers, Dashboard, Reports
-- Calls out explicit deferred features (Settings, self-registration, charts, date-range filter)
+- Calls out explicit deferred/upcoming features (Settings, admin-managed
+  account registration, charts, date-range filter)
 
 #### [NEW] `docs/Programa1/entrega/03-arquitectura/content.md`
 - Architecture justification document in Spanish
@@ -434,7 +454,7 @@ com.example.mangos/
 | 12 | Testing & Polish (incl. offline scenarios, edit-window) | ~2 hours |
 | **Total** | | **~20.5 hours** |
 
-Estimate excludes inevitable Gradle/Hilt/Firebase setup snags (budget 2–4h slack across the 5 days). Settings screen and Register screen cut per WARNING block above. Charts (Vico) cut from Reports; can be added back at the end if everything else is green.
+Estimate excludes inevitable Gradle/Hilt/Firebase setup snags (budget 2–4h slack across the 5 days). Settings screen and public Register screen cut per WARNING block above; authenticated Admin-only account management is upcoming work. Charts (Vico) cut from Reports; can be added back at the end if everything else is green.
 
 ---
 

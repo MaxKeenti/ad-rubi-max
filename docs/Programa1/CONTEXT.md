@@ -16,13 +16,29 @@ considered and deferred — see ADR-0001 if present.
 
 ## Account creation
 
-There is **no self-service registration**. Admin creates user accounts
-manually in the Firebase Console and assigns the `role` in the user's
-Firestore document. The app exposes Login only.
+There is **no self-service registration**. Operators cannot create their own
+accounts, and Admins cannot create their own Admin account from inside the app.
+In v1, an Admin creates user accounts manually in the Firebase Console and
+assigns the `role` in the user's Firestore document. The app exposes Login
+only.
 
 This also resolves the "who is the first admin?" bootstrap question:
 whoever sets up the Firebase project is the first admin, by virtue of
 having Console access.
+
+Upcoming account-management work moves account creation into the app without
+opening self-registration:
+- An authenticated Admin can create and manage Operator accounts from an
+  in-app Admin UI.
+- An authenticated Admin can create another Admin account from the same UI.
+- Creating another Admin requires the acting Admin to re-enter their login
+  credentials as confirmation before the registration is submitted.
+- An authenticated Admin can promote an Operator by selecting that Operator
+  from the roster. Promotion retires/deactivates the Operator login, creates a
+  new Admin login with the same email, then requires both the promoted Operator
+  and the acting Admin to re-enter their login credentials before completion.
+  The old Operator `uid` remains on historical Purchases for attribution.
+- No user can create or promote their own account.
 
 ## Authorization policy
 

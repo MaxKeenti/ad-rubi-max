@@ -27,10 +27,20 @@ users/{userId}
 └── accountCreatedAt: Timestamp   // serverTimestamp()
 ```
 
-- **Creación:** manual desde la Consola de Firebase por un Administrador.
-  No hay auto-registro en la app.
+- **Creación:** manual desde la Consola de Firebase por un Administrador
+  en v1. No hay auto-registro en la app: ni Operadores ni Administradores
+  pueden darse de alta a sí mismos. En la próxima iteración, un
+  Administrador autenticado podrá crear Operadores y otro Administrador
+  desde una UI interna; el alta de otro Administrador exige reingresar las
+  credenciales del Admin actuante. La promoción de Operador a Administrador
+  desactiva/retira la cuenta de Operador, crea una nueva cuenta Admin con el
+  mismo correo electrónico y exige confirmación de contraseña del Operador
+  promovido más re-autenticación del Admin actuante.
 - **`userId`:** coincide con el `uid` de Firebase Auth — es la misma
   identidad.
+- **Promoción:** al crear una cuenta Admin nueva para un Operador promovido,
+  cambia el `userId`/`uid`. Las Compras ya registradas conservan el `createdBy`
+  anterior para mantener la atribución histórica.
 - **Restricción de seguridad:** un usuario puede escribir su propio
   documento pero no puede modificar `role`. Ver reglas en entregable 03.
 

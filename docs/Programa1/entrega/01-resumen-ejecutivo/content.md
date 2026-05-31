@@ -35,7 +35,7 @@ ergonomía del flujo actual:
 | Incluido en v1 | Diferido |
 |---|---|
 | Captura de compras (entradas) | Pantalla de Configuración |
-| Catálogo de proveedores (CRUD admin) | Auto-registro de usuarios |
+| Catálogo de proveedores (CRUD admin) | Gestión de usuarios desde UI Admin |
 | Autenticación con roles | Gráficos en Reportes |
 | Reportes textuales (toneladas, top 5 proveedores) | Filtros por rango de fechas |
 | Sincronización offline | Multi-bodega / multi-región |
