@@ -1,14 +1,17 @@
 package com.example.mangos.data.repository.firestore
 
+import android.util.Log
 import com.example.mangos.data.model.Purchase
 import com.example.mangos.data.repository.AuthRepository
 import com.example.mangos.data.repository.PurchaseRepository
 import com.example.mangos.data.repository.SupplierRepository
 import com.example.mangos.data.repository.toTodaySummary
 import com.example.mangos.data.util.toDateKey
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.MetadataChanges
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.snapshots
@@ -79,7 +82,10 @@ class PurchaseRepositoryFirestoreImpl @Inject constructor(
             .whereEqualTo("deletedAt", null)
             .orderBy("enteredAt", Query.Direction.DESCENDING)
             .limit(limit.toLong())
-            .snapshots()
+            // INCLUDE metadata changes so the pending→synced flip
+            // (hasPendingWrites: true→false) emits an update and the badge
+            // clears. EXCLUDE would swallow that metadata-only transition.
+            .snapshots(MetadataChanges.INCLUDE)
             .map { snap ->
                 snap.documents.mapNotNull { doc ->
                     val purchase = doc.toPurchase() ?: return@mapNotNull null
@@ -132,7 +138,15 @@ class PurchaseRepositoryFirestoreImpl @Inject constructor(
             "deletedAt" to null,
             "deletedBy" to null,
         )
-        collection.document(newId).set(data).await()
+        // Fire-and-forget: the Task returned by set() only resolves on
+        // server ack, so .await() would hang indefinitely offline and leave
+        // the form's isSaving stuck. The local cache persists synchronously
+        // and snapshot listeners pick it up immediately; the server ack is
+        // observable later via metadata.hasPendingWrites flipping to false.
+        collection.document(newId).set(data)
+            .addOnFailureListener { ex ->
+                Log.e(TAG, "set() failed for purchase=$newId", ex)
+            }
         newId
     }
 
@@ -155,8 +169,15 @@ class PurchaseRepositoryFirestoreImpl @Inject constructor(
     }
 
     override suspend fun softDelete(id: String, deletedBy: String): Result<Unit> = runCatching {
+        // Client-side Timestamp.now() (not FieldValue.serverTimestamp()) so the
+        // local cache projects a non-null deletedAt immediately. With the
+        // server sentinel, pending writes leave deletedAt = null in the cache
+        // and whereEqualTo("deletedAt", null) keeps matching the doc until
+        // the server roundtrip lands — which is the CP-06 refresh bug. The
+        // authoritative audit clock remains serverWrittenAt (ADR-0002);
+        // deletedAt is informative.
         val updates: Map<String, Any> = mapOf(
-            "deletedAt" to FieldValue.serverTimestamp(),
+            "deletedAt" to Timestamp.now(),
             "deletedBy" to deletedBy,
         )
         firestore.collection(PURCHASES)
@@ -192,5 +213,6 @@ class PurchaseRepositoryFirestoreImpl @Inject constructor(
 
     private companion object {
         const val PURCHASES = "purchases"
+        const val TAG = "PurchaseRepoFirestore"
     }
 }

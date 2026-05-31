@@ -269,7 +269,7 @@ describe("purchases", () => {
 
     await assertSucceeds(
       updateDoc(doc(operatorDb, "purchases/purchase-1"), {
-        deletedAt: serverTimestamp(),
+        deletedAt: Timestamp.fromMillis(Date.now()),
         deletedBy: "op1",
       }),
     );

@@ -39,7 +39,7 @@ service cloud.firestore {
           "deletedBy"
         ])
         && (!changed.hasAny(["deletedAt", "deletedBy"])
-          || (request.resource.data.deletedAt == request.time
+          || (request.resource.data.deletedAt is timestamp
             && request.resource.data.deletedBy == request.auth.uid));
     }
 

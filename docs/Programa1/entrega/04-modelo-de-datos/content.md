@@ -129,6 +129,13 @@ Todas las consultas de lectura filtran `where deletedAt == null` por
 defecto. El borrado físico nunca se usa. Los registros eliminados quedan
 en Firestore para el rastro de auditoría; no hay UI v1 para navegarlos.
 
+`deletedAt` se escribe con `Timestamp.now()` del cliente (no
+`serverTimestamp()`) para que el caché local lo vea no-null
+inmediatamente y la lista oculte el documento sin esperar al ack del
+servidor. El reloj autoritativo de auditoría sigue siendo
+`serverWrittenAt` (ADR-0002); `deletedAt` es informativo, con skew típico
+menor a 60 segundos.
+
 ## 3. Índices compuestos
 
 Firestore exige índices compuestos para consultas que filtran por
