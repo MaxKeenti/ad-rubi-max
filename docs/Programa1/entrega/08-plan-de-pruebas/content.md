@@ -18,17 +18,17 @@ No se hacen pruebas unitarias exhaustivas por presupuesto. Si la app
 falla en un flujo, lo agarra el test manual; si las reglas fallan, lo
 agarra el test del emulador.
 
-## 2. Casos de prueba manuales
+## 2. Casos de prueba manuales y de reglas
 
 ### CP-01: Flujo de autenticación
 
 | Paso | Acción | Resultado esperado |
 |---|---|---|
-| 1 | Admin crea una cuenta en la Consola de Firebase con rol "operator" | Cuenta visible en Firestore en `users/{uid}` con `role = "operator"` |
+| 1 | Existe al menos una cuenta Admin bootstrap creada desde Firebase Console | Cuenta visible en Firestore en `users/{uid}` con `role = "admin"` |
 | 2 | Operador abre la app por primera vez | Aparece pantalla de Login (sin opción de Registro) |
 | 3 | Operador captura credenciales correctas | Aterriza en Dashboard como Operador |
 | 4 | Operador cierra sesión desde el menú overflow del Dashboard | Regresa a Login |
-| 5 | Admin inicia sesión con sus credenciales | Aterriza en Dashboard con la pestaña **Proveedores** visible |
+| 5 | Admin inicia sesión con sus credenciales | Aterriza en Dashboard con las pestañas **Proveedores** y **Usuarios** visibles |
 
 ### CP-02: Captura de compra normal
 
@@ -96,7 +96,8 @@ agarra el test del emulador.
 |---|---|---|
 | 1 | Operador inicia sesión | Rol "operator" |
 | 2 | Operador intenta escribir su propio doc cambiando `role` a `"admin"` (vía emulador, consola web, o un cliente Firestore directo) | La escritura es **denegada** por las reglas |
-| 3 | Operador puede actualizar su `displayName` | Permitido |
+| 3 | Operador intenta crear otro `users/{uid}` o escribir `disabledAt`, `retiredAt`, `promotedToUid` | La escritura es **denegada**; esos campos solo los escribe Cloud Functions con Admin SDK |
+| 4 | Operador puede actualizar su `displayName` | Permitido |
 
 ### CP-10: Reglas de seguridad — escritura no autorizada en `suppliers`
 
@@ -118,8 +119,45 @@ agarra el test del emulador.
 
 | Paso | Acción | Resultado esperado |
 |---|---|---|
-| 1 | Operador inicia sesión | Barra inferior muestra Dashboard, Compras, Reportes (sin Proveedores) |
-| 2 | Admin inicia sesión | Barra inferior muestra Dashboard, Compras, Proveedores, Reportes |
+| 1 | Operador inicia sesión | Barra inferior muestra Dashboard, Compras, Reportes (sin Proveedores ni Usuarios) |
+| 2 | Admin inicia sesión | Barra inferior muestra Dashboard, Compras, Proveedores, Usuarios, Reportes |
+
+### CP-13: Admin crea Operador desde la app
+
+| Paso | Acción | Resultado esperado |
+|---|---|---|
+| 1 | Admin entra a la pestaña **Usuarios** | Se muestra el roster de Operadores activos |
+| 2 | Pulsa **Operador** y captura nombre, correo nuevo y contraseña inicial | El formulario valida correo y contraseña mínima |
+| 3 | Pulsa **Crear operador** | La cuenta Auth se crea, `users/{newUid}` existe con `role = "operator"` y el roster se refresca |
+| 4 | Cierra sesión e inicia con la cuenta nueva | Aterriza como Operador; no ve Proveedores ni Usuarios |
+
+### CP-14: Admin crea otro Admin con re-autenticación
+
+| Paso | Acción | Resultado esperado |
+|---|---|---|
+| 1 | Admin entra a **Usuarios** → **Admin** | Se abre el formulario de alta de Admin |
+| 2 | Captura nombre, correo nuevo, contraseña inicial y una contraseña Admin incorrecta | La operación falla; no aparece `users/{newUid}` con rol admin |
+| 3 | Repite con la contraseña correcta del Admin actuante | La cuenta se crea con `role = "admin"` |
+| 4 | Cierra sesión e inicia con el nuevo Admin | Ve Proveedores y Usuarios en la barra inferior |
+
+### CP-15: Promoción de Operador a Admin
+
+| Paso | Acción | Resultado esperado |
+|---|---|---|
+| 1 | Admin crea o selecciona un Operador de prueba con una compra histórica | La compra tiene `createdBy = oldOperatorUid` |
+| 2 | En **Usuarios**, pulsa el icono de promover en ese Operador | Se abre confirmación con resumen del Operador |
+| 3 | Captura contraseña incorrecta del Operador o del Admin | La promoción falla sin cambiar roles ni crear nuevo Admin |
+| 4 | Captura contraseña correcta del Operador y del Admin actuante | El viejo `users/{oldUid}` queda con `disabledAt`, `retiredAt`, `promotedToUid`; se crea `users/{newUid}` con `role = "admin"` y `promotedFromUid = oldUid` |
+| 5 | Intenta iniciar sesión con la cuenta vieja y luego con el correo promovido | La cuenta vieja queda retirada; el correo original inicia como Admin nuevo |
+| 6 | Revisa la compra histórica | Conserva `createdBy = oldOperatorUid`; no se reescribe a `newUid` |
+
+### CP-16: Usuarios retirados y writes privilegiados
+
+| Paso | Acción | Resultado esperado |
+|---|---|---|
+| 1 | Con tests de reglas, simula un Operador retirado con token antiguo | No puede leer su doc ni crear compras |
+| 2 | Con tests de reglas, intenta crear usuarios o cambiar roles desde cliente Admin/Operador | Denegado; solo Functions/Admin SDK puede hacerlo |
+| 3 | Ejecuta `firebase emulators:exec --only firestore 'cd tests/rules && npm test'` | Todos los tests pasan |
 
 ## 3. Pruebas automatizadas
 
@@ -136,24 +174,26 @@ seguridad mínima.
 ### Reglas de Firestore con el emulador
 
 ```sh
-firebase emulators:start --only firestore
-# en otra terminal, contra la URL del emulador:
-firebase emulators:exec --only firestore "npm run test:rules"
+firebase emulators:exec --only firestore 'cd tests/rules && npm test'
 ```
 
-Los tests cubren los casos críticos de los CP-09 y CP-10 más:
+Los tests cubren los casos críticos de los CP-09, CP-10 y CP-16 más:
 
 - Lectura permitida para usuarios autenticados, denegada para anónimos.
 - Creación de Purchase permitida solo si `createdBy == auth.uid`.
 - Update de Purchase respetando la ventana de 24h medida contra
   `serverWrittenAt`.
+- Denegación de creación directa de `users/*`, cambio directo de `role`,
+  y escritura directa de campos privilegiados (`disabledAt`, `retiredAt`,
+  `promotedToUid`).
+- Bloqueo de usuarios retirados aunque conserven un token antiguo.
 
 ## 4. Criterios de aceptación para entrega
 
 La app se considera lista para entrega cuando:
 
-- [ ] Los 12 casos de prueba manuales pasan en emulador y en al menos un
-      dispositivo físico Android.
+- [ ] CP-01 a CP-15 pasan en emulador y en al menos un dispositivo físico
+      Android; CP-16 pasa en el emulador de reglas.
 - [ ] `./gradlew assembleDebug` termina sin errores.
 - [ ] El APK firmado se instala y arranca en un dispositivo limpio.
 - [ ] Las reglas de Firestore están desplegadas en el proyecto de

@@ -125,22 +125,37 @@ es no negociable porque Firebase Auth + Firestore es un modelo abierto:
 cualquiera con la APK puede leer `google-services.json`, apuntar un cliente
 de Firestore al proyecto e ignorar la UI completamente.
 
-### Reglas en pseudocódigo
+### Reglas y API confiable en pseudocódigo
+
+Las operaciones de alta, retiro y promoción de usuarios **no** se hacen con
+writes directos desde Android. La app llama Cloud Functions (`createOperatorAccount`,
+`createAdminAccount`, `listOperators`, `promoteOperatorToAdmin`) y esas
+funciones usan Firebase Admin SDK para crear/deshabilitar cuentas Auth y
+escribir los campos privilegiados de `users/*`.
 
 ```js
+function isActiveUser() {
+  return request.auth != null
+         && exists(users/request.auth.uid)
+         && users/request.auth.uid.disabledAt == null
+         && users/request.auth.uid.retiredAt == null;
+}
+
 match /users/{uid} {
-  allow read:  request.auth.uid == uid || isAdmin();
-  allow write: request.auth.uid == uid
-               && request.resource.data.role == resource.data.role
-               || isAdmin();
+  allow read:   isActiveUser() && (request.auth.uid == uid || isAdmin());
+  allow create: false; // solo Cloud Functions/Admin SDK
+  allow update: isActiveUser()
+                && (request.auth.uid == uid || isAdmin())
+                && affectedKeys.hasOnly(["displayName"]);
+  allow delete: false;
 }
 match /suppliers/{id} {
-  allow read:  request.auth != null;
+  allow read:  isActiveUser();
   allow write: isAdmin();
 }
 match /purchases/{id} {
-  allow read:   request.auth != null;
-  allow create: request.auth != null
+  allow read:   isActiveUser();
+  allow create: isActiveUser()
                 && request.resource.data.createdBy == request.auth.uid
                 && request.resource.data.serverWrittenAt == request.time
                 && request.resource.data.deletedAt == null
@@ -157,7 +172,7 @@ match /purchases/{id} {
                          "deletedAt", "deletedBy"
                        ])
                     && (!affectedKeys.hasAny(["deletedAt", "deletedBy"])
-                        || (request.resource.data.deletedAt == request.time
+                        || (request.resource.data.deletedAt is timestamp
                             && request.resource.data.deletedBy
                                == request.auth.uid)));
   allow delete: isAdmin()
@@ -168,10 +183,11 @@ match /purchases/{id} {
 }
 ```
 
-Cuatro propiedades garantizadas por esta política:
+Cinco propiedades garantizadas por esta política:
 
 1. **Ningún usuario puede ascenderse a admin** — la regla en `users/{uid}`
-   exige que `role` no cambie.
+   no permite escribir `role`; solo Cloud Functions/Admin SDK puede crear
+   documentos de usuario o escribir campos de retiro/promoción.
 2. **Ningún Operador puede modificar el catálogo de proveedores** — solo
    `isAdmin()` puede escribir en `suppliers/*`.
 3. **La ventana de edición de 24 horas se mide contra el reloj del
@@ -189,10 +205,26 @@ Cuatro propiedades garantizadas por esta política:
    `supplierName` denormalizado — la política de "denormalización sin
    retro-relleno" (ver entregable 06 / glosario) queda enforzada por las
    reglas, no por convención. Adicionalmente, cuando los `affectedKeys`
-   incluyen `deletedAt` o `deletedBy`, la regla exige
-   `deletedAt == request.time` y `deletedBy == request.auth.uid`: el
-   Operador solo puede borrar como sí mismo y en ese instante, no
-   estampar la eliminación con el `uid` de otro usuario ni retroactivarla.
+   incluyen `deletedAt` o `deletedBy`, la regla exige que `deletedAt` sea
+   timestamp y `deletedBy == request.auth.uid`: el Operador solo puede
+   borrar como sí mismo, no estampar la eliminación con el `uid` de otro
+   usuario.
+5. **Un usuario retirado deja de operar aun con token viejo.** Las reglas
+   revisan `disabledAt`/`retiredAt` en `users/{uid}` antes de permitir
+   lecturas o escrituras de dominio. Esto cubre la ventana corta donde un
+   token de Firebase Auth emitido antes del retiro todavía podría existir.
+
+### Hallazgo de implementación: promoción con el mismo correo
+
+Firebase Auth no permite dos cuentas activas con el mismo email, y
+deshabilitar una cuenta no libera el email. Para cumplir el flujo
+"retirar Operador y crear Admin nuevo con el mismo correo", la Cloud
+Function de promoción primero deshabilita la cuenta Auth vieja y mueve su
+email Auth a un marcador interno `retired-<uid>-<timestamp>@mangos.invalid`.
+El documento histórico `users/{oldUid}` conserva el email original de
+negocio, queda marcado con `disabledAt`, `retiredAt` y `promotedToUid`, y
+la cuenta Admin nueva se crea con el correo original. Las Compras no se
+reescriben.
 
 ## 6. Decisiones arquitectónicas formales
 

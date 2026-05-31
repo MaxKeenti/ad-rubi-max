@@ -186,3 +186,37 @@ Callable endpoints:
 - **Schema choice:** if adding fields such as `retiredAt`, `disabledAt`,
   `promotedToUid`, or `promotedFromUid`, update `entrega/04-modelo-de-datos`
   after implementation so the deliverable matches the final schema.
+
+## Implementation findings — 2026-05-31
+
+- Implemented trusted backend as callable Cloud Functions:
+  `createOperatorAccount`, `createAdminAccount`, `listOperators`, and
+  `promoteOperatorToAdmin`.
+- Android uses a dedicated `UserAdminRepository` backed by Firebase
+  Functions. `AuthRepository` remains focused on login/session state.
+- Same-email promotion required one important adjustment: disabling a Firebase
+  Auth account does **not** free its email. The promotion Function disables the
+  old Operator Auth user and moves its Auth email to
+  `retired-<uid>-<timestamp>@mangos.invalid`, then creates the new Admin Auth
+  user with the original email. The old Firestore `users/{oldUid}` doc keeps
+  audit fields and historical Purchases keep `createdBy = oldUid`.
+- Password confirmation for the promoted Operator cannot be verified with the
+  Admin SDK alone. The backend verifies email/password through Identity
+  Toolkit, so Functions requires `FIREBASE_WEB_API_KEY`.
+- Firestore rules were tightened: clients cannot create `users/*`, cannot
+  change `role`, cannot write `disabledAt`/`retiredAt`/promotion fields, and
+  retired users are blocked even if they still hold an old token.
+- Manual CPs added for Melanie:
+  - CP-13: Admin creates Operator from the app.
+  - CP-14: Admin creates another Admin with re-authentication.
+  - CP-15: Operator promotion retire/recreate flow.
+  - CP-16: retired users and privileged user writes covered by emulator tests.
+
+## Verification
+
+- `npm run build` in `functions` passed.
+- `firebase emulators:exec --only firestore 'cd tests/rules && npm test'`
+  passed with 24 tests.
+- `./gradlew :app:compileDebugKotlin` passed.
+- `./gradlew :app:testDebugUnitTest` passed.
+- Manual verification remains assigned to Melanie through CP-13 to CP-15.

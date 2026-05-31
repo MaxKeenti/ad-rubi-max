@@ -122,7 +122,28 @@ Pestaña **Compras** en la barra inferior.
 
 <!-- SCREENSHOT: suppliers.png, edit-supplier.png -->
 
-## 7. Reportes
+## 7. Usuarios (solo Administrador)
+
+> Esta pestaña solo aparece si tu rol es **Administrador**.
+
+- **Roster de Operadores:** muestra los Operadores activos.
+- **Crear Operador:** pulsa **Operador**, captura nombre, correo y
+  contraseña inicial. El Operador podrá iniciar sesión con esas
+  credenciales.
+- **Crear Admin:** pulsa **Admin**, captura los datos del nuevo Admin y
+  confirma con la contraseña del Admin actuante. Esto evita altas
+  accidentales de cuentas administrativas.
+- **Promover Operador:** desde el roster, pulsa el icono de promoción.
+  El Operador debe confirmar su contraseña y el Admin actuante debe
+  confirmar sus credenciales. El sistema retira la cuenta de Operador y
+  crea una cuenta Admin nueva con el mismo correo.
+
+Las compras históricas del Operador promovido conservan el `uid` viejo
+para no romper la auditoría.
+
+<!-- SCREENSHOT: users-roster.png, users-create.png, users-promote.png -->
+
+## 8. Reportes
 
 Pestaña **Reportes**.
 
@@ -135,7 +156,7 @@ Pestaña **Reportes**.
 
 <!-- SCREENSHOT: reports.png -->
 
-## 8. Cerrar sesión
+## 9. Cerrar sesión
 
 1. En el Dashboard, pulsa el icono de menú **(⋮)** en la esquina
    superior derecha.
@@ -143,7 +164,7 @@ Pestaña **Reportes**.
 
 <!-- SCREENSHOT: logout.png -->
 
-## 9. Preguntas frecuentes
+## 10. Preguntas frecuentes
 
 **¿Qué pasa si capturo una entrada sin internet?**
 Se guarda localmente y se muestra con un indicador "pendiente". Cuando
@@ -165,4 +186,6 @@ con proveedor no registrado, da de alta al proveedor real, y actualiza
 la compra para apuntar al nuevo proveedor.
 
 **Olvidé mi contraseña.**
-Pídele al Administrador que la resetee desde la Consola de Firebase.
+Pídele al Administrador que la resetee desde Firebase Auth. La app
+permite crear usuarios, pero el restablecimiento de contraseña sigue
+haciéndose desde Firebase.

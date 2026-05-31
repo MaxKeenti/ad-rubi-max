@@ -11,13 +11,15 @@ contexto.
 - **Operador.** Trabajador de bodega responsable de registrar las entradas
   de camiones en el muelle. Cada Operador tiene su propio teléfono y su
   propia cuenta (ver ADR-0001).
-- **Administrador.** Gestiona el catálogo de proveedores, reconcilia
-  proveedores no registrados, y puede editar o eliminar (suave) cualquier
-  compra. También puede registrar compras como un Operador.
+- **Administrador.** Gestiona el catálogo de proveedores, el roster de
+  Operadores, la creación de cuentas y la reconciliación de proveedores no
+  registrados; además puede editar o eliminar (suave) cualquier compra.
+  También puede registrar compras como un Operador.
 
-No existe un rol intermedio. En v1 los Administradores se crean manualmente
-en la consola de Firebase. No hay auto-registro en la app: ni los Operadores
-ni los Administradores pueden darse de alta a sí mismos.
+No existe un rol intermedio. El primer Administrador se crea manualmente en
+Firebase para bootstrap. Después no hay auto-registro: ni los Operadores ni
+los Administradores pueden darse de alta a sí mismos; los crea otro
+Administrador autenticado desde la app.
 
 ## 3. Requerimientos funcionales
 
@@ -30,7 +32,7 @@ ni los Administradores pueden darse de alta a sí mismos.
 | RF-AUTH-03 | El usuario puede cerrar sesión desde el menú overflow del Dashboard. | Alta |
 | RF-AUTH-04 | **No existe** pantalla de auto-registro. Ningún Operador ni Administrador puede registrar su propia cuenta. | Alta |
 
-### 3.1.1 Gestión de usuarios (próxima iteración)
+### 3.1.1 Gestión de usuarios (RF-USR)
 
 | ID | Descripción | Prioridad |
 |---|---|---|
@@ -140,8 +142,7 @@ ni los Administradores pueden darse de alta a sí mismos.
   asume Ciudad de México (UTC−6 sin horario de verano).
 - **Una sola moneda.** MXN. Sin override por compra. Ver sección
   "Money" del glosario.
-- **No se modelan ex-empleados.** Cuando un usuario deja la empresa, el
-  Administrador cambia su contraseña en Firebase Auth y baja su rol a
-  operador. No hay `users.isActive` en v1. La próxima iteración sí introduce
-  retiro/desactivación de cuenta para el caso específico de promoción de
-  Operador a Administrador.
+- **Ex-empleados fuera de promoción.** La baja general de empleados sigue
+  siendo operación administrativa en Firebase Auth. La app sí modela
+  retiro/desactivación para el caso específico de promoción de Operador a
+  Administrador (`disabledAt`, `retiredAt`, `promotedToUid`).

@@ -74,17 +74,17 @@ users/{userId}
 ├── email: String
 ├── displayName: String
 ├── role: String ("admin" | "operator")
-└── accountCreatedAt: Timestamp   // serverTimestamp()
+├── accountCreatedAt: Timestamp   // serverTimestamp()
+├── disabledAt: Timestamp?
+├── retiredAt: Timestamp?
+├── promotedToUid: String?
+└── promotedFromUid: String?
 ```
 No self-registration. Operators cannot register themselves, and Admins cannot
-register themselves as Admins. In v1, Admin creates these in the Firebase
-Console. Upcoming account-management work moves this into an authenticated
-Admin UI: Admins can create/manage Operators, and can create another Admin only
-after re-entering their own login credentials as confirmation. Admins can also
-promote an Operator by selecting them from the roster: retire/deactivate the
-Operator login, create a new Admin login with the same email, then require the
-promoted Operator and the acting Admin to re-enter their credentials before the
-promotion completes. Historical Purchases keep the old Operator `uid`.
+register themselves as Admins. The first Admin is bootstrapped in Firebase
+Console; subsequent Operator/Admin creation and Operator promotion happen in
+the authenticated Admin-only Users UI through callable Cloud Functions/Admin
+SDK. Historical Purchases keep the old Operator `uid`.
 
 ### Collection: `suppliers`
 ```
@@ -185,14 +185,12 @@ All read queries default to `where deletedAt == null`. See `CONTEXT.md` → "Thr
 #### [NEW] `data/repository/AuthRepository.kt`
 - Interface + Implementation
 - Surface: `currentUser`, `signIn()`, `signOut()`, `getUserRole()`
-- **No public `register()` / no self-registration** — accounts are created by
-  Admin in Firebase Console for v1
-- **Upcoming:** authenticated Admin-only account-management surface for
-  creating/managing Operators and creating another Admin with Admin
-  re-authentication
-- **Upcoming:** Operator-to-Admin promotion flow that retires the Operator
-  login, creates a new Admin login with the same email, and requires both
-  Operator password confirmation and acting-Admin re-authentication
+- **No public `register()` / no self-registration** — first Admin is
+  bootstrapped in Firebase Console; later account management uses
+  `UserAdminRepository` + callable Functions
+- Authenticated Admin-only account-management surface creates/manages
+  Operators, creates another Admin with Admin re-authentication, and promotes
+  Operators through retire/recreate flow
 - Wraps Firebase Auth + Firestore user document
 
 #### [NEW] `data/repository/SupplierRepository.kt`
@@ -314,9 +312,10 @@ Vico cut for scope. If time permits at end of execution, charts can be added bac
 #### [NEW] `ui/navigation/MangosNavGraph.kt`
 - Define all routes and navigation graph
 - Conditional navigation based on auth state
-- Bottom nav bar items: Dashboard, Purchases, Suppliers (Admin only), Reports
-- No public Register route, no Settings route. Upcoming account management
-  should be an authenticated Admin-only route, not self-registration.
+- Bottom nav bar items: Dashboard, Purchases, Suppliers (Admin only), Users
+  (Admin only), Reports
+- No public Register route, no Settings route. Account management is an
+  authenticated Admin-only route, not self-registration.
 
 #### [NEW] `ui/navigation/Screen.kt`
 - Sealed class defining all screen routes

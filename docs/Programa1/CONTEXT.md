@@ -18,16 +18,14 @@ considered and deferred — see ADR-0001 if present.
 
 There is **no self-service registration**. Operators cannot create their own
 accounts, and Admins cannot create their own Admin account from inside the app.
-In v1, an Admin creates user accounts manually in the Firebase Console and
-assigns the `role` in the user's Firestore document. The app exposes Login
-only.
+The first Admin is still bootstrapped manually in Firebase Console; after that,
+an authenticated Admin uses the in-app Users screen to create Operators, create
+another Admin, and promote Operators.
 
 This also resolves the "who is the first admin?" bootstrap question:
 whoever sets up the Firebase project is the first admin, by virtue of
 having Console access.
 
-Upcoming account-management work moves account creation into the app without
-opening self-registration:
 - An authenticated Admin can create and manage Operator accounts from an
   in-app Admin UI.
 - An authenticated Admin can create another Admin account from the same UI.
@@ -39,6 +37,11 @@ opening self-registration:
   and the acting Admin to re-enter their login credentials before completion.
   The old Operator `uid` remains on historical Purchases for attribution.
 - No user can create or promote their own account.
+- User creation, retirement, and promotion happen through callable Cloud
+  Functions backed by Firebase Admin SDK, not through direct Android writes to
+  Firestore.
+- Promotion preserves historical attribution: old Purchases keep the old
+  Operator `uid` in `createdBy`.
 
 ## Authorization policy
 
@@ -48,11 +51,12 @@ rules. A user cannot promote themselves to admin by editing their own role
 field; rules forbid it. See ADR-0002.
 
 Policy summary:
-- `users/{uid}`: read = own doc OR admin; write = own doc except `role`;
-  admins can write any user.
-- `suppliers/*`: read = any signed-in user; write = admin only.
-- `purchases/*`: read = any signed-in user; create = any signed-in user;
-  update/delete = admin OR original creator within 24h of `createdAt`
+- `users/{uid}`: active user can read own doc; active admin can read user docs;
+  client writes are limited to `displayName`. Creation, role changes, and
+  retirement/promotion fields are trusted-backend writes only.
+- `suppliers/*`: read = any active signed-in user; write = admin only.
+- `purchases/*`: read = any active signed-in user; create = any active signed-in user;
+  update/delete = admin OR original creator within 24h of `serverWrittenAt`
   (Operator typo-fix window).
 
 ## Supplier

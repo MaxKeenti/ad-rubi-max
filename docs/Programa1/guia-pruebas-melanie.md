@@ -2,7 +2,7 @@
 
 > **Para quién es esto:** Melanie.
 > **Quién lo escribió:** Max.
-> **Para qué:** correr los 12 casos de prueba (CP-01 a CP-12) del plan de
+> **Para qué:** correr los 16 casos de prueba (CP-01 a CP-16) del plan de
 > pruebas antes de la entrega final del 1 de junio. Esta guía es la
 > versión "ejecutable" de `docs/Programa1/entrega/08-plan-de-pruebas/content.md`
 > — el documento de allá es el formal que se imprime; éste es el que tú
@@ -19,6 +19,12 @@
 - [ ] **Tus credenciales de operador**: te las paso por mensaje
   privado (no las pongas en commits). Si no te llegaron, escríbeme.
 - [ ] **Las credenciales de admin**: también por mensaje privado.
+- [ ] **Cloud Functions desplegadas** para el proyecto `mangos-372bd`.
+  Los CP-13 a CP-15 usan la pestaña Usuarios; si al abrirla aparece un
+  error de Functions o de permisos, detente y avísame.
+- [ ] **`FIREBASE_WEB_API_KEY` configurada en Functions.** Sin esta
+  variable, las confirmaciones de contraseña para crear Admin/promover
+  Operador fallan aunque la contraseña sea correcta.
 - [ ] **Acceso a la Consola de Firebase del proyecto `mangos-372bd`**
   con tu cuenta Google — Max te invita como editor antes de que
   arranques. Necesitarás entrar a Firestore unas 3 o 4 veces para
@@ -40,7 +46,7 @@ Cada caso tiene:
 - Un campo de **notas** para que escribas lo que viste, capturas, IDs
   de documentos, lo que sea relevante.
 
-Al final del documento hay una **Hoja de resultados** con los 12 casos
+Al final del documento hay una **Hoja de resultados** con los 16 casos
 en tabla. Cuando termines, llénala y mándamela (commit + push o
 captura de la tabla por Slack — lo que prefieras).
 
@@ -54,10 +60,17 @@ estos alias:
 | **OP-MEL** | la tuya — `melanie@…` (te paso la contraseña) | operator |
 | **OP-MAX** | la mía — `max@…` (te paso la contraseña) | operator |
 | **ADMIN** | `admin@admin.com` (te paso la contraseña) | admin |
+| **OP-TEMP** | cuenta que vas a crear en CP-13 | operator |
+| **ADMIN-TEMP** | cuenta que vas a crear en CP-14 | admin |
 
 Nada en el código depende de los correos exactos, así que si los nombres
 cambian, no te asustes — lo que importa es el **rol** (operator vs
 admin).
+
+Para CP-13 a CP-15 usa correos de prueba únicos, por ejemplo
+`melanie.op.temp+YYYYMMDDHHmm@...` y
+`melanie.admin.temp+YYYYMMDDHHmm@...`. No promociones **OP-MEL** ni
+**OP-MAX**; la promoción retira la cuenta de Operador.
 
 ## 2. Pre-vuelo: setup
 
@@ -93,7 +106,7 @@ Antes del CP-01 confirma que en Firestore existan estos documentos
 Si falta alguno de éstos, **escríbeme antes de seguir** — yo agrego lo
 que falte desde la consola. Si están todos, sigue con el CP-01.
 
-## 3. Los 12 casos
+## 3. Los 16 casos
 
 ---
 
@@ -107,9 +120,9 @@ operador y admin, y que la barra inferior sea distinta según el rol.
 | # | Acción | Resultado esperado |
 |---|---|---|
 | 1 | Abre la app por primera vez | Aparece la pantalla de Login (no hay opción de "Crear cuenta") |
-| 2 | Captura las credenciales de **OP-MEL** y pulsa "Iniciar sesión" | Aterrizas en el Dashboard. La barra inferior muestra **Dashboard / Compras / Reportes** (sin la pestaña Proveedores) |
+| 2 | Captura las credenciales de **OP-MEL** y pulsa "Iniciar sesión" | Aterrizas en el Dashboard. La barra inferior muestra **Dashboard / Compras / Reportes** (sin Proveedores ni Usuarios) |
 | 3 | Pulsa el menú overflow (⋮) arriba a la derecha y elige "Cerrar sesión" | Regresas a Login |
-| 4 | Captura las credenciales de **ADMIN** y pulsa "Iniciar sesión" | Aterrizas en el Dashboard. La barra inferior ahora muestra **Dashboard / Compras / Proveedores / Reportes** (la pestaña Proveedores apareció) |
+| 4 | Captura las credenciales de **ADMIN** y pulsa "Iniciar sesión" | Aterrizas en el Dashboard. La barra inferior ahora muestra **Dashboard / Compras / Proveedores / Usuarios / Reportes** (aparecen las pestañas administrativas) |
 | 5 | Cierra sesión con el menú overflow | Regresas a Login |
 
 **Resultado:** `[x] Pasa` `[ ] Falla`
@@ -302,7 +315,7 @@ Pero si desaparece de las "Últimas 5 compras" y se muestra como debe de ser en 
   Firestore se ablandó a `request.resource.data.deletedAt is timestamp`
   para acompañar el cambio (uid sigue anclado).
 - **Verificación en desarrollo:** `./gradlew assembleDebug` ✓; tests de
-  reglas del emulador 17/17 ✓.
+  reglas del emulador 24/24 ✓.
 - **Pendiente:** re-correr este caso en el mismo Xiaomi 15T con Melanie.
   Esperado: la compra eliminada desaparece del Historial > "Todos"
   inmediatamente, sin necesidad de cambiar entre chips de proveedor ni
@@ -372,7 +385,7 @@ Eran dos bugs en uno; los dos quedaron corregidos en el task 20.
     Ahora el flip metadata se emite, el VM ve `isPending = false`, y
     el badge se quita.
 - **Verificación en desarrollo:** `./gradlew assembleDebug` ✓; tests de
-  reglas del emulador 17/17 ✓.
+  reglas del emulador 24/24 ✓.
 - **Pendiente:** re-correr en el mismo Xiaomi 15T con Melanie.
   Esperado: (1) el botón Guardar offline cierra la pantalla en <2 s; (2)
   las 3 compras aparecen en "Últimas 5" con badge "pendiente"; (3) al
@@ -428,14 +441,16 @@ Funcionamiento correcto
 ### CP-09 — Reglas de seguridad: denegación de auto-ascenso
 
 **Qué prueba:** que un operador **no pueda** modificar su propio
-documento de `users/{uid}` para subirse a admin. Esto es lo que evita
-que cualquiera con la APK se promueva.
+documento de `users/{uid}` para subirse a admin, crear usuarios, ni
+escribir campos de retiro/promoción. Esto es lo que evita que cualquiera
+con la APK se promueva o fabrique cuentas.
 
 > **Este caso está cubierto al 100% por los tests automatizados del
 > emulador**: ver `tests/rules/rules.test.js` → `users › operator
-> cannot promote self to admin`. La corrida más reciente
-> (`firebase emulators:exec ... npm test`) reporta `tests 17, pass 17,
-> fail 0`. Para esta corrida manual:
+> cannot promote self to admin`, `operator cannot create user documents`
+> y `operator cannot write own privileged retirement fields`. La corrida
+> más reciente debe reportar `tests 24, pass 24, fail 0`. Para esta
+> corrida manual:
 >
 > **Marca este caso como ✅ "Cubierto por tests automatizados"** y
 > pasa al CP-10. No tiene caso reproducirlo manualmente — necesitarías
@@ -516,10 +531,11 @@ Funcionamiento correcto
 
 ### CP-12 — Visibilidad de pestañas por rol
 
-**Qué prueba:** que la barra inferior solo muestre la pestaña
-"Proveedores" cuando el rol es admin. Esto es **conveniencia de UI**
-solamente — la autorización real está en las reglas. Pero es lo que
-hace que la app se sienta "limpia" para el operador.
+**Qué prueba:** que la barra inferior solo muestre las pestañas
+"Proveedores" y "Usuarios" cuando el rol es admin. Esto es
+**conveniencia de UI** solamente — la autorización real está en las
+reglas. Pero es lo que hace que la app se sienta "limpia" para el
+operador.
 
 **Preparación:** ninguna. Si ya cerraste sesión al final del CP-11,
 empieza desde la pantalla de Login.
@@ -528,8 +544,8 @@ empieza desde la pantalla de Login.
 
 | # | Acción | Resultado esperado |
 |---|---|---|
-| 1 | Inicia sesión como **OP-MEL** | Barra inferior: **Dashboard / Compras / Reportes**. La pestaña "Proveedores" **no** está |
-| 2 | Cierra sesión, inicia como **ADMIN** | Barra inferior: **Dashboard / Compras / Proveedores / Reportes** (las 4) |
+| 1 | Inicia sesión como **OP-MEL** | Barra inferior: **Dashboard / Compras / Reportes**. Las pestañas "Proveedores" y "Usuarios" **no** están |
+| 2 | Cierra sesión, inicia como **ADMIN** | Barra inferior: **Dashboard / Compras / Proveedores / Usuarios / Reportes** (las 5) |
 
 **Resultado:** `[x] Pasa` `[ ] Falla`
 
@@ -537,6 +553,128 @@ empieza desde la pantalla de Login.
 
 ```
 Funcionamiento correcto
+
+```
+
+---
+
+### CP-13 — Admin crea Operador desde la app
+
+**Qué prueba:** que un Admin autenticado pueda crear una cuenta de
+Operador desde la pestaña Usuarios, sin abrir auto-registro público.
+
+**Preparación:** sesionada como **ADMIN**, con internet. Define un correo
+único para **OP-TEMP** y una contraseña temporal de al menos 6 caracteres.
+
+**Pasos:**
+
+| # | Acción | Resultado esperado |
+|---|---|---|
+| 1 | Entra a la pestaña **Usuarios** | Ves el roster de Operadores activos |
+| 2 | Pulsa **Operador** | Se abre el formulario "Nuevo operador" |
+| 3 | Captura nombre, correo de **OP-TEMP** y contraseña temporal | El formulario acepta los datos |
+| 4 | Pulsa **Crear operador** | Regresas al roster; aparece el nuevo Operador |
+| 5 | Abre Firestore Console → `users` y busca el nuevo doc | Tiene `email`, `displayName`, `role = "operator"`, `accountCreatedAt`, `disabledAt = null`, `retiredAt = null` |
+| 6 | Cierra sesión e inicia con **OP-TEMP** | Entra como Operador; no ve Proveedores ni Usuarios |
+
+**Resultado:** `[ ] Pasa` `[ ] Falla`
+
+**Notas:**
+
+```
+
+
+```
+
+---
+
+### CP-14 — Admin crea otro Admin con re-autenticación
+
+**Qué prueba:** que crear otro Admin requiera confirmar la contraseña del
+Admin actuante y que el nuevo usuario quede con rol admin.
+
+**Preparación:** sesionada como **ADMIN**, con internet. Define un correo
+único para **ADMIN-TEMP** y una contraseña temporal de al menos 6
+caracteres.
+
+**Pasos:**
+
+| # | Acción | Resultado esperado |
+|---|---|---|
+| 1 | En **Usuarios**, pulsa **Admin** | Se abre "Nuevo admin" |
+| 2 | Captura nombre, correo de **ADMIN-TEMP**, contraseña temporal y una contraseña Admin incorrecta | Al pulsar **Crear admin**, aparece error; no se crea el usuario |
+| 3 | Repite con la contraseña correcta de **ADMIN** | Regresas al roster; aparece mensaje "Administrador creado" |
+| 4 | Abre Firestore Console → `users` y busca el nuevo doc | Tiene `role = "admin"`, `accountCreatedAt`, `disabledAt = null`, `retiredAt = null` |
+| 5 | Cierra sesión e inicia con **ADMIN-TEMP** | Entra como Admin; ve Proveedores y Usuarios |
+
+**Resultado:** `[ ] Pasa` `[ ] Falla`
+
+**Notas:**
+
+```
+
+
+```
+
+---
+
+### CP-15 — Promoción de Operador a Admin
+
+**Qué prueba:** que un Admin pueda promover un Operador usando el flujo
+de retiro/recreación: se retira el login viejo, se crea un Admin nuevo
+con el mismo correo y las compras históricas conservan el `uid` viejo.
+
+**Preparación:** usa **OP-TEMP** creado en CP-13, no **OP-MEL** ni
+**OP-MAX**. Antes de promoverlo, inicia sesión como **OP-TEMP** y captura
+una compra sencilla para que exista una compra histórica con
+`createdBy = oldOperatorUid`.
+
+**Pasos:**
+
+| # | Acción | Resultado esperado |
+|---|---|---|
+| 1 | Como **ADMIN**, entra a **Usuarios** y localiza **OP-TEMP** | El Operador aparece en el roster |
+| 2 | Pulsa el icono de promover del renglón de **OP-TEMP** | Se abre "Promover operador" con su nombre/correo |
+| 3 | Captura una contraseña incorrecta de Operador y la contraseña correcta de Admin | La promoción falla; **OP-TEMP** sigue como Operador |
+| 4 | Repite con contraseña correcta de Operador y contraseña Admin incorrecta | La promoción falla; no se crea Admin nuevo |
+| 5 | Repite con ambas contraseñas correctas | Regresas al roster; aparece mensaje de éxito |
+| 6 | En Firestore revisa el `users/{oldOperatorUid}` de **OP-TEMP** | Conserva `role = "operator"`, pero ahora tiene `disabledAt`, `retiredAt`, `promotedToUid` y `authEmailRetiredTo` |
+| 7 | Revisa `users/{promotedToUid}` | Tiene el correo original de **OP-TEMP**, `role = "admin"`, `promotedFromUid = oldOperatorUid` |
+| 8 | Inicia sesión con el correo original de **OP-TEMP** y su contraseña | Entra como Admin nuevo; ve Proveedores y Usuarios |
+| 9 | Revisa la compra histórica creada antes de promover | Su `createdBy` sigue siendo `oldOperatorUid`; no se reescribió a `promotedToUid` |
+
+**Resultado:** `[ ] Pasa` `[ ] Falla`
+
+**Notas:**
+
+```
+
+
+```
+
+---
+
+### CP-16 — Usuarios retirados y writes privilegiados
+
+**Qué prueba:** que la seguridad no dependa de ocultar botones: ni
+Operadores ni Admins pueden crear/modificar documentos `users/*`
+directamente desde cliente, y un Operador retirado no puede seguir
+operando aunque conserve un token viejo.
+
+> Este caso es automatizado. Córrelo desde la raíz del repo:
+>
+> ```sh
+> firebase emulators:exec --only firestore 'cd tests/rules && npm test'
+> ```
+>
+> Debe terminar con `tests 24`, `pass 24`, `fail 0`.
+
+**Resultado:** `[ ] Cubierto por tests automatizados` `[ ] Falla`
+
+**Notas:**
+
+```
+
 
 ```
 
@@ -573,14 +711,18 @@ esperado". Falla = "no lo vi" o "vi algo distinto". Si dudas, pon
 | CP-04 | Captura contra UNREGISTERED | `[Si] Pasa` `[ ] Falla` | |
 | CP-05 | Ventana de edición 24h | `[Si] Pasa` `[ ] Falla` | |
 | CP-06 | Soft-delete | `[ ] Pasa` `[Si] Falla` → corregido en task 20 (2026-05-31), re-corrida pendiente | |  
-    Falla original: la compra eliminada sigue apareciendo en Historial/Todos hasta cambiar entre pestañas internas. Fix: `softDelete()` ahora escribe `deletedAt` con `Timestamp.now()` del cliente para que el caché lo vea no-null inmediato. Tests de reglas 17/17 ✓. Pendiente re-corrida en Xiaomi 15T.
+    Falla original: la compra eliminada sigue apareciendo en Historial/Todos hasta cambiar entre pestañas internas. Fix: `softDelete()` ahora escribe `deletedAt` con `Timestamp.now()` del cliente para que el caché lo vea no-null inmediato. Tests de reglas 24/24 ✓. Pendiente re-corrida en Xiaomi 15T.
 | CP-07 | Captura offline + sync | `[ ] Pasa` `[Si] Falla` → corregido en task 20 (2026-05-31), re-corrida pendiente | |
     Falla original: al guardar offline el botón se queda en "Guardando..."; la compra aparece como pendiente, pero al recuperar internet no se sincroniza y queda pendiente permanentemente. Fix: (A) `add()` fire-and-forget en lugar de `.set().await()` para no colgar offline; (B) `observeRecentWithPending` usa `MetadataChanges.INCLUDE` para que el flip `hasPendingWrites: true→false` emita. Pendiente re-corrida en Xiaomi 15T.
 | CP-08 | Proveedor desactivado vs histórico | `[Si] Pasa` `[ ] Falla` | |
 | CP-09 | Auto-ascenso denegado | `[X] Cubierto por tests automatizados` | n/a manual |
 | CP-10 | Escritura no autorizada en suppliers | `[X] Cubierto por tests automatizados` | n/a manual |
 | CP-11 | Zona horaria del `dateKey` | `[Si] Pasa` `[ ] Falla` | |
-| CP-12 | Visibilidad de pestañas por rol | `[Si] Pasa` `[ ] Falla` | |
+| CP-12 | Visibilidad de pestañas por rol | `[Si] Pasa` `[ ] Falla` | Re-correr por nueva pestaña Usuarios |
+| CP-13 | Admin crea Operador | `[ ] Pasa` `[ ] Falla` | |
+| CP-14 | Admin crea otro Admin | `[ ] Pasa` `[ ] Falla` | |
+| CP-15 | Promoción Operador → Admin | `[ ] Pasa` `[ ] Falla` | |
+| CP-16 | Usuarios retirados / writes privilegiados | `[ ] Cubierto por tests automatizados` `[ ] Falla` | |
 
 **Dispositivo usado:** ___Telefono Xiaomi 15T____________
 
@@ -613,6 +755,12 @@ genere; pon aquí el que recibiste) LO RECIBÍ
   prueba.
 - **Pending / pendiente:** indicador en una compra que dice "esto se
   capturó offline y todavía no llega al servidor". CP-07 lo prueba.
+- **Retirado:** cuenta de Operador que ya no puede operar porque fue
+  promovida. Su documento `users/{oldUid}` queda para auditoría, pero el
+  login viejo se desactiva. CP-15/CP-16 lo prueban.
+- **Promoción:** flujo Admin-only que retira un Operador y crea un nuevo
+  Admin con el mismo correo. Las compras históricas conservan el `uid`
+  viejo. CP-15 lo prueba.
 
 ---
 

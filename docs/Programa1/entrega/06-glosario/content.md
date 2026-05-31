@@ -126,9 +126,9 @@ fan-out de actualizaciones a las Compras existentes.
 
 Los Proveedores usan `isActive: Boolean` en su lugar — la desactivación
 es reversible y oculta al Proveedor del dropdown del muelle sin afectar
-la resolución histórica de Compras. Los Usuarios no se hacen
-soft-delete; los empleados que se van se manejan en Firebase Auth
-(cambio de contraseña, downgrade de rol).
+la resolución histórica de Compras. Los Usuarios no se borran físicamente:
+en el caso especial de promoción Operador→Admin, el login viejo se retira
+con `disabledAt`/`retiredAt` y queda como evidencia histórica.
 
 ---
 
@@ -144,27 +144,24 @@ vía selector) se consideró y se difirió — ver ADR-0001.
 
 ## Administrador
 
-Un usuario que puede gestionar el roster de Proveedores y (más adelante)
-los roles de usuario. Los Administradores también registran Compras. No
-hay un rol "supervisor" separado; admin/operator es el único split de
-roles.
+Un usuario que puede gestionar el roster de Proveedores y el roster de
+Operadores. También puede registrar Compras. No hay un rol "supervisor"
+separado; admin/operator es el único split de roles.
 
 ## Creación de cuentas
 
 **No hay auto-registro.** Ni los Operadores ni los Administradores pueden
-darse de alta a sí mismos. En v1, el Administrador crea las cuentas de usuario
-manualmente en la Consola de Firebase y asigna el `role` en el documento
-Firestore del usuario. La app expone solo Login.
+darse de alta a sí mismos. El primer Administrador se crea manualmente en
+Firebase para bootstrap; después, la creación de cuentas ocurre desde la
+pestaña **Usuarios** por acción de un Administrador autenticado.
 
 Esto también resuelve la pregunta de bootstrap "¿quién es el primer
 Administrador?": quien configure el proyecto de Firebase es el primer
 Administrador, por virtud de tener acceso a la Consola.
 
-En la próxima iteración, la creación de cuentas se moverá a una UI
-administrativa dentro de la app: un Administrador autenticado podrá registrar
-Operadores, administrar el roster de Operadores y registrar otro
-Administrador. Para dar de alta otro Administrador deberá reingresar sus
-credenciales como confirmación.
+Un Administrador autenticado puede registrar Operadores, administrar el
+roster de Operadores y registrar otro Administrador. Para dar de alta otro
+Administrador debe reingresar sus credenciales como confirmación.
 
 La promoción de Operador a Administrador es un flujo explícito, no una edición
 directa de `role`: el Admin selecciona al Operador, el sistema
@@ -184,8 +181,10 @@ ADR-0002.
 
 Resumen de política:
 
-- `users/{uid}`: lectura = propio doc O admin; escritura = propio doc
-  excepto `role`; los admins pueden escribir a cualquier usuario.
+- `users/{uid}`: lectura = propio doc O admin, siempre que la cuenta esté
+  activa; escritura de cliente = solo `displayName`. La creación de
+  usuarios, cambio de `role` y campos de retiro/promoción los escribe
+  Cloud Functions con Admin SDK.
 - `suppliers/*`: lectura = cualquier autenticado; escritura = solo admin.
 - `purchases/*`: lectura = cualquier autenticado; creación = cualquier
   autenticado; update/delete = admin O el creador original dentro de

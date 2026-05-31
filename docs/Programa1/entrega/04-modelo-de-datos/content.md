@@ -28,14 +28,14 @@ users/{userId}
 ├── disabledAt: Timestamp?        // null en cuentas activas
 ├── retiredAt: Timestamp?         // null salvo cuentas retiradas por promocion
 ├── promotedToUid: String?        // uid admin nuevo, solo en operador retirado
-└── promotedFromUid: String?      // uid operador anterior, solo en admin promovido
+├── promotedFromUid: String?      // uid operador anterior, solo en admin promovido
+└── authEmailRetiredTo: String?   // email tecnico al que se movio Auth viejo
 ```
 
-- **Creación:** manual desde la Consola de Firebase por un Administrador
-  en v1. No hay auto-registro en la app: ni Operadores ni Administradores
-  pueden darse de alta a sí mismos. En la próxima iteración, un
-  Administrador autenticado podrá crear Operadores y otro Administrador
-  desde una UI interna; el alta de otro Administrador exige reingresar las
+- **Creación:** el primer Administrador se bootstrappea manualmente desde
+  Firebase Console. Después no hay auto-registro: un Administrador
+  autenticado crea Operadores u otro Administrador desde la UI interna
+  **Usuarios**. El alta de otro Administrador exige reingresar las
   credenciales del Admin actuante. La promoción de Operador a Administrador
   desactiva/retira la cuenta de Operador, crea una nueva cuenta Admin con el
   mismo correo electrónico y exige confirmación de contraseña del Operador
@@ -47,7 +47,7 @@ users/{userId}
   anterior para mantener la atribución histórica. La cuenta Auth del Operador
   se deshabilita y su correo Auth se mueve a un marcador interno para liberar
   el correo original; el documento `users/{oldUid}` se conserva con
-  `disabledAt`, `retiredAt` y `promotedToUid`.
+  `disabledAt`, `retiredAt`, `promotedToUid` y `authEmailRetiredTo`.
 - **Restricción de seguridad:** un usuario puede escribir su propio
   `displayName`, pero no puede crear cuentas, modificar `role` ni escribir
   campos de retiro/promoción. Esos cambios pasan por Cloud Functions con Admin

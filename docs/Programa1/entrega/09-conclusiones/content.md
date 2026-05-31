@@ -13,6 +13,9 @@ reemplaza:
   enforzan del lado del servidor con Firestore Security Rules. Un
   Operador no puede ascenderse a Administrador, ni siquiera con acceso
   directo al SDK de Firestore.
+- **Gestión de usuarios sin auto-registro.** El Administrador puede crear
+  Operadores, crear otro Administrador con re-autenticación y promover un
+  Operador mediante un flujo confiable en Cloud Functions/Admin SDK.
 - **Modelo de datos honesto sobre el tiempo y el dinero.** Tres
   timestamps distintos por compra reconcilian correctamente la captura
   offline con la ventana de edición de 24 horas. El dinero vive como
@@ -78,7 +81,6 @@ Lo que **no** hace v1, por decisión explícita:
 
 | Limitación | Razón | Disparador para revisitar |
 |---|---|---|
-| Sin pantalla de gestión de usuarios | En v1 el Admin provisiona cuentas en la Consola; resuelve el bootstrap del primer admin sin abrir auto-registro | Próxima iteración: UI Admin para registrar Operadores, gestionar Operadores, registrar otro Admin con re-autenticación y promover Operadores con doble confirmación |
 | Sin tableta compartida en el muelle | Modelo de un teléfono por Operador (ADR-0001) | Si el cliente confirma "vamos a poner tabletas" |
 | Sin gráficos en Reportes | Vico recortado por tiempo; texto es suficiente para v1 | Cuando termine el presupuesto y la app esté estable |
 | Sin filtro por rango de fechas en Historial | Filtro por proveedor cubre el 80% de los casos | Si el Admin reporta que necesita comparar semanas/meses lado a lado |
@@ -94,14 +96,9 @@ En orden de valor descendente:
    asume un workflow ("el operador parado junto a la báscula"); falta
    verificar empíricamente que la UX coincide con cómo realmente
    trabajan.
-2. **Gestión de usuarios desde la app.** Mantener cerrado el
-   auto-registro, pero permitir que un Administrador autenticado registre
-   Operadores, gestione el roster de Operadores y registre otro
-   Administrador. El alta de otro Administrador debe pedir reingresar las
-   credenciales del Admin actuante como confirmación. La promoción de
-   Operador a Administrador debe retirar/desactivar la cuenta de Operador,
-   crear una nueva cuenta Admin con el mismo correo y exigir confirmación
-   tanto del Operador promovido como del Admin actuante.
+2. **Pulir operación de usuarios en campo.** La gestión de usuarios ya
+   existe; falta validarla con Melanie en CP-13 a CP-15 y, si el cliente
+   lo pide, agregar restablecimiento de contraseña desde la misma UI.
 3. **Gráficos en Reportes.** Es lo primero que un usuario va a pedir
    después de usar la app un mes. Vico se reincorpora aditivamente.
 4. **Notificaciones push** para Administradores cuando hay compras con

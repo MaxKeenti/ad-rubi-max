@@ -27,7 +27,7 @@ ergonomía del flujo actual:
 - Funciona **offline** — la conectividad en bodega es poco confiable; las
   capturas se sincronizan automáticamente cuando vuelve la red.
 - Roles diferenciados: **Operador** captura entradas; **Administrador**
-  gestiona el catálogo de proveedores y reconcilia datos.
+  gestiona proveedores, usuarios y reconciliación de datos.
 - Reportes diarios y mensuales accesibles desde la misma app.
 
 ## Alcance
@@ -35,11 +35,12 @@ ergonomía del flujo actual:
 | Incluido en v1 | Diferido |
 |---|---|
 | Captura de compras (entradas) | Pantalla de Configuración |
-| Catálogo de proveedores (CRUD admin) | Gestión de usuarios desde UI Admin |
-| Autenticación con roles | Gráficos en Reportes |
-| Reportes textuales (toneladas, top 5 proveedores) | Filtros por rango de fechas |
-| Sincronización offline | Multi-bodega / multi-región |
-| Reglas de seguridad servidor-side | Modo tableta compartida |
+| Catálogo de proveedores (CRUD admin) | Gráficos en Reportes |
+| Gestión de usuarios desde UI Admin | Filtros por rango de fechas |
+| Autenticación con roles | Multi-bodega / multi-región |
+| Reportes textuales (toneladas, top 5 proveedores) | Modo tableta compartida |
+| Sincronización offline | Exportación CSV/Excel |
+| Reglas de seguridad servidor-side | Notificaciones push |
 
 ## Decisiones arquitectónicas clave
 

@@ -284,8 +284,8 @@ de que sigue compilando después del cambio.
     apareciendo en la lista.
   - CP-03 (sin precio), CP-04 (UNREGISTERED), CP-05 (ventana 24h),
     CP-11 (dateKey) siguen pasando.
-  - Tests de reglas (`tests/rules/rules.test.js`) siguen en
-    17/17 — el shape del documento `purchases` no cambió (solo el
+  - Tests de reglas (`tests/rules/rules.test.js`) siguen verdes; después
+    de task 19 son 24/24. El shape del documento `purchases` no cambió (solo el
     valor literal de `deletedAt` pasa de sentinel server a
     `Timestamp` cliente, ambos son `timestamp` desde la óptica de las
     rules).
