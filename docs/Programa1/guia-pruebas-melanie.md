@@ -276,7 +276,8 @@ compra existente (las que capturaste en CPs anteriores funcionan).
 | 3 | En Firestore Console, busca el doc por su id | El documento **sigue existiendo** — no se eliminó físicamente. Ahora tiene `deletedAt: <timestamp reciente>` y `deletedBy: <tu uid de admin>` |
 | 4 | Vuelve a la pestaña Compras en la app | La compra eliminada no aparece en ninguna lista (Dashboard, Historial, Reportes) |
 
-**Resultado:** `[ ] Pasa` `[x] Falla`
+**Resultado:** `[ ] Pasa` `[x] Falla` — **corrección aplicada el
+2026-05-31 (task 20); re-corrida con Melanie pendiente**.
 
 **Notas:**
 
@@ -285,6 +286,28 @@ Si se elimina la compra pero no desaparece del historial de compras en "TODOS" h
 
 ```
 Pero si desaparece de las "Últimas 5 compras" y se muestra como debe de ser en el Firebase
+
+**Re-corrida (post-fix, pendiente):**
+
+- **Causa raíz:** `softDelete()` escribía `deletedAt` con
+  `FieldValue.serverTimestamp()`. Mientras la escritura estaba en cola
+  local, el cache de Firestore proyectaba el sentinel como `null`, y el
+  query `whereEqualTo("deletedAt", null)` seguía matcheando el doc. Solo
+  al recargar el listener (cambiar de chip de proveedor) la lista se
+  refrescaba.
+- **Fix:** ahora `softDelete()` usa `Timestamp.now()` del cliente. El
+  cache ve un timestamp no-null en el mismo tick → la lista excluye el
+  doc inmediatamente. El reloj autoritativo de auditoría sigue siendo
+  `serverWrittenAt` (ADR-0002); `deletedAt` es informativo. La regla de
+  Firestore se ablandó a `request.resource.data.deletedAt is timestamp`
+  para acompañar el cambio (uid sigue anclado).
+- **Verificación en desarrollo:** `./gradlew assembleDebug` ✓; tests de
+  reglas del emulador 17/17 ✓.
+- **Pendiente:** re-correr este caso en el mismo Xiaomi 15T con Melanie.
+  Esperado: la compra eliminada desaparece del Historial > "Todos"
+  inmediatamente, sin necesidad de cambiar entre chips de proveedor ni
+  reiniciar la pestaña.
+
 ---
 
 ### CP-07 — Captura offline
@@ -310,7 +333,8 @@ solas cuando vuelve la red.
 > **si no desaparecen al recuperar red**, anótalo como falla y
 > describe qué pasó (siguen pendientes para siempre, parpadean, etc.).
 
-**Resultado:** `[ ] Pasa` `[x] Falla`
+**Resultado:** `[ ] Pasa` `[x] Falla` — **corrección aplicada el
+2026-05-31 (task 20); re-corrida con Melanie pendiente**.
 
 **Notas:**
 
@@ -321,6 +345,43 @@ A la hora de registrar una compra yo quise guardarla y se quedo el boton de guar
 Pero al regresarme desde la flecha de regresar en las ultimas 5 comprar si me aparecia la compra y en estado de pendiente y cuando quito el modo avion se quedan asi permanentemente 
 
 ```
+
+**Re-corrida (post-fix, pendiente):**
+
+Eran dos bugs en uno; los dos quedaron corregidos en el task 20.
+
+- **Bug A — "Guardando…" colgado.** `PurchaseRepositoryFirestoreImpl.add()`
+  hacía `collection.document(...).set(data).await()`. Por contrato del
+  SDK de Firestore, ese `Task` solo resuelve cuando el server confirma —
+  offline queda colgado para siempre, la corrutina del `onSave()` nunca
+  termina, y `isSaving` no vuelve a `false`.
+  - **Fix:** fire-and-forget. La escritura sigue persistiendo
+    sincronamente en el cache local (los listeners la ven de inmediato),
+    pero `add()` ya no espera el ack del server. `isSaving` vuelve a
+    `false`, `saveCompleted` se prende, y la pantalla se cierra en menos
+    de 2 s aunque no haya red. Si el server después rechaza la
+    escritura, se loggea con TAG `PurchaseRepoFirestore`.
+- **Bug B — Badge "pendiente" para siempre.** `observeRecentWithPending`
+  usaba `.snapshots()`, que por default es `MetadataChanges.EXCLUDE`.
+  Cuando el server confirmaba la escritura pendiente, el único cambio
+  era `metadata.hasPendingWrites: true → false` (metadata-only), y con
+  EXCLUDE ese evento **no se emitía**. El `Flow` se quedaba con la
+  última emisión donde `isPending = true` aunque el doc sí hubiera
+  sincronizado.
+  - **Fix:** cambiar ese query a `.snapshots(MetadataChanges.INCLUDE)`.
+    Ahora el flip metadata se emite, el VM ve `isPending = false`, y
+    el badge se quita.
+- **Verificación en desarrollo:** `./gradlew assembleDebug` ✓; tests de
+  reglas del emulador 17/17 ✓.
+- **Pendiente:** re-correr en el mismo Xiaomi 15T con Melanie.
+  Esperado: (1) el botón Guardar offline cierra la pantalla en <2 s; (2)
+  las 3 compras aparecen en "Últimas 5" con badge "pendiente"; (3) al
+  recuperar red, los badges se quitan uno por uno en 10-30 s; (4) los
+  docs aparecen en Firebase Console con `serverWrittenAt` poblado.
+- **Si el paso 4 falla** (los docs no llegan al server tras recuperar
+  red), entonces hay un tercer bug que el task 20 **no** cubre —
+  probablemente cola offline corrupta, token de Auth expirado, o regla
+  rechazando el write. En ese caso, anotar y abrir issue separado.
 
 ---
 
@@ -511,10 +572,10 @@ esperado". Falla = "no lo vi" o "vi algo distinto". Si dudas, pon
 | CP-03 | Captura sin precio | `[Si] Pasa` `[ ] Falla` | |
 | CP-04 | Captura contra UNREGISTERED | `[Si] Pasa` `[ ] Falla` | |
 | CP-05 | Ventana de edición 24h | `[Si] Pasa` `[ ] Falla` | |
-| CP-06 | Soft-delete | `[ ] Pasa` `[Si] Falla` | |  
-    Falla: la compra eliminada sigue apareciendo en Historial/Todos hasta cambiar entre pestañas internas.
-| CP-07 | Captura offline + sync | `[ ] Pasa` `[Si] Falla` | |
-    Falla: al guardar offline el botón se queda en “Guardando...”; la compra aparece como pendiente, pero al recuperar internet no se sincroniza y queda pendiente permanentemente.
+| CP-06 | Soft-delete | `[ ] Pasa` `[Si] Falla` → corregido en task 20 (2026-05-31), re-corrida pendiente | |  
+    Falla original: la compra eliminada sigue apareciendo en Historial/Todos hasta cambiar entre pestañas internas. Fix: `softDelete()` ahora escribe `deletedAt` con `Timestamp.now()` del cliente para que el caché lo vea no-null inmediato. Tests de reglas 17/17 ✓. Pendiente re-corrida en Xiaomi 15T.
+| CP-07 | Captura offline + sync | `[ ] Pasa` `[Si] Falla` → corregido en task 20 (2026-05-31), re-corrida pendiente | |
+    Falla original: al guardar offline el botón se queda en "Guardando..."; la compra aparece como pendiente, pero al recuperar internet no se sincroniza y queda pendiente permanentemente. Fix: (A) `add()` fire-and-forget en lugar de `.set().await()` para no colgar offline; (B) `observeRecentWithPending` usa `MetadataChanges.INCLUDE` para que el flip `hasPendingWrites: true→false` emita. Pendiente re-corrida en Xiaomi 15T.
 | CP-08 | Proveedor desactivado vs histórico | `[Si] Pasa` `[ ] Falla` | |
 | CP-09 | Auto-ascenso denegado | `[X] Cubierto por tests automatizados` | n/a manual |
 | CP-10 | Escritura no autorizada en suppliers | `[X] Cubierto por tests automatizados` | n/a manual |
