@@ -112,12 +112,12 @@ operador y admin, y que la barra inferior sea distinta según el rol.
 | 4 | Captura las credenciales de **ADMIN** y pulsa "Iniciar sesión" | Aterrizas en el Dashboard. La barra inferior ahora muestra **Dashboard / Compras / Proveedores / Reportes** (la pestaña Proveedores apareció) |
 | 5 | Cierra sesión con el menú overflow | Regresas a Login |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[Sí] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-
+Todo aparece como debe, los proveedores con el nombre correcto y los estados correspondientes y se pueden añadir proveedores (no añadi aun ninguno)
 
 ```
 
@@ -146,13 +146,12 @@ con proveedor del catálogo, toneladas, precio y fecha.
 > Si en Firestore ves `12500` literal en `pricePerTonCentavos`, el
 > mapping de la app está mal — anótalo como falla.
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[ ] Pasa` `[Si] Falla`
 
 **Notas:**
 
 ```
-
-
+La compra se guarda correctamente, pero el campo createdBy no coincide visualmente con el UID de mi celular, me parece que sale un UUID pero por usuario.
 ```
 
 ---
@@ -176,12 +175,12 @@ manejen correctamente las compras sin precio.
 > **Si en `pricePerTonCentavos` ves `0` en lugar de `null`**, la app
 > está poniendo cero cuando debería poner null — anótalo como falla.
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[Sí] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-
+Todo funciona correctamente
 
 ```
 
@@ -206,12 +205,12 @@ capturar el nombre real en texto libre.
 | 5 | Cierra sesión, entra como **ADMIN**, ve a **Reportes** o **Compras** | La compra que acabas de capturar aparece bajo "Proveedor no registrado" y la nota libre `Mangos de Veracruz S.A.` es visible |
 | 6 | Abre el doc en Firestore | `supplierId = "UNREGISTERED"` y `supplierNoteFreeform = "Mangos de Veracruz S.A."` |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[Si] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-
+Funcionamiento correcto
 
 ```
 
@@ -248,12 +247,12 @@ solo tienes un dispositivo, alterna sesión entre **OP-MEL** y
 | 4 | (Cubierto por tests automatizados — ver nota arriba) | n/a |
 | 5 | Cierra sesión. Entra como **ADMIN**. Edita esa misma compra cambiando la cantidad a `2` | Edición permitida — el admin no tiene ventana |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[Si] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-
+Funcionamiento correcto
 
 ```
 
@@ -277,15 +276,15 @@ compra existente (las que capturaste en CPs anteriores funcionan).
 | 3 | En Firestore Console, busca el doc por su id | El documento **sigue existiendo** — no se eliminó físicamente. Ahora tiene `deletedAt: <timestamp reciente>` y `deletedBy: <tu uid de admin>` |
 | 4 | Vuelve a la pestaña Compras en la app | La compra eliminada no aparece en ninguna lista (Dashboard, Historial, Reportes) |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[ ] Pasa` `[Si] Falla`
 
 **Notas:**
 
 ```
-
+Si se elimina la compra pero no desaparece del historial de compras en "TODOS" hasta que cambio de pestaña entre los proveedores, por que incluso cuando cambio entre ventanas de "Inicio", "Proveedores" y demás ahí sigue apareciendo, solo desaparece cuando cambio de pestaña en la misma ventana. 
 
 ```
-
+Pero si desaparece de las "Últimas 5 compras" y se muestra como debe de ser en el Firebase
 ---
 
 ### CP-07 — Captura offline
@@ -311,15 +310,16 @@ solas cuando vuelve la red.
 > **si no desaparecen al recuperar red**, anótalo como falla y
 > describe qué pasó (siguen pendientes para siempre, parpadean, etc.).
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[ ] Pasa` `[Si] Falla`
 
 **Notas:**
 
 ```
-
+A la hora de registrar una compra yo quise guardarla y se quedo el boton de guardar de la siguiente manera...
+"Guardando..." y en gris
 
 ```
-
+Pero al regresarme desde la flecha de regresar en las ultimas 5 comprar si me aparecia la compra y en estado de pendiente y cuando quito el modo avion se quedan asi permanentemente 
 ---
 
 ### CP-08 — Proveedor desactivado vs histórico
@@ -351,12 +351,12 @@ pero probablemente no tiene compras todavía. Antes de empezar:
 | 2 | Cancela. Ve al Historial. Busca la compra que capturaste en la preparación | La compra aparece con el nombre `Frutas Selectas SA` legible y correcto, **a pesar** de que el proveedor está desactivado |
 | 3 | Cierra sesión, entra como **ADMIN**, ve a Reportes | El proveedor desactivado puede o no aparecer en el "Top 5 del mes" dependiendo de cuántas toneladas tiene — no importa para este caso. Lo que importa es que el nombre histórico sea legible |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[Si] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-
+Funcionamiento correcto
 
 ```
 
@@ -440,12 +440,12 @@ día y se ve claramente la diferencia.
 > el dateKey en UTC en vez de zona local. Anótalo como falla — es un
 > bug serio que rompería los reportes diarios.
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[Si] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-
+Funcionamiento correcto
 
 ```
 
@@ -468,12 +468,12 @@ empieza desde la pantalla de Login.
 | 1 | Inicia sesión como **OP-MEL** | Barra inferior: **Dashboard / Compras / Reportes**. La pestaña "Proveedores" **no** está |
 | 2 | Cierra sesión, inicia como **ADMIN** | Barra inferior: **Dashboard / Compras / Proveedores / Reportes** (las 4) |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[Si] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-
+Funcionamiento correcto
 
 ```
 
@@ -504,29 +504,31 @@ esperado". Falla = "no lo vi" o "vi algo distinto". Si dudas, pon
 
 | CP | Qué prueba | Resultado | Notas breves |
 |---|---|---|---|
-| CP-01 | Auth (login, logout, barra por rol) | `[ ] Pasa` `[ ] Falla` | |
-| CP-02 | Captura de compra normal | `[ ] Pasa` `[ ] Falla` | |
-| CP-03 | Captura sin precio | `[ ] Pasa` `[ ] Falla` | |
-| CP-04 | Captura contra UNREGISTERED | `[ ] Pasa` `[ ] Falla` | |
-| CP-05 | Ventana de edición 24h | `[ ] Pasa` `[ ] Falla` | |
-| CP-06 | Soft-delete | `[ ] Pasa` `[ ] Falla` | |
-| CP-07 | Captura offline + sync | `[ ] Pasa` `[ ] Falla` | |
-| CP-08 | Proveedor desactivado vs histórico | `[ ] Pasa` `[ ] Falla` | |
+| CP-01 | Auth (login, logout, barra por rol) | `[Si] Pasa` `[ ] Falla` | |
+| CP-02 | Captura de compra normal | `[ ] Pasa` `[ ] Falla` |Si|
+| CP-03 | Captura sin precio | `[Si] Pasa` `[ ] Falla` | |
+| CP-04 | Captura contra UNREGISTERED | `[Si] Pasa` `[ ] Falla` | |
+| CP-05 | Ventana de edición 24h | `[Si] Pasa` `[ ] Falla` | |
+| CP-06 | Soft-delete | `[ ] Pasa` `[Si] Falla` | |  
+    Falla: la compra eliminada sigue apareciendo en Historial/Todos hasta cambiar entre pestañas internas.
+| CP-07 | Captura offline + sync | `[ ] Pasa` `[Si] Falla` | |
+    Falla: al guardar offline el botón se queda en “Guardando...”; la compra aparece como pendiente, pero al recuperar internet no se sincroniza y queda pendiente permanentemente.
+| CP-08 | Proveedor desactivado vs histórico | `[Si] Pasa` `[ ] Falla` | |
 | CP-09 | Auto-ascenso denegado | `[X] Cubierto por tests automatizados` | n/a manual |
 | CP-10 | Escritura no autorizada en suppliers | `[X] Cubierto por tests automatizados` | n/a manual |
-| CP-11 | Zona horaria del `dateKey` | `[ ] Pasa` `[ ] Falla` | |
-| CP-12 | Visibilidad de pestañas por rol | `[ ] Pasa` `[ ] Falla` | |
+| CP-11 | Zona horaria del `dateKey` | `[Si] Pasa` `[ ] Falla` | |
+| CP-12 | Visibilidad de pestañas por rol | `[Si] Pasa` `[ ] Falla` | |
 
-**Dispositivo usado:** _________________________________________
+**Dispositivo usado:** ___Telefono Xiaomi 15T____________
 
-**Versión de Android:** ________________________________________
+**Versión de Android:** __16____________________
 
 **APK probado:** `mangos-v1.0.apk` (SHA: lo te paso cuando lo
-genere; pon aquí el que recibiste)
+genere; pon aquí el que recibiste) LO RECIBÍ
 
-**Fecha de la corrida:** _______________________________________
+**Fecha de la corrida:** ___3o/05/2026_y 31/05/2026_____________
 
-**Tiempo total invertido:** ____________________________________
+**Tiempo total invertido:** ___3 Horas aproximandamente____________
 
 ## 6. Mini-glosario
 
