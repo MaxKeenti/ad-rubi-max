@@ -577,12 +577,12 @@ Operador desde la pestaña Usuarios, sin abrir auto-registro público.
 | 5 | Abre Firestore Console → `users` y busca el nuevo doc | Tiene `email`, `displayName`, `role = "operator"`, `accountCreatedAt`, `disabledAt = null`, `retiredAt = null` |
 | 6 | Cierra sesión e inicia con **OP-TEMP** | Entra como Operador; no ve Proveedores ni Usuarios |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[ ] Pasa` `[X] Falla`
 
 **Notas:**
 
 ```
-
+Dice que no se encontro la funcion de administracion de usuarios en el FireBase
 
 ```
 
@@ -607,12 +607,12 @@ caracteres.
 | 4 | Abre Firestore Console → `users` y busca el nuevo doc | Tiene `role = "admin"`, `accountCreatedAt`, `disabledAt = null`, `retiredAt = null` |
 | 5 | Cierra sesión e inicia con **ADMIN-TEMP** | Entra como Admin; ve Proveedores y Usuarios |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[ ] Pasa` `[X] Falla`
 
 **Notas:**
 
 ```
-
+Dice que no se encontro la funcion de administracion de usuarios en el FireBase
 
 ```
 
