@@ -121,14 +121,33 @@ describe("users", () => {
     await assertFails(getDoc(doc(operatorDb, "users/op1")));
   });
 
-  test("admin client cannot create user documents directly", async () => {
+  test("admin can create operator user documents for Spark fallback", async () => {
     const adminDb = await db("admin1", "admin");
 
-    await assertFails(
+    await assertSucceeds(
       setDoc(doc(adminDb, "users/op2"), {
         displayName: "Operador Dos",
         email: "op2@example.com",
         role: "operator",
+        accountCreatedAt: serverTimestamp(),
+        disabledAt: null,
+        retiredAt: null,
+      }),
+    );
+  });
+
+  test("admin can create promoted admin user documents for Spark fallback", async () => {
+    const adminDb = await db("admin1", "admin");
+
+    await assertSucceeds(
+      setDoc(doc(adminDb, "users/admin2"), {
+        displayName: "Admin Dos",
+        email: "admin2@example.com",
+        role: "admin",
+        accountCreatedAt: serverTimestamp(),
+        disabledAt: null,
+        retiredAt: null,
+        promotedFromUid: "op1",
       }),
     );
   });
@@ -144,9 +163,30 @@ describe("users", () => {
     );
   });
 
-  test("admin client cannot write promotion audit fields directly", async () => {
+  test("admin can retire operator user documents for Spark fallback", async () => {
     const adminDb = await db("admin1", "admin");
-    await seedUser("op1", "operator");
+    await seedUser("op1", "operator", {
+      email: "op1@example.com",
+      disabledAt: null,
+      retiredAt: null,
+    });
+
+    await assertSucceeds(
+      updateDoc(doc(adminDb, "users/op1"), {
+        disabledAt: serverTimestamp(),
+        retiredAt: serverTimestamp(),
+        promotedToUid: "admin2",
+      }),
+    );
+  });
+
+  test("admin cannot retire operator with literal client timestamps", async () => {
+    const adminDb = await db("admin1", "admin");
+    await seedUser("op1", "operator", {
+      email: "op1@example.com",
+      disabledAt: null,
+      retiredAt: null,
+    });
 
     await assertFails(
       updateDoc(doc(adminDb, "users/op1"), {

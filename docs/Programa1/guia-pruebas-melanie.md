@@ -19,12 +19,14 @@
 - [ ] **Tus credenciales de operador**: te las paso por mensaje
   privado (no las pongas en commits). Si no te llegaron, escríbeme.
 - [ ] **Las credenciales de admin**: también por mensaje privado.
-- [ ] **Cloud Functions desplegadas** para el proyecto `mangos-372bd`.
-  Los CP-13 a CP-15 usan la pestaña Usuarios; si al abrirla aparece un
-  error de Functions o de permisos, detente y avísame.
-- [ ] **`FIREBASE_WEB_API_KEY` configurada en Functions.** Sin esta
-  variable, las confirmaciones de contraseña para crear Admin/promover
-  Operador fallan aunque la contraseña sea correcta.
+- [ ] **APK actualizado después del fix de Usuarios.** El proyecto
+  `mangos-372bd` está en Spark, así que Cloud Functions no se puede
+  desplegar sin pasar a Blaze. La app primero intenta usar Functions si
+  existen; si Firebase responde que no existen, usa un fallback con Auth
+  REST + Firestore protegido por reglas admin-only.
+- [ ] **`FIREBASE_WEB_API_KEY` configurada en Functions** solo si se
+  decide desplegar Functions en un proyecto Blaze. Para el APK actual en
+  Spark no hace falta.
 - [ ] **Acceso a la Consola de Firebase del proyecto `mangos-372bd`**
   con tu cuenta Google — Max te invita como editor antes de que
   arranques. Necesitarás entrar a Firestore unas 3 o 4 veces para
@@ -584,6 +586,8 @@ Operador desde la pestaña Usuarios, sin abrir auto-registro público.
 ```
 Dice que no se encontro la funcion de administracion de usuarios en el FireBase
 
+2026-05-31: corregido en el APK nuevo con fallback Spark. Reintentar CP-13.
+
 ```
 
 ---
@@ -614,6 +618,8 @@ caracteres.
 ```
 Dice que no se encontro la funcion de administracion de usuarios en el FireBase
 
+2026-05-31: corregido en el APK nuevo con fallback Spark. Reintentar CP-14.
+
 ```
 
 ---
@@ -638,7 +644,7 @@ una compra sencilla para que exista una compra histórica con
 | 3 | Captura una contraseña incorrecta de Operador y la contraseña correcta de Admin | La promoción falla; **OP-TEMP** sigue como Operador |
 | 4 | Repite con contraseña correcta de Operador y contraseña Admin incorrecta | La promoción falla; no se crea Admin nuevo |
 | 5 | Repite con ambas contraseñas correctas | Regresas al roster; aparece mensaje de éxito |
-| 6 | En Firestore revisa el `users/{oldOperatorUid}` de **OP-TEMP** | Conserva `role = "operator"`, pero ahora tiene `disabledAt`, `retiredAt`, `promotedToUid` y `authEmailRetiredTo` |
+| 6 | En Firestore revisa el `users/{oldOperatorUid}` de **OP-TEMP** | Conserva `role = "operator"`, pero ahora tiene `disabledAt`, `retiredAt` y `promotedToUid`. Si se usa Functions en Blaze también puede tener `authEmailRetiredTo`; en Spark fallback se elimina el Auth viejo para liberar el correo |
 | 7 | Revisa `users/{promotedToUid}` | Tiene el correo original de **OP-TEMP**, `role = "admin"`, `promotedFromUid = oldOperatorUid` |
 | 8 | Inicia sesión con el correo original de **OP-TEMP** y su contraseña | Entra como Admin nuevo; ve Proveedores y Usuarios |
 | 9 | Revisa la compra histórica creada antes de promover | Su `createdBy` sigue siendo `oldOperatorUid`; no se reescribió a `promotedToUid` |
@@ -656,10 +662,11 @@ una compra sencilla para que exista una compra histórica con
 
 ### CP-16 — Usuarios retirados y writes privilegiados
 
-**Qué prueba:** que la seguridad no dependa de ocultar botones: ni
-Operadores ni Admins pueden crear/modificar documentos `users/*`
-directamente desde cliente, y un Operador retirado no puede seguir
-operando aunque conserve un token viejo.
+**Qué prueba:** que la seguridad no dependa de ocultar botones: los
+Operadores no pueden crear/modificar documentos `users/*`, los Admins
+solo pueden crear/retirar usuarios con los campos exactos que necesita
+el fallback Spark, y un Operador retirado no puede seguir operando
+aunque conserve un token viejo.
 
 > Este caso es automatizado. Córrelo desde la raíz del repo:
 >

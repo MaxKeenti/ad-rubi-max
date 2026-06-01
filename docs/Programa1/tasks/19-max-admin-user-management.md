@@ -194,6 +194,11 @@ Callable endpoints:
   `promoteOperatorToAdmin`.
 - Android uses a dedicated `UserAdminRepository` backed by Firebase
   Functions. `AuthRepository` remains focused on login/session state.
+- The real Firebase project `mangos-372bd` is on Spark, so Functions cannot
+  be deployed without upgrading to Blaze. Android now has a Spark fallback:
+  if callable Functions return `NOT_FOUND`, an authenticated Admin creates
+  Auth accounts through Identity Toolkit REST and writes constrained
+  `users/*` docs through Firestore rules.
 - Same-email promotion required one important adjustment: disabling a Firebase
   Auth account does **not** free its email. The promotion Function disables the
   old Operator Auth user and moves its Auth email to
@@ -203,9 +208,13 @@ Callable endpoints:
 - Password confirmation for the promoted Operator cannot be verified with the
   Admin SDK alone. The backend verifies email/password through Identity
   Toolkit, so Functions requires `FIREBASE_WEB_API_KEY`.
-- Firestore rules were tightened: clients cannot create `users/*`, cannot
-  change `role`, cannot write `disabledAt`/`retiredAt`/promotion fields, and
-  retired users are blocked even if they still hold an old token.
+- Firestore rules were tightened: Operators cannot create `users/*`, no
+  client can mutate `role` on existing docs, and retired users are blocked
+  even if they still hold an old token.
+- After the Spark fallback, rules allow Admin clients to create user docs and
+  retire Operator docs only with the exact fields/server timestamps required
+  by the fallback. Operators still cannot create users, change roles, or write
+  retirement/promotion fields.
 - Manual CPs added for Melanie:
   - CP-13: Admin creates Operator from the app.
   - CP-14: Admin creates another Admin with re-authentication.
@@ -216,7 +225,13 @@ Callable endpoints:
 
 - `npm run build` in `functions` passed.
 - `firebase emulators:exec --only firestore 'cd tests/rules && npm test'`
-  passed with 24 tests.
+  passed with 26 tests.
 - `./gradlew :app:compileDebugKotlin` passed.
 - `./gradlew :app:testDebugUnitTest` passed.
+- `./gradlew :app:assembleDebug` passed.
+- `firebase deploy --only firestore:rules --project mangos-372bd
+  --non-interactive` passed.
+- `firebase deploy --only functions --project mangos-372bd --non-interactive`
+  is blocked until the project is upgraded to Blaze because Cloud Build and
+  Artifact Registry cannot be enabled on Spark.
 - Manual verification remains assigned to Melanie through CP-13 to CP-15.

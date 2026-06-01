@@ -25,12 +25,12 @@ class SupplierRepositoryFirestoreImpl @Inject constructor(
         firestore.collection(SUPPLIERS)
             .whereEqualTo("isActive", true)
             .snapshots()
-            .map { snap -> snap.documents.mapNotNull { it.toSupplier() } }
+            .map { snap -> snap.documents.mapNotNull { it.toSupplier() }.withUnregisteredFallback() }
 
     override fun observeAll(): Flow<List<Supplier>> =
         firestore.collection(SUPPLIERS)
             .snapshots()
-            .map { snap -> snap.documents.mapNotNull { it.toSupplier() } }
+            .map { snap -> snap.documents.mapNotNull { it.toSupplier() }.withUnregisteredFallback() }
 
     override suspend fun getById(id: String): Supplier? {
         return firestore.collection(SUPPLIERS).document(id).get().await().toSupplier()
@@ -110,6 +110,26 @@ class SupplierRepositoryFirestoreImpl @Inject constructor(
             createdBy = getString("createdBy").orEmpty(),
         )
     }
+
+    private fun List<Supplier>.withUnregisteredFallback(): List<Supplier> =
+        if (any { it.id == Supplier.UNREGISTERED_ID }) {
+            this
+        } else {
+            this + unregisteredSupplier()
+        }
+
+    private fun unregisteredSupplier(): Supplier =
+        Supplier(
+            id = Supplier.UNREGISTERED_ID,
+            name = "Proveedor no registrado",
+            phone = "",
+            email = "",
+            location = "",
+            mangoVariety = "",
+            isActive = true,
+            createdAt = Timestamp(0, 0),
+            createdBy = "system",
+        )
 
     private companion object {
         const val SUPPLIERS = "suppliers"

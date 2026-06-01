@@ -64,12 +64,63 @@ service cloud.firestore {
       ]);
     }
 
+    function validUserRole(role) {
+      return role == "admin" || role == "operator";
+    }
+
+    function adminUserCreateAllowed() {
+      return isAdmin()
+        && request.resource.data.keys().hasOnly([
+          "email",
+          "displayName",
+          "role",
+          "accountCreatedAt",
+          "disabledAt",
+          "retiredAt",
+          "promotedFromUid"
+        ])
+        && request.resource.data.keys().hasAll([
+          "email",
+          "displayName",
+          "role",
+          "accountCreatedAt",
+          "disabledAt",
+          "retiredAt"
+        ])
+        && request.resource.data.email is string
+        && request.resource.data.displayName is string
+        && validUserRole(request.resource.data.role)
+        && request.resource.data.accountCreatedAt == request.time
+        && request.resource.data.disabledAt == null
+        && request.resource.data.retiredAt == null
+        && (!request.resource.data.keys().hasAny(["promotedFromUid"])
+          || request.resource.data.promotedFromUid is string);
+    }
+
+    function adminUserRetirementAllowed() {
+      let changed = request.resource.data.diff(resource.data).affectedKeys();
+      return isAdmin()
+        && resource.data.role == "operator"
+        && request.resource.data.role == resource.data.role
+        && request.resource.data.email == resource.data.email
+        && changed.hasOnly([
+          "disabledAt",
+          "retiredAt",
+          "promotedToUid"
+        ])
+        && request.resource.data.disabledAt == request.time
+        && request.resource.data.retiredAt == request.time
+        && request.resource.data.promotedToUid is string;
+    }
+
     match /users/{uid} {
       allow read: if isActiveUser() && (request.auth.uid == uid || isAdmin());
-      allow create: if false;
+      allow create: if adminUserCreateAllowed();
       allow update: if isActiveUser()
-        && (request.auth.uid == uid || isAdmin())
-        && userClientAllowedChanges();
+        && (
+          ((request.auth.uid == uid || isAdmin()) && userClientAllowedChanges())
+          || adminUserRetirementAllowed()
+        );
       allow delete: if false;
     }
 
