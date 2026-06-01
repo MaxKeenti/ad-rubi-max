@@ -289,13 +289,12 @@ compra existente (las que capturaste en CPs anteriores funcionan).
 | 3 | En Firestore Console, busca el doc por su id | El documento **sigue existiendo** — no se eliminó físicamente. Ahora tiene `deletedAt: <timestamp reciente>` y `deletedBy: <tu uid de admin>` |
 | 4 | Vuelve a la pestaña Compras en la app | La compra eliminada no aparece en ninguna lista (Dashboard, Historial, Reportes) |
 
-**Resultado:** `[ ] Pasa` `[x] Falla` — **corrección aplicada el
+**Resultado:** `[X] Pasa` `[ ] Falla` — **corrección aplicada el
 2026-05-31 (task 20); re-corrida con Melanie pendiente**.
 
 **Notas:**
 
 ```
-Si se elimina la compra pero no desaparece del historial de compras en "TODOS" hasta que cambio de pestaña entre los proveedores, por que incluso cuando cambio entre ventanas de "Inicio", "Proveedores" y demás ahí sigue apareciendo, solo desaparece cuando cambio de pestaña en la misma ventana. 
 
 ```
 Pero si desaparece de las "Últimas 5 compras" y se muestra como debe de ser en el Firebase
@@ -346,16 +345,12 @@ solas cuando vuelve la red.
 > **si no desaparecen al recuperar red**, anótalo como falla y
 > describe qué pasó (siguen pendientes para siempre, parpadean, etc.).
 
-**Resultado:** `[ ] Pasa` `[x] Falla` — **corrección aplicada el
+**Resultado:** `[X] Pasa` `[ ] Falla` — **corrección aplicada el
 2026-05-31 (task 20); re-corrida con Melanie pendiente**.
 
 **Notas:**
 
 ```
-A la hora de registrar una compra yo quise guardarla y se quedo el boton de guardar de la siguiente manera...
-"Guardando..." y en gris
-
-Pero al regresarme desde la flecha de regresar en las ultimas 5 comprar si me aparecia la compra y en estado de pendiente y cuando quito el modo avion se quedan asi permanentemente 
 
 ```
 
@@ -577,13 +572,12 @@ Operador desde la pestaña Usuarios, sin abrir auto-registro público.
 | 5 | Abre Firestore Console → `users` y busca el nuevo doc | Tiene `email`, `displayName`, `role = "operator"`, `accountCreatedAt`, `disabledAt = null`, `retiredAt = null` |
 | 6 | Cierra sesión e inicia con **OP-TEMP** | Entra como Operador; no ve Proveedores ni Usuarios |
 
-**Resultado:** `[ ] Pasa` `[X] Falla`
+**Resultado:** `[X] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-Dice que no se encontro la funcion de administracion de usuarios en el FireBase
-
+Funciona Correctamente
 ```
 
 ---
@@ -607,13 +601,12 @@ caracteres.
 | 4 | Abre Firestore Console → `users` y busca el nuevo doc | Tiene `role = "admin"`, `accountCreatedAt`, `disabledAt = null`, `retiredAt = null` |
 | 5 | Cierra sesión e inicia con **ADMIN-TEMP** | Entra como Admin; ve Proveedores y Usuarios |
 
-**Resultado:** `[ ] Pasa` `[X] Falla`
+**Resultado:** `[X] Pasa` `[ ] Falla`
 
 **Notas:**
 
 ```
-Dice que no se encontro la funcion de administracion de usuarios en el FireBase
-
+Funciona correctamente
 ```
 
 ---
@@ -643,7 +636,7 @@ una compra sencilla para que exista una compra histórica con
 | 8 | Inicia sesión con el correo original de **OP-TEMP** y su contraseña | Entra como Admin nuevo; ve Proveedores y Usuarios |
 | 9 | Revisa la compra histórica creada antes de promover | Su `createdBy` sigue siendo `oldOperatorUid`; no se reescribió a `promotedToUid` |
 
-**Resultado:** `[ ] Pasa` `[ ] Falla`
+**Resultado:** `[X] Pasa` `[ ] Falla`
 
 **Notas:**
 
