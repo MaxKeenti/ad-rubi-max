@@ -17,3 +17,14 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase / Node
+functions/node_modules/
+functions/lib/
+functions/.env
+functions/.env.*
+!functions/.env.example
+tests/rules/node_modules/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
