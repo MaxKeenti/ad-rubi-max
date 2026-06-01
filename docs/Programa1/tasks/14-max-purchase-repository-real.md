@@ -1,5 +1,7 @@
 # Task 14 — Max — PurchaseRepository real Firestore implementation
 
+**Status:** done; CP-06/CP-07 follow-up fixes landed in task 20.
+
 **Owner:** Max
 **Estimated effort:** ~2.5 hours
 **Prerequisites:** `13-max-supplier-repository-real`, `11-max-money-datekey-utils`
@@ -33,7 +35,10 @@ in the project.
   - `getTodaySummary(dateKey)` — fetches today's purchases, computes `TodaySummary` in memory (small data set; no need for aggregation queries).
   - `add(purchase)` — sets `serverWrittenAt = FieldValue.serverTimestamp()`, `dateKey = purchase.date.toDateKey()` (recompute defensively), populates denormalized `supplierName` and `createdByName` by looking up the cached supplier and current user. Generates id with `.document().id`. Returns the new id.
   - `update(purchase)` — recomputes `dateKey` from `purchase.date` (in case the user changed it). Does NOT touch `serverWrittenAt`, `createdBy`, `enteredAt`, denormalized names.
-  - `softDelete(id, deletedBy)` — `.update(mapOf("deletedAt" to FieldValue.serverTimestamp(), "deletedBy" to deletedBy))`.
+  - `softDelete(id, deletedBy)` — current implementation writes
+    `deletedAt = Timestamp.now()` and `deletedBy = deletedBy` so the local
+    cache hides the row immediately; this replaced the original
+    `FieldValue.serverTimestamp()` plan in task 20.
 
 - A `Flow<List<Pair<Purchase, Boolean>>>` variant or extension that pairs each Purchase with its `metadata.hasPendingWrites` flag — for the Dashboard badge. **Discuss with Melanie if this requires an interface change** (it likely does); if so, re-open the interface with a 5-min sync and update.
 

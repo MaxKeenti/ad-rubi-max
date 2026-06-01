@@ -90,10 +90,12 @@ Administrador autenticado desde la app.
 
 ### 4.1 Plataforma y stack
 
-- **Android** ≥ API 36 (Android 16) — el proyecto actual define
-  `minSdk = 36`, `targetSdk = 36` y compila con Android 16 API 36.1.
+- **Android** ≥ API 26 (Android 8.0) — el proyecto actual define
+  `minSdk = 26`, `targetSdk = 36` y `compileSdk = 36`.
 - **Kotlin** + Jetpack Compose + Material 3.
-- **Backend:** Firebase Firestore + Firebase Authentication.
+- **Backend:** Firebase Firestore + Firebase Authentication; Cloud
+  Functions para operaciones privilegiadas de usuarios cuando el proyecto
+  Firebase está en plan Blaze, con fallback Spark protegido por reglas.
 
 ### 4.2 Disponibilidad y red
 

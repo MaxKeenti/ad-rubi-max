@@ -115,8 +115,10 @@ fan-out de actualizaciones a las Compras existentes.
 
 ### Esquema de soft-delete
 
-- `deletedAt: Timestamp?` — null en Compras vivas; establecido por
-  `FieldValue.serverTimestamp()` al borrar.
+- `deletedAt: Timestamp?` — null en Compras vivas; establecido con
+  `Timestamp.now()` del cliente al borrar para que el cache local lo vea
+  no-null inmediatamente y oculte la fila sin esperar el ack del servidor.
+  El reloj autoritativo de auditoría sigue siendo `serverWrittenAt`.
 - `deletedBy: String?` — userId del usuario que borró (por ADR-0002,
   siempre un Admin o el Operador original dentro de la ventana de 24h).
 - Todas las consultas de Compra por defecto filtran

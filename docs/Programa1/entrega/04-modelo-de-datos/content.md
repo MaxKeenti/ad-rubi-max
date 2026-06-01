@@ -47,7 +47,11 @@ users/{userId}
   anterior para mantener la atribución histórica. La cuenta Auth del Operador
   se deshabilita y su correo Auth se mueve a un marcador interno para liberar
   el correo original; el documento `users/{oldUid}` se conserva con
-  `disabledAt`, `retiredAt`, `promotedToUid` y `authEmailRetiredTo`.
+  `disabledAt`, `retiredAt` y `promotedToUid`. Si se usa Cloud
+  Functions, la cuenta Auth vieja se deshabilita y su correo Auth se
+  mueve a `authEmailRetiredTo`; si se usa el fallback Spark, la cuenta
+  Auth vieja se elimina para liberar el correo original antes de crear
+  el nuevo Admin.
 - **Restricción de seguridad:** un usuario puede escribir su propio
   `displayName`, pero no puede crear cuentas, modificar `role` ni escribir
   campos de retiro/promoción. Esos cambios pasan por Cloud Functions con Admin
@@ -85,7 +89,7 @@ purchases/{purchaseId}
 ├── supplierName: String              // denormalizado al escribir — nunca se retro-rellena
 ├── supplierNoteFreeform: String?     // solo cuando supplierId == "UNREGISTERED"
 ├── quantityTons: Double
-├── pricePerTonCentavos: Long?        // MXN centavos; null = precio desconocido al captura
+├── pricePerTonCentavos: Long?        // MXN centavos; null = precio desconocido al capturar
 ├── date: Timestamp                   // recibido-en: cuándo llegó el camión (editable)
 ├── dateKey: String                   // "YYYY-MM-DD" en zona MX; índice de día calendario
 ├── createdBy: String                 // userId del Operador
@@ -152,15 +156,17 @@ múltiples campos no contiguos. Los necesarios para v1:
 
 | Consulta | Campos del índice |
 |---|---|
+| Compras recientes vivas | `deletedAt ASC, enteredAt DESC, __name__ DESC` |
 | Compras del día | `dateKey ASC, deletedAt ASC, enteredAt DESC` |
 | Historial por proveedor | `supplierId ASC, deletedAt ASC, date DESC` |
 | Compras del Operador para ventana de edición | `createdBy ASC, deletedAt ASC, serverWrittenAt DESC` |
 
-El tercer campo del índice "Compras del día" (`enteredAt DESC`) refleja
-que la consulta del dashboard ordena los recibos del día por orden
-inverso de captura — el camión más recientemente registrado aparece
-arriba. Sin ese tercer campo, Firestore rechazaría el `orderBy` en una
-consulta ya filtrada por `dateKey` y `deletedAt`.
+El índice de compras recientes alimenta el Dashboard y el Historial sin
+filtro. El tercer campo del índice "Compras del día" (`enteredAt DESC`)
+refleja que la consulta del dashboard ordena los recibos del día por orden
+inverso de captura — el camión más recientemente registrado aparece arriba.
+Sin ese tercer campo, Firestore rechazaría el `orderBy` en una consulta ya
+filtrada por `dateKey` y `deletedAt`.
 
 Se declaran en `firestore.indexes.json` y se despliegan junto a las reglas
 con la CLI de Firebase.

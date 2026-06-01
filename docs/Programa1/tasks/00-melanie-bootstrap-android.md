@@ -67,6 +67,8 @@ Adjust if a newer stable exists.
 - **Hilt + Compose + kapt** combo bites. If you see "Unresolved reference: HiltAndroidApp" the kapt processor isn't wired. Make sure `kotlin-kapt` plugin is applied and `kapt(...)` is in dependencies.
 - **Firebase BOM** is non-negotiable — never pin individual Firebase versions. The BOM keeps them compatible.
 - **`google-services.json` path** must be `Programa1/app/google-services.json` (next to `app/build.gradle.kts`).
-- The current project targets Android 16: `minSdk = 36`, `targetSdk = 36`, and `compileSdk` uses API 36.1. Keep the requirements and manual aligned with those Gradle values.
+- Current Gradle config after implementation: `minSdk = 26`,
+  `targetSdk = 36`, and `compileSdk = 36`. Keep requirements and manual
+  aligned with those values.
 - This is **the most failure-prone task of the project**. If you get stuck, push WIP and grab Max — he can read the Gradle error from the commit and suggest the fix.
 - Once this lands, Max's `00-max-draft-interfaces` task can start. The interface review sync happens once both day-0 tasks are landed.

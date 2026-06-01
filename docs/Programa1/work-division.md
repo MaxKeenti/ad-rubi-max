@@ -1,5 +1,10 @@
 # Work Division — Max + Melanie
 
+> **Current status (2026-06-01):** this is now a historical planning
+> document. The contract-first split was executed, real Firebase bindings
+> replaced fakes, user management shipped, and the final implementation
+> snapshot lives in `docs/Programa1/implementation_plan.md`.
+
 **Decided:** 2026-05-26 (grilling session continuation)
 **Team:** González Calzada Maximiliano (Firebase access), Sosa Montoya Melanie Rubí (Android Studio)
 **Budget:** ~5 days, ~20 effective hours per person

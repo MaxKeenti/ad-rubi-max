@@ -17,7 +17,7 @@ Este flujo presenta varios problemas:
   hoy? ¿qué proveedor lidera la semana?).
 - **Sin respaldo histórico** consultable más allá del día en curso.
 
-## La solución propuesta
+## La solución implementada
 
 Aplicación Android nativa que **reemplaza el pizarrón** preservando la
 ergonomía del flujo actual:
@@ -28,11 +28,12 @@ ergonomía del flujo actual:
   capturas se sincronizan automáticamente cuando vuelve la red.
 - Roles diferenciados: **Operador** captura entradas; **Administrador**
   gestiona proveedores, usuarios y reconciliación de datos.
-- Reportes diarios y mensuales accesibles desde la misma app.
+- Reportes diarios y mensuales accesibles desde la misma app, sin depender
+  de hojas de cálculo para la operación diaria.
 
 ## Alcance
 
-| Incluido en v1 | Diferido |
+| Incluido en la entrega | Diferido |
 |---|---|
 | Captura de compras (entradas) | Pantalla de Configuración |
 | Catálogo de proveedores (CRUD admin) | Gráficos en Reportes |
@@ -70,3 +71,5 @@ ergonomía del flujo actual:
 - APK instalable y demostrable en emulador o dispositivo físico.
 - Documentación técnica completa en español (este conjunto de entregables).
 - Repositorio Git con historial de commits que evidencia el proceso.
+- PDF único de entrega generado desde Typst:
+  `docs/Programa1/entrega/entrega-completa.pdf`.

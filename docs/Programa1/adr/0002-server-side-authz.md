@@ -30,17 +30,30 @@ Three options were considered:
 Adopt **(I) Firestore Security Rules** as the source of truth for
 authorization. Client UI checks roles for ergonomics only.
 
+User account creation and promotion use Firebase Cloud Functions/Admin SDK
+when deployable. The current Android app also includes a Spark-plan fallback
+that calls Identity Toolkit REST and writes the matching `users/*` documents
+directly; Firestore rules allow that path only for active admins and only for
+the exact trusted field shapes described below.
+
 ## Rules (summary)
 
 - `users/{uid}`
-  - read: `request.auth.uid == uid` OR caller is admin
-  - write: `request.auth.uid == uid` AND `request.resource.data.role == resource.data.role` (cannot change own role); admins can write any user
+  - read: active user reads own doc OR active admin reads user docs
+  - create: active admin only, with the exact account-creation fields
+    (`email`, `displayName`, `role`, `accountCreatedAt`, `disabledAt`,
+    `retiredAt`, optional `promotedFromUid`) and
+    `accountCreatedAt == request.time`
+  - normal update: client writes are limited to `displayName`
+  - retirement/promotion update: active admin can mark an Operator with
+    `disabledAt`, `retiredAt`, and `promotedToUid`; clients still cannot
+    rewrite `role` or delete users
 - `suppliers/{id}`
-  - read: any signed-in user
+  - read: any active signed-in user
   - write: admin only
 - `purchases/{id}`
-  - read: any signed-in user
-  - create: any signed-in user, AND
+  - read: any active signed-in user
+  - create: any active signed-in user, AND
     - `createdBy == request.auth.uid`
     - `serverWrittenAt == request.time` (the server clock is the only
       acceptable value — the client cannot forge an older `serverWrittenAt`
@@ -58,9 +71,10 @@ authorization. Client UI checks roles for ergonomics only.
       delete but cannot rewrite the audit trail (`createdBy`,
       `createdByName`, `enteredAt`, `serverWrittenAt`, `supplierName`)
     - AND if `deletedAt`/`deletedBy` are among the affected keys, then
-      `deletedAt == request.time` AND `deletedBy == request.auth.uid` —
-      the owner can only soft-delete *as themselves, now*, not stamp the
-      deletion with another user's id or backdate it.
+      `deletedAt is timestamp` AND `deletedBy == request.auth.uid` —
+      the owner can only soft-delete *as themselves*. `deletedAt` is a
+      client timestamp so Firestore's local cache hides the row immediately;
+      the authoritative edit-window clock remains `serverWrittenAt`.
   - delete: admin, OR owner within the same 24h / not-already-deleted window
 
   Note: the 24h window is measured against `serverWrittenAt`, not the

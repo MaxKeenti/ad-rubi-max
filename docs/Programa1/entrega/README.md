@@ -25,7 +25,8 @@ deliverable vive en su propia subcarpeta con un `content.md` editable y un
 ```
 entrega/
 ├── README.md              ← este archivo
-├── justfile               ← `just build` compila todo a PDF
+├── main.typ               ← compila toda la entrega a un solo PDF
+├── justfile               ← `just bundle` compila `entrega-completa.pdf`
 ├── shared/
 │   ├── portada-template.typ   ← función portada(...) reutilizable
 │   ├── style.typ              ← preámbulo: fuentes, codly, cmarker, integrantes
@@ -58,7 +59,13 @@ entrega/
 ## Compilar
 
 ```sh
-# Todos los entregables a la vez
+# PDF unico para entrega final
+just bundle
+
+# O simplemente:
+just
+
+# Entregables individuales, si se necesita revisar una seccion aislada
 just build
 
 # O uno por uno (desde la raíz de su carpeta)
@@ -67,9 +74,10 @@ just build
 cd 03-arquitectura && typst compile --root .. main.typ
 ```
 
-Cada `main.typ` produce un PDF junto a sí mismo (`main.pdf`). El target
-`just bundle` (opcional) concatena todos en un solo PDF para la entrega
-final.
+`just bundle` produce `entrega-completa.pdf` desde el `main.typ` de esta
+carpeta, con una sola portada e índice. Cada subcarpeta conserva su
+`main.typ` independiente para compilar secciones aisladas; `just build`
+produce esos `main.pdf` junto a cada fuente.
 
 ## Mantener sincronizado con las fuentes en inglés
 

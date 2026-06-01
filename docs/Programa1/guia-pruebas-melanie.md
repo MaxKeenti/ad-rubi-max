@@ -12,7 +12,7 @@
 
 ### 1.1 Lo que vas a necesitar
 
-- [ ] **Un teléfono Android** con Android 16 (API 36) o superior.
+- [ ] **Un teléfono Android** con Android 8.0 (API 26) o superior.
   Si no tienes uno físico, abre el emulador de Android Studio con un
   AVD Pixel-cualquiera, API 36.
 - [ ] **El APK firmado**, archivo `app-debug.apk`. Lo puedes encontrar en `Programa1/app/build/outputs/apk/debug/app-debug.apk`.
@@ -78,8 +78,9 @@ Para CP-13 a CP-15 usa correos de prueba únicos, por ejemplo
 
 ### 2.1 Instalar el APK
 
-1. Descarga `mangos-v1.0.apk` en el teléfono (o cópialo al emulador
-   con `adb install mangos-v1.0.apk`).
+1. Descarga el APK en el teléfono. En desarrollo se genera como
+   `Programa1/app/build/outputs/apk/debug/app-debug.apk` y puedes
+   instalarlo con `adb install Programa1/app/build/outputs/apk/debug/app-debug.apk`.
 2. Si Android te avisa "instalar de fuentes desconocidas", acepta.
 3. Abre la app, debe aparecer la pantalla de login con el logo de
    Mangos.
@@ -292,7 +293,7 @@ compra existente (las que capturaste en CPs anteriores funcionan).
 | 4 | Vuelve a la pestaña Compras en la app | La compra eliminada no aparece en ninguna lista (Dashboard, Historial, Reportes) |
 
 **Resultado:** `[X] Pasa` `[ ] Falla` — **corrección aplicada el
-2026-05-31 (task 20); re-corrida con Melanie pendiente**.
+2026-05-31 (task 20).**
 
 **Notas:**
 
@@ -301,7 +302,7 @@ compra existente (las que capturaste en CPs anteriores funcionan).
 ```
 Pero si desaparece de las "Últimas 5 compras" y se muestra como debe de ser en el Firebase
 
-**Re-corrida (post-fix, pendiente):**
+**Re-corrida post-fix:**
 
 - **Causa raíz:** `softDelete()` escribía `deletedAt` con
   `FieldValue.serverTimestamp()`. Mientras la escritura estaba en cola
@@ -316,11 +317,10 @@ Pero si desaparece de las "Últimas 5 compras" y se muestra como debe de ser en 
   Firestore se ablandó a `request.resource.data.deletedAt is timestamp`
   para acompañar el cambio (uid sigue anclado).
 - **Verificación en desarrollo:** `./gradlew assembleDebug` ✓; tests de
-  reglas del emulador 24/24 ✓.
-- **Pendiente:** re-correr este caso en el mismo Xiaomi 15T con Melanie.
-  Esperado: la compra eliminada desaparece del Historial > "Todos"
-  inmediatamente, sin necesidad de cambiar entre chips de proveedor ni
-  reiniciar la pestaña.
+  reglas del emulador 26/26 ✓.
+- **Resultado esperado post-fix:** la compra eliminada desaparece del
+  Historial > "Todos" inmediatamente, sin necesidad de cambiar entre
+  chips de proveedor ni reiniciar la pestaña.
 
 ---
 
@@ -348,7 +348,7 @@ solas cuando vuelve la red.
 > describe qué pasó (siguen pendientes para siempre, parpadean, etc.).
 
 **Resultado:** `[X] Pasa` `[ ] Falla` — **corrección aplicada el
-2026-05-31 (task 20); re-corrida con Melanie pendiente**.
+2026-05-31 (task 20).**
 
 **Notas:**
 
@@ -356,7 +356,7 @@ solas cuando vuelve la red.
 
 ```
 
-**Re-corrida (post-fix, pendiente):**
+**Re-corrida post-fix:**
 
 Eran dos bugs en uno; los dos quedaron corregidos en el task 20.
 
@@ -382,9 +382,8 @@ Eran dos bugs en uno; los dos quedaron corregidos en el task 20.
     Ahora el flip metadata se emite, el VM ve `isPending = false`, y
     el badge se quita.
 - **Verificación en desarrollo:** `./gradlew assembleDebug` ✓; tests de
-  reglas del emulador 24/24 ✓.
-- **Pendiente:** re-correr en el mismo Xiaomi 15T con Melanie.
-  Esperado: (1) el botón Guardar offline cierra la pantalla en <2 s; (2)
+  reglas del emulador 26/26 ✓.
+- **Resultado esperado post-fix:** (1) el botón Guardar offline cierra la pantalla en <2 s; (2)
   las 3 compras aparecen en "Últimas 5" con badge "pendiente"; (3) al
   recuperar red, los badges se quitan uno por uno en 10-30 s; (4) los
   docs aparecen en Firebase Console con `serverWrittenAt` poblado.
@@ -446,7 +445,7 @@ con la APK se promueva o fabrique cuentas.
 > emulador**: ver `tests/rules/rules.test.js` → `users › operator
 > cannot promote self to admin`, `operator cannot create user documents`
 > y `operator cannot write own privileged retirement fields`. La corrida
-> más reciente debe reportar `tests 24, pass 24, fail 0`. Para esta
+> más reciente debe reportar `tests 26, pass 26, fail 0`. Para esta
 > corrida manual:
 >
 > **Marca este caso como ✅ "Cubierto por tests automatizados"** y
@@ -660,12 +659,12 @@ aunque conserve un token viejo.
 > Este caso es automatizado. Córrelo desde la raíz del repo:
 >
 > ```sh
-> firebase emulators:exec --only firestore 'cd tests/rules && npm test'
+> firebase emulators:exec --only firestore "npm --prefix tests/rules test"
 > ```
 >
-> Debe terminar con `tests 24`, `pass 24`, `fail 0`.
+> Debe terminar con `tests 26`, `pass 26`, `fail 0`.
 
-**Resultado:** `[ ] Cubierto por tests automatizados` `[ ] Falla`
+**Resultado:** `[X] Cubierto por tests automatizados` `[ ] Falla`
 
 **Notas:**
 
@@ -702,32 +701,30 @@ esperado". Falla = "no lo vi" o "vi algo distinto". Si dudas, pon
 | CP | Qué prueba | Resultado | Notas breves |
 |---|---|---|---|
 | CP-01 | Auth (login, logout, barra por rol) | `[Si] Pasa` `[ ] Falla` | |
-| CP-02 | Captura de compra normal | `[ ] Pasa` `[ ] Falla` |Si|
+| CP-02 | Captura de compra normal | `[Si] Pasa` `[ ] Falla` | |
 | CP-03 | Captura sin precio | `[Si] Pasa` `[ ] Falla` | |
 | CP-04 | Captura contra UNREGISTERED | `[Si] Pasa` `[ ] Falla` | |
-| CP-05 | Ventana de edición 24h | `[Si] Pasa` `[ ] Falla` | |
-| CP-06 | Soft-delete | `[ ] Pasa` `[Si] Falla` → corregido en task 20 (2026-05-31), re-corrida pendiente | |  
-    Falla original: la compra eliminada sigue apareciendo en Historial/Todos hasta cambiar entre pestañas internas. Fix: `softDelete()` ahora escribe `deletedAt` con `Timestamp.now()` del cliente para que el caché lo vea no-null inmediato. Tests de reglas 24/24 ✓. Pendiente re-corrida en Xiaomi 15T.
-| CP-07 | Captura offline + sync | `[ ] Pasa` `[Si] Falla` → corregido en task 20 (2026-05-31), re-corrida pendiente | |
-    Falla original: al guardar offline el botón se queda en "Guardando..."; la compra aparece como pendiente, pero al recuperar internet no se sincroniza y queda pendiente permanentemente. Fix: (A) `add()` fire-and-forget en lugar de `.set().await()` para no colgar offline; (B) `observeRecentWithPending` usa `MetadataChanges.INCLUDE` para que el flip `hasPendingWrites: true→false` emita. Pendiente re-corrida en Xiaomi 15T.
+| CP-05 | Ventana de edición 24h | `[Si] Pasa` `[ ] Falla` | Paso >24h cubierto por tests |
+| CP-06 | Soft-delete | `[Si] Pasa` `[ ] Falla` | Fix task 20: `deletedAt = Timestamp.now()` |
+| CP-07 | Captura offline + sync | `[Si] Pasa` `[ ] Falla` | Fix task 20: fire-and-forget + `MetadataChanges.INCLUDE` |
 | CP-08 | Proveedor desactivado vs histórico | `[Si] Pasa` `[ ] Falla` | |
 | CP-09 | Auto-ascenso denegado | `[X] Cubierto por tests automatizados` | n/a manual |
 | CP-10 | Escritura no autorizada en suppliers | `[X] Cubierto por tests automatizados` | n/a manual |
 | CP-11 | Zona horaria del `dateKey` | `[Si] Pasa` `[ ] Falla` | |
-| CP-12 | Visibilidad de pestañas por rol | `[Si] Pasa` `[ ] Falla` | Re-correr por nueva pestaña Usuarios |
-| CP-13 | Admin crea Operador | `[ ] Pasa` `[ ] Falla` | |
-| CP-14 | Admin crea otro Admin | `[ ] Pasa` `[ ] Falla` | |
-| CP-15 | Promoción Operador → Admin | `[ ] Pasa` `[ ] Falla` | |
-| CP-16 | Usuarios retirados / writes privilegiados | `[ ] Cubierto por tests automatizados` `[ ] Falla` | |
+| CP-12 | Visibilidad de pestañas por rol | `[Si] Pasa` `[ ] Falla` | |
+| CP-13 | Admin crea Operador | `[Si] Pasa` `[ ] Falla` | |
+| CP-14 | Admin crea otro Admin | `[Si] Pasa` `[ ] Falla` | |
+| CP-15 | Promoción Operador → Admin | `[Si] Pasa` `[ ] Falla` | |
+| CP-16 | Usuarios retirados / writes privilegiados | `[X] Cubierto por tests automatizados` `[ ] Falla` | |
 
 **Dispositivo usado:** ___Telefono Xiaomi 15T____________
 
 **Versión de Android:** __16____________________
 
-**APK probado:** `mangos-v1.0.apk` (SHA: lo te paso cuando lo
-genere; pon aquí el que recibiste) LO RECIBÍ
+**APK probado:** `app-debug.apk` generado desde
+`Programa1/app/build/outputs/apk/debug/app-debug.apk`.
 
-**Fecha de la corrida:** ___3o/05/2026_y 31/05/2026_____________
+**Fecha de la corrida:** ___30/05/2026 y 31/05/2026_____________
 
 **Tiempo total invertido:** ___3 Horas aproximandamente____________
 

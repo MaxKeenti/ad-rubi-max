@@ -1,30 +1,24 @@
 # Manual de Usuario
 
-> **NOTA:** este documento se finaliza cuando la app esté implementada
-> (capturas de pantalla reales reemplazarán los placeholders
-> `<!-- SCREENSHOT: ... -->`). La estructura y los textos están listos
-> para usarse como guion de redacción.
-
 ## 1. Instalación
 
 ### Requisitos del dispositivo
 
-- Android 16 (API 36) o superior.
+- Android 8.0 (API 26) o superior.
 - Conexión a internet **solo para el primer inicio de sesión** y para
   sincronizar las capturas. Las operaciones cotidianas funcionan offline.
 - Espacio libre: ~50 MB.
 
 ### Instalar el APK
 
-1. Recibirás un archivo `mangos-v1.0.apk` por correo o vía un enlace de
-   descarga.
+1. Recibirás el APK de la app por correo o vía un enlace de descarga. En
+   desarrollo, el archivo se genera como
+   `Programa1/app/build/outputs/apk/debug/app-debug.apk`.
 2. En el teléfono Android, abre el archivo descargado.
 3. Si Android te avisa "instalar de fuentes desconocidas", acepta. Es
    normal en distribución privada (no estamos publicados en Play Store).
 4. Confirma la instalación. El icono **Mangos** aparecerá en el cajón de
    apps.
-
-<!-- SCREENSHOT: instalación-1.png, instalación-2.png -->
 
 ## 2. Iniciar sesión
 
@@ -34,8 +28,6 @@ primera vez que abres la app:
 1. Pulsa el icono **Mangos**.
 2. Captura tu correo y contraseña.
 3. Pulsa **Iniciar sesión**.
-
-<!-- SCREENSHOT: login.png -->
 
 > **No hay opción de "Crear cuenta"** en esta versión. Si no tienes
 > credenciales, contacta a tu Administrador.
@@ -51,8 +43,6 @@ Esta es la pantalla principal. Muestra:
 - **Últimas 5 compras** — lista breve para revisar lo recién capturado.
 - **Botón flotante (+)** — atajo rápido para registrar una nueva
   entrada.
-
-<!-- SCREENSHOT: dashboard.png -->
 
 ### Indicador "Pendiente"
 
@@ -82,8 +72,6 @@ Esta es **la operación principal** que harás varias veces al día.
 La compra aparece inmediatamente en el Dashboard y en el historial,
 incluso si estás offline.
 
-<!-- SCREENSHOT: add-purchase.png, add-purchase-unregistered.png -->
-
 ### Corregir un typo
 
 Si te das cuenta que capturaste mal una compra:
@@ -106,8 +94,6 @@ Pestaña **Compras** en la barra inferior.
 - **Filtro por proveedor:** pulsa el chip de proveedor para ver solo
   las compras de uno específico.
 
-<!-- SCREENSHOT: history.png -->
-
 ## 6. Proveedores (solo Administrador)
 
 > Esta pestaña solo aparece si tu rol es **Administrador**.
@@ -119,8 +105,6 @@ Pestaña **Compras** en la barra inferior.
 - **Desactivar** un proveedor deslizando hacia un lado. Un proveedor
   desactivado deja de aparecer en el dropdown del muelle pero las
   compras históricas siguen mostrando su nombre correctamente.
-
-<!-- SCREENSHOT: suppliers.png, edit-supplier.png -->
 
 ## 7. Usuarios (solo Administrador)
 
@@ -141,8 +125,6 @@ Pestaña **Compras** en la barra inferior.
 Las compras históricas del Operador promovido conservan el `uid` viejo
 para no romper la auditoría.
 
-<!-- SCREENSHOT: users-roster.png, users-create.png, users-promote.png -->
-
 ## 8. Reportes
 
 Pestaña **Reportes**.
@@ -154,15 +136,11 @@ Pestaña **Reportes**.
 - **Top 5 proveedores del mes** — lista textual de los proveedores con
   más toneladas en el mes en curso.
 
-<!-- SCREENSHOT: reports.png -->
-
 ## 9. Cerrar sesión
 
 1. En el Dashboard, pulsa el icono de menú **(⋮)** en la esquina
    superior derecha.
 2. Selecciona **Cerrar sesión**.
-
-<!-- SCREENSHOT: logout.png -->
 
 ## 10. Preguntas frecuentes
 
@@ -180,7 +158,7 @@ No necesariamente. Significa que tu captura aún no llegó al servidor
 (probablemente capturaste offline). Mientras tu teléfono no se conecte,
 otros usuarios no la verán.
 
-**Selecccioné "Proveedor no registrado" para un camión. ¿Y ahora?**
+**Seleccioné "Proveedor no registrado" para un camión. ¿Y ahora?**
 Continúa con tu día. El Administrador revisa periódicamente las compras
 con proveedor no registrado, da de alta al proveedor real, y actualiza
 la compra para apuntar al nuevo proveedor.

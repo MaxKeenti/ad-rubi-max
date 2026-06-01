@@ -97,8 +97,9 @@ En orden de valor descendente:
    verificar empíricamente que la UX coincide con cómo realmente
    trabajan.
 2. **Pulir operación de usuarios en campo.** La gestión de usuarios ya
-   existe; falta validarla con Melanie en CP-13 a CP-15 y, si el cliente
-   lo pide, agregar restablecimiento de contraseña desde la misma UI.
+   existe y los CP-13 a CP-15 quedaron cubiertos; el siguiente paso
+   natural es agregar restablecimiento de contraseña desde la misma UI si
+   el cliente lo pide.
 3. **Gráficos en Reportes.** Es lo primero que un usuario va a pedir
    después de usar la app un mes. Vico se reincorpora aditivamente.
 4. **Notificaciones push** para Administradores cuando hay compras con
@@ -112,8 +113,15 @@ En orden de valor descendente:
 
 ## 5. Reflexión del equipo
 
-> **Espacio reservado.** Aquí va una sección breve y honesta sobre el
-> proceso del equipo: cómo nos repartimos el trabajo, qué tan exacta
-> resultó la estimación, qué fricciones técnicas tuvimos (Firebase
-> setup, Hilt, Compose, etc.), qué haríamos diferente la próxima vez.
-> Se redacta una vez que la implementación termine, no antes.
+El reparto contract-first funcionó: definir primero modelos e interfaces
+de repositorio permitió avanzar en UI y Firebase en paralelo. La parte que
+más consumió tiempo no fue dibujar pantallas, sino cerrar detalles de
+integración: Hilt, reglas de Firestore, índices compuestos, sincronización
+offline y la gestión de usuarios sin auto-registro público.
+
+La estimación inicial fue optimista. El alcance real creció cuando se hizo
+explícita la seguridad del lado del servidor y la promoción de usuarios,
+pero los recortes tempranos evitaron que el proyecto se quedara a medias:
+sin Settings, sin Register público, sin gráficos y sin filtros de fecha en
+Historial. Con más tiempo, habríamos reservado una sesión exclusiva para
+pruebas de campo offline antes de escribir el reporte final.

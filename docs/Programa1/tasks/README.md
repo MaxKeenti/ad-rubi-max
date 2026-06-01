@@ -1,5 +1,10 @@
 # Tasks — agent-executable work units
 
+> **Current status (2026-06-01):** these files are historical execution
+> specs. The shipped implementation is summarized in
+> `../implementation_plan.md`; verification results live in
+> `../guia-pruebas-melanie.md`.
+
 Each `.md` file in this directory is one **agent-executable task**. The
 naming convention encodes order and owner:
 

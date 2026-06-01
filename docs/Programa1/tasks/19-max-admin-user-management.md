@@ -1,9 +1,12 @@
 # Task 19 — Max — Admin user management and operator promotion
 
+**Status:** done in code on 2026-05-31; the delivered behavior is reflected
+in `../implementation_plan.md` and `../entrega/07-manual-de-usuario/content.md`.
+
 **Owner:** Max
 **Estimated effort:** ~4-6 hours
 **Prerequisites:** `12-max-auth-repository-real`, `15-max-firestore-rules`, `18-max-rules-emulator-tests`
-**Day:** post-v1 / next implementation
+**Day:** final-scope extension
 
 ## Goal
 
@@ -224,7 +227,7 @@ Callable endpoints:
 ## Verification
 
 - `npm run build` in `functions` passed.
-- `firebase emulators:exec --only firestore 'cd tests/rules && npm test'`
+- `firebase emulators:exec --only firestore "npm --prefix tests/rules test"`
   passed with 26 tests.
 - `./gradlew :app:compileDebugKotlin` passed.
 - `./gradlew :app:testDebugUnitTest` passed.

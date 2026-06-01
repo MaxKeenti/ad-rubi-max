@@ -157,24 +157,25 @@ agarra el test del emulador.
 |---|---|---|
 | 1 | Con tests de reglas, simula un Operador retirado con token antiguo | No puede leer su doc ni crear compras |
 | 2 | Con tests de reglas, intenta crear usuarios o cambiar roles desde cliente Admin/Operador | Denegado; solo Functions/Admin SDK puede hacerlo |
-| 3 | Ejecuta `firebase emulators:exec --only firestore 'cd tests/rules && npm test'` | Todos los tests pasan |
+| 3 | Ejecuta `firebase emulators:exec --only firestore "npm --prefix tests/rules test"` | Todos los tests pasan |
 
 ## 3. Pruebas automatizadas
 
-### Compilación y lint
+### Compilación y pruebas unitarias
 
 ```sh
-./gradlew assembleDebug   # debe terminar en BUILD SUCCESSFUL
-./gradlew lint            # no errores críticos
+cd Programa1
+./gradlew :app:assembleDebug      # debe terminar en BUILD SUCCESSFUL
+./gradlew :app:testDebugUnitTest  # pruebas unitarias Kotlin
 ```
 
-Estos se corren antes de cada commit relevante. Forman la red de
-seguridad mínima.
+Estos se corren antes de la entrega y antes de cambios relevantes.
+Forman la red de seguridad mínima del cliente Android.
 
 ### Reglas de Firestore con el emulador
 
 ```sh
-firebase emulators:exec --only firestore 'cd tests/rules && npm test'
+firebase emulators:exec --only firestore "npm --prefix tests/rules test"
 ```
 
 Los tests cubren los casos críticos de los CP-09, CP-10 y CP-16 más:

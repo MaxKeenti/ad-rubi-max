@@ -1,5 +1,8 @@
 # Task 20 — Max — Fix soft-delete refresh and offline sync regressions
 
+**Status:** done in code on 2026-05-31; final test results are summarized
+in `../guia-pruebas-melanie.md`.
+
 **Owner:** Max
 **Estimated effort:** ~3-4 hours (1h diagnóstico/repro + 1.5h fix + 1h re-run CP-06/CP-07 con Melanie)
 **Prerequisites:** `14-max-purchase-repository-real`
@@ -285,7 +288,7 @@ de que sigue compilando después del cambio.
   - CP-03 (sin precio), CP-04 (UNREGISTERED), CP-05 (ventana 24h),
     CP-11 (dateKey) siguen pasando.
   - Tests de reglas (`tests/rules/rules.test.js`) siguen verdes; después
-    de task 19 son 24/24. El shape del documento `purchases` no cambió (solo el
+    de task 19 son 26/26. El shape del documento `purchases` no cambió (solo el
     valor literal de `deletedAt` pasa de sentinel server a
     `Timestamp` cliente, ambos son `timestamp` desde la óptica de las
     rules).

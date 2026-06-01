@@ -1,11 +1,11 @@
 # Build entregables. Run from this directory.
-#   just              # default: build all
-#   just build        # build all
+#   just              # default: build single final PDF
+#   just bundle       # build single final PDF
+#   just build        # build all standalone PDFs
 #   just one 03-arquitectura   # build one
-#   just bundle       # concat all PDFs into entrega-completa.pdf (needs qpdf or pdftk)
 #   just clean        # remove all generated PDFs
 
-default: build
+default: bundle
 
 # --root .. makes the entrega/ directory the Typst project root so that
 # main.typ files can import /shared/style.typ (absolute path).
@@ -31,19 +31,9 @@ one DIR:
 watch DIR:
     cd {{DIR}} && typst watch --root "$(cd .. && pwd)" main.typ
 
-# Concatenate all PDFs into a single bundle. Requires qpdf.
-bundle: build
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if ! command -v qpdf >/dev/null; then
-      echo "qpdf no instalado. brew install qpdf"
-      exit 1
-    fi
-    pdfs=()
-    for dir in 0*/; do
-      if [ -f "$dir/main.pdf" ]; then pdfs+=("$dir/main.pdf"); fi
-    done
-    qpdf --empty --pages "${pdfs[@]}" -- entrega-completa.pdf
+# Compile the complete entrega as one Typst document.
+bundle:
+    typst compile --root "$(pwd)" main.typ entrega-completa.pdf
     echo "✓ entrega-completa.pdf generado"
 
 # Render all Mermaid sources in shared/diagrams to SVG. Requires mmdc.

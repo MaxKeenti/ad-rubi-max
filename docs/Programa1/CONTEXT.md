@@ -86,7 +86,7 @@ or (b) leaving it for low-volume one-offs.
 
 ## Admin
 
-A user who can manage the Supplier roster and (later) user roles. Admins also
+A user who can manage the Supplier roster and the Operator roster. Admins also
 record Purchases. There is no separate "manager" role; admin/operator is the
 only role split.
 
@@ -105,8 +105,10 @@ separate concepts the app does not yet model.
 
 ### Soft-delete schema
 
-- `deletedAt: Timestamp?` — null on live Purchases; set by
-  `FieldValue.serverTimestamp()` on delete.
+- `deletedAt: Timestamp?` — null on live Purchases; set with client
+  `Timestamp.now()` on delete so Firestore's local cache sees a non-null
+  value immediately and active-list queries drop the row before the server
+  ack. The authoritative audit clock remains `serverWrittenAt`.
 - `deletedBy: String?` — userId of the user who deleted (per ADR-0002,
   always an Admin or the original Operator within the 24h window).
 - All Purchase queries default to `where deletedAt == null`. Deleted rows

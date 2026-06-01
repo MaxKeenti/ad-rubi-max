@@ -2,8 +2,10 @@
 
 ## 1. Visión general
 
-La aplicación sigue el patrón **MVVM (Model-View-ViewModel)** organizado en
-tres capas según los principios de **Clean Architecture**:
+La aplicación sigue el patrón **MVVM (Model-View-ViewModel)** organizado
+por capas. La frontera principal de dominio son los modelos y las
+interfaces de repositorio; no hay clases `UseCase` separadas porque el
+alcance del proyecto no lo justificó.
 
 ```mermaid
 flowchart TB
@@ -12,8 +14,8 @@ flowchart TB
     VM[ViewModels]
     S <--> VM
   end
-  subgraph DOM["Domain Layer"]
-    UC[Use Cases / Lógica de negocio]
+  subgraph DOM["Domain Boundary"]
+    MODELS[Modelos + interfaces de repositorio]
   end
   subgraph DATA["Data Layer"]
     REPO[Repositorios]
@@ -22,8 +24,8 @@ flowchart TB
     REPO <--> FS
     REPO <--> FA
   end
-  VM --> UC
-  UC --> REPO
+  VM --> MODELS
+  MODELS --> REPO
 ```
 
 > El diagrama anterior está disponible como SVG renderizado en
@@ -34,9 +36,11 @@ flowchart TB
 - **MVVM** separa el estado de la UI de la lógica de negocio. Esto hace que
   los ViewModels sean testables sin emulador y los Composables se mantengan
   delgados.
-- **Clean Architecture (por capas)** obliga a la inversión de dependencias:
-  la capa de UI no conoce Firebase directamente, sino que habla con
-  interfaces de repositorio. **Esto satisface el requisito de escalabilidad**:
+- **Clean Architecture (por capas)** se aplica a través de interfaces de
+  repositorio: la capa de UI no conoce Firebase directamente, sino que
+  habla con contratos (`AuthRepository`, `PurchaseRepository`,
+  `SupplierRepository`, `UserAdminRepository`). **Esto satisface el
+  requisito de escalabilidad**:
   reemplazar Firestore por otro backend (Supabase, una API REST propia,
   Room para uso 100% local) implica reescribir solo la capa Data.
 - **Repository pattern** centraliza el mapeo de modelos de dominio a
@@ -52,6 +56,7 @@ flowchart TB
 | Inyección de dependencias | Hilt (Dagger) | Standard Android; integración con ViewModel y Compose. |
 | Backend | Firebase Firestore | NoSQL; persistencia offline nativa; realtime listeners; sin servidor propio. |
 | Autenticación | Firebase Authentication | Servicio gestionado; cuentas email/password sin reinventar gestión de sesiones. |
+| Funciones backend | Firebase Functions + Admin SDK | Altas/promociones de usuarios como operaciones privilegiadas. |
 | Reglas de seguridad | Firestore Security Rules | Autorización del lado del servidor; ver ADR-0002. |
 | Navegación | Jetpack Navigation Compose | Recomendación oficial para Compose. |
 | Gráficos | (deferido — texto en v1) | Vico estaba en el plan inicial pero se recortó por tiempo. |
@@ -65,7 +70,10 @@ com.example.mangos/
 ├── MainActivity.kt           # Entry point Compose + Hilt
 ├── data/
 │   ├── model/                # User, Supplier, Purchase, UserRole
-│   ├── repository/           # Auth/Supplier/PurchaseRepository
+│   ├── repository/           # Auth/Supplier/Purchase/UserAdminRepository
+│   │   ├── firestore/        # Implementaciones reales Firestore/Auth
+│   │   ├── functions/        # User admin via Functions + Spark fallback
+│   │   └── fake/             # Fakes conservados para desarrollo
 │   ├── util/                 # MoneyFormatter, DateKey
 │   └── di/                   # Módulo Hilt
 └── ui/
@@ -73,6 +81,7 @@ com.example.mangos/
     ├── dashboard/
     ├── purchases/            # AddEdit + History
     ├── suppliers/            # List + AddEdit (admin)
+    ├── users/                # Gestión de usuarios (admin)
     ├── reports/
     ├── navigation/           # NavGraph + Screen + BottomNavBar
     └── theme/                # Color, Theme, Type
@@ -127,11 +136,14 @@ de Firestore al proyecto e ignorar la UI completamente.
 
 ### Reglas y API confiable en pseudocódigo
 
-Las operaciones de alta, retiro y promoción de usuarios **no** se hacen con
-writes directos desde Android. La app llama Cloud Functions (`createOperatorAccount`,
-`createAdminAccount`, `listOperators`, `promoteOperatorToAdmin`) y esas
-funciones usan Firebase Admin SDK para crear/deshabilitar cuentas Auth y
-escribir los campos privilegiados de `users/*`.
+Las operaciones de alta, retiro y promoción de usuarios se concentran en
+`UserAdminRepository`. En un proyecto Firebase con Blaze, la app llama
+Cloud Functions (`createOperatorAccount`, `createAdminAccount`,
+`listOperators`, `promoteOperatorToAdmin`) y esas funciones usan Firebase
+Admin SDK para crear/deshabilitar cuentas Auth. En Spark, donde Functions
+no se despliegan, la app usa un fallback REST de Identity Toolkit y
+Firestore; por eso las reglas permiten a un Admin activo crear/retirar
+documentos `users/*` **solo** con el shape exacto esperado.
 
 ```js
 function isActiveUser() {
@@ -143,10 +155,27 @@ function isActiveUser() {
 
 match /users/{uid} {
   allow read:   isActiveUser() && (request.auth.uid == uid || isAdmin());
-  allow create: false; // solo Cloud Functions/Admin SDK
+  allow create: isAdmin()
+                && request.resource.data.keys().hasOnly([
+                     "email", "displayName", "role", "accountCreatedAt",
+                     "disabledAt", "retiredAt", "promotedFromUid"
+                   ])
+                && request.resource.data.accountCreatedAt == request.time
+                && request.resource.data.disabledAt == null
+                && request.resource.data.retiredAt == null
+                && validUserRole(request.resource.data.role);
   allow update: isActiveUser()
-                && (request.auth.uid == uid || isAdmin())
-                && affectedKeys.hasOnly(["displayName"]);
+                && (
+                  ((request.auth.uid == uid || isAdmin())
+                   && affectedKeys.hasOnly(["displayName"]))
+                  || (isAdmin()
+                      && resource.data.role == "operator"
+                      && affectedKeys.hasOnly([
+                           "disabledAt", "retiredAt", "promotedToUid"
+                         ])
+                      && request.resource.data.disabledAt == request.time
+                      && request.resource.data.retiredAt == request.time)
+                );
   allow delete: false;
 }
 match /suppliers/{id} {
@@ -186,8 +215,10 @@ match /purchases/{id} {
 Cinco propiedades garantizadas por esta política:
 
 1. **Ningún usuario puede ascenderse a admin** — la regla en `users/{uid}`
-   no permite escribir `role`; solo Cloud Functions/Admin SDK puede crear
-   documentos de usuario o escribir campos de retiro/promoción.
+   no permite escribir `role` sobre un documento existente. Las altas y
+   retiros pasan por Cloud Functions/Admin SDK o por el fallback Spark,
+   que solo un Admin activo puede ejecutar y que las reglas limitan a
+   campos exactos.
 2. **Ningún Operador puede modificar el catálogo de proveedores** — solo
    `isAdmin()` puede escribir en `suppliers/*`.
 3. **La ventana de edición de 24 horas se mide contra el reloj del
@@ -270,12 +301,17 @@ flowchart LR
   subgraph GCP["Google Cloud (Firebase)"]
     Auth[Firebase Auth]
     Firestore[(Firestore<br/>+ Security Rules)]
+    Functions[Callable Functions<br/>+ Admin SDK]
   end
   APK <--> SDK
   SDK <-->|HTTPS / gRPC| Auth
   SDK <-->|HTTPS / gRPC| Firestore
+  SDK <-->|HTTPS callable| Functions
+  Functions --> Auth
+  Functions --> Firestore
 ```
 
-No hay backend propio ni infraestructura adicional. Toda la lógica de
-negocio vive en el cliente; la autoridad para autorización vive en las
-Security Rules.
+No hay servidor propio. La lógica de operación vive en el cliente y en
+repositorios; las altas/promociones privilegiadas viven en Cloud Functions
+cuando están desplegadas. La autoridad para autorización de datos vive en
+las Security Rules.

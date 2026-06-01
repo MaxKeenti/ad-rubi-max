@@ -124,19 +124,27 @@ autorización. La UI cliente verifica roles solo por ergonomía.
 ### Reglas (resumen)
 
 - `users/{uid}`
-  - lectura: `request.auth.uid == uid` O el caller es admin
-  - escritura: `request.auth.uid == uid` Y `request.resource.data.role
-    == resource.data.role` (no puede cambiar su propio rol); los admins
-    pueden escribir a cualquier usuario
+  - lectura: usuario activo leyendo su propio documento O admin activo
+  - creación: admin activo, con campos exactos de alta
+    (`email`, `displayName`, `role`, `accountCreatedAt`, `disabledAt`,
+    `retiredAt`, opcional `promotedFromUid`) y `accountCreatedAt ==
+    request.time`
+  - actualización normal: solo `displayName`
+  - retiro/promoción: admin activo puede marcar un Operador con
+    `disabledAt`, `retiredAt` y `promotedToUid`; no puede reescribir
+    `role` ni borrar usuarios
 - `suppliers/{id}`
-  - lectura: cualquier usuario autenticado
+  - lectura: cualquier usuario autenticado y activo
   - escritura: solo admin
 - `purchases/{id}`
-  - lectura: cualquier usuario autenticado
-  - creación: cualquier usuario autenticado, `createdBy ==
-    request.auth.uid`
+  - lectura: cualquier usuario autenticado y activo
+  - creación: usuario activo, `createdBy == request.auth.uid`,
+    `serverWrittenAt == request.time`, `deletedAt == null` y
+    `deletedBy == null`
   - update/delete: admin, O (`createdBy == request.auth.uid` Y
-    `request.time - resource.data.serverWrittenAt < duration.value(24, 'h')`)
+    compra no eliminada Y `request.time - resource.data.serverWrittenAt
+    < duration.value(24, 'h')`), con whitelist de campos operativos para
+    Operadores
 
 > **Nota:** la ventana de 24h se mide contra `serverWrittenAt`, no contra
 > el `enteredAt` establecido por el cliente. Esto es deliberado — ver
