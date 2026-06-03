@@ -12,7 +12,67 @@
   --accent-cool: #385cad;
   --code-bg: #17212b;
   --code-ink: #eef5f0;
+  --inline-code-bg: #edf1ea;
+  --inline-code-ink: #8d3d17;
+  --header-bg: rgba(255, 255, 255, 0.94);
+  --sidebar-bg: rgba(255, 255, 255, 0.86);
+  --hero-bg:
+    linear-gradient(135deg, rgba(22, 113, 95, 0.1), rgba(184, 91, 36, 0.1)),
+    var(--surface);
+  --card-shadow: 0 10px 30px rgba(29, 35, 41, 0.05);
   --shadow: 0 18px 45px rgba(29, 35, 41, 0.08);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #101516;
+  --surface: #171d20;
+  --surface-soft: #20302d;
+  --ink: #eef4f1;
+  --muted: #a9b5b0;
+  --line: #2d3a38;
+  --accent: #54c5a9;
+  --accent-strong: #96e4d1;
+  --accent-warm: #f0a06d;
+  --accent-cool: #9cb4ff;
+  --code-bg: #0a1015;
+  --code-ink: #e5f7f0;
+  --inline-code-bg: #26302e;
+  --inline-code-ink: #ffbd8d;
+  --header-bg: rgba(18, 23, 25, 0.94);
+  --sidebar-bg: rgba(23, 29, 32, 0.86);
+  --hero-bg:
+    linear-gradient(135deg, rgba(84, 197, 169, 0.14), rgba(240, 160, 109, 0.12)),
+    var(--surface);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.34);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101516;
+    --surface: #171d20;
+    --surface-soft: #20302d;
+    --ink: #eef4f1;
+    --muted: #a9b5b0;
+    --line: #2d3a38;
+    --accent: #54c5a9;
+    --accent-strong: #96e4d1;
+    --accent-warm: #f0a06d;
+    --accent-cool: #9cb4ff;
+    --code-bg: #0a1015;
+    --code-ink: #e5f7f0;
+    --inline-code-bg: #26302e;
+    --inline-code-ink: #ffbd8d;
+    --header-bg: rgba(18, 23, 25, 0.94);
+    --sidebar-bg: rgba(23, 29, 32, 0.86);
+    --hero-bg:
+      linear-gradient(135deg, rgba(84, 197, 169, 0.14), rgba(240, 160, 109, 0.12)),
+      var(--surface);
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.24);
+    --shadow: 0 18px 45px rgba(0, 0, 0, 0.34);
+  }
 }
 
 * {
@@ -56,7 +116,7 @@ a:hover {
   min-height: 72px;
   padding: 12px clamp(16px, 4vw, 40px);
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.94);
+  background: var(--header-bg);
   backdrop-filter: blur(14px);
 }
 
@@ -104,6 +164,51 @@ a:hover {
   text-decoration: none;
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.theme-toggle {
+  position: relative;
+  display: inline-grid;
+  width: 42px;
+  min-width: 42px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--accent-strong);
+  cursor: pointer;
+}
+
+.theme-toggle:hover,
+.theme-toggle:focus-visible {
+  border-color: var(--accent);
+  outline: 0;
+}
+
+.theme-toggle:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.theme-icon {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+}
+
+.theme-toggle[data-theme="dark"] .theme-icon {
+  border-color: transparent;
+  background: currentColor;
+  box-shadow: -6px 0 0 -2px var(--surface);
+}
+
 .site-layout {
   display: grid;
   grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
@@ -122,7 +227,7 @@ a:hover {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.86);
+  background: var(--sidebar-bg);
 }
 
 .nav-group + .nav-group {
@@ -235,8 +340,8 @@ a:hover {
 
 .document code {
   border-radius: 5px;
-  background: #edf1ea;
-  color: #8d3d17;
+  background: var(--inline-code-bg);
+  color: var(--inline-code-ink);
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.92em;
   padding: 0.12em 0.36em;
@@ -326,9 +431,7 @@ tr:last-child td {
   padding: clamp(28px, 5vw, 54px);
   border: 1px solid var(--line);
   border-radius: 8px;
-  background:
-    linear-gradient(135deg, rgba(22, 113, 95, 0.1), rgba(184, 91, 36, 0.1)),
-    var(--surface);
+  background: var(--hero-bg);
   box-shadow: var(--shadow);
 }
 
@@ -382,7 +485,7 @@ tr:last-child td {
   background: var(--surface);
   color: var(--ink);
   text-decoration: none;
-  box-shadow: 0 10px 30px rgba(29, 35, 41, 0.05);
+  box-shadow: var(--card-shadow);
 }
 
 .doc-card:hover {
@@ -440,8 +543,12 @@ tr:last-child td {
     flex-direction: column;
   }
 
-  .index-link {
+  .header-actions {
     width: 100%;
+  }
+
+  .index-link {
+    flex: 1;
     justify-content: center;
   }
 
