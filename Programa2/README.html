@@ -25,15 +25,16 @@
     <main class="content">
       <article class="document">
         <h1 id="animochat-student-motivational-ai-chat">AnimoChat - Student Motivational AI Chat</h1>
-<p>Planning workspace for Programa2 in 6NM61 Programacion Movil. The app concept comes from the attached classroom notes: an Android chat where a student writes academic fears or worries and receives motivational feedback from an AI API.</p>
+<p>Planning and Android scaffold workspace for Programa2 in 6NM61 Programacion Movil. The app concept comes from the attached classroom notes: an Android chat where a student writes academic fears or worries and receives motivational feedback from an AI API.</p>
 <h2 id="current-status">Current Status</h2>
-<p>Program 2 is in the planning phase. There is no Android scaffold yet. The canonical source and execution docs are under <code>docs/</code>.</p>
+<p>Current repo status as of 2026-06-03: the Android Compose scaffold exists and builds. The app still shows the default placeholder screen. No Program 2 tasks beyond the scaffold have been run yet.</p>
+<div class="table-wrap"><table><thead><tr><th>Area</th><th>Status</th><th>Notes</th></tr></thead><tbody><tr><td>Android scaffold</td><td>Done</td><td><code>./gradlew :app:assembleDebug</code> succeeds.</td></tr><tr><td>Compose chat UI</td><td>Pending</td><td>No <code>ui/chat/</code> package exists yet.</td></tr><tr><td>Repository/data models</td><td>Pending</td><td>No <code>data/</code> package or <code>AiChatRepository</code> exists yet.</td></tr><tr><td>Gemini HTTP client</td><td>Pending</td><td>No AI provider dependency or key wiring exists yet.</td></tr><tr><td>Safety classifier/fallbacks</td><td>Pending</td><td>Defined in docs only.</td></tr><tr><td>Manual CP2 runbook/screenshots</td><td>Pending</td><td>Create after the chat flow runs.</td></tr></tbody></table></div>
 <h2 id="planned-scope">Planned Scope</h2>
 <ul><li>Android app built with Kotlin and Jetpack Compose.</li><li>Chat UI for student concerns and AI motivational feedback.</li><li>HTTP call to one AI provider, planned as Google Gemini API for v1.</li><li>JSON response parsing before rendering in Compose.</li><li>Negative prompt/safety policy for killing, self-harm, suicide, and violence cases.</li><li>Manual CP2 test runbook before delivery.</li></ul>
 <h2 id="documentation">Documentation</h2>
 <div class="table-wrap"><table><thead><tr><th>Need</th><th>File</th></tr></thead><tbody><tr><td>Classroom-note source</td><td><code>docs/source-notes-2026-06-02.html</code></td></tr><tr><td>Domain context</td><td><code>docs/CONTEXT.html</code></td></tr><tr><td>Implementation plan</td><td><code>docs/implementation_plan.html</code></td></tr><tr><td>Work split</td><td><code>docs/work-division.html</code></td></tr><tr><td>Architecture decisions</td><td><code>docs/adr/</code></td></tr><tr><td>Agent task specs</td><td><code>docs/tasks/</code></td></tr></tbody></table></div>
-<h2 id="planned-build-commands">Planned Build Commands</h2>
-<p>After the Android scaffold exists:</p>
+<h2 id="build-and-verification-commands">Build And Verification Commands</h2>
+<p>Current scaffold verification commands:</p>
 <pre><code class="language-sh">cd Programa2
 ./gradlew :app:assembleDebug
 ./gradlew :app:testDebugUnitTest</code></pre>

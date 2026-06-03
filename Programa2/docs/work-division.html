@@ -32,10 +32,14 @@
 <strong>Branches:</strong> <code>max</code>, <code>rubi</code> -&gt; merge into <code>main</code></p>
 <p>This document captures the Program 2 work-division plan. Detailed task files live in <code>docs/tasks/</code>. The &quot;why&quot; behind architectural decisions lives in <code>docs/adr/</code>.</p>
 <hr>
+<h2 id="0-current-execution-status">0. Current Execution Status</h2>
+<p>Current repo status as of 2026-06-03: only Melanie's Android Compose scaffold work has been run. The scaffold builds, but it still shows the default placeholder UI. Max's provider/prompt contract, data models, Gemini client, safety classifier, Melanie's chat UI, ViewModel integration, manual runbook, and screenshots are all still pending.</p>
+<div class="table-wrap"><table><thead><tr><th>Task</th><th>Status</th><th>Current evidence</th></tr></thead><tbody><tr><td>00 Melanie - Bootstrap Android project</td><td>Done enough to continue</td><td><code>Programa2/app/</code> exists and <code>./gradlew :app:assembleDebug</code> succeeds.</td></tr><tr><td>00 Max - Provider and prompt contract</td><td>Pending</td><td>No <code>data/</code> package or repository contract exists yet.</td></tr><tr><td>01 Max - AI client and JSON models</td><td>Pending</td><td>No HTTP/JSON/Gemini code exists yet.</td></tr><tr><td>02 Melanie - Chat UI</td><td>Pending</td><td>No <code>ui/chat/</code> package exists yet.</td></tr><tr><td>03 Max - Safety classifier and fallbacks</td><td>Pending</td><td>No safety classifier or fallback implementation exists yet.</td></tr><tr><td>04 Melanie - ViewModel wire-up</td><td>Pending</td><td>No <code>ChatViewModel</code> exists yet.</td></tr><tr><td>05 Max - Tests and demo script</td><td>Pending</td><td>No CP2 runbook file exists yet.</td></tr><tr><td>06 Melanie - Final docs and screenshots</td><td>Pending</td><td>No screenshots or final pass/fail results exist yet.</td></tr></tbody></table></div>
 <h2 id="1-coordination-model-contract-first-parallel">1. Coordination Model: Contract-First Parallel</h2>
 <p>The split is the same shape used in Program 1: define contracts first, then let UI and data/provider work proceed in parallel.</p>
 <p>The key contract is <code>AiChatRepository</code>. Once its request/response models are accepted, Melanie can build the Compose chat UI against a fake repository while Max implements the real Gemini HTTP client, prompt policy, safety classifier, and parser tests.</p>
 <h2 id="2-day-0-bootstrap-sequence">2. Day-0 Bootstrap Sequence</h2>
+<p>The Compose scaffold portion of this sequence has already happened. Continue from the provider/prompt contract review and the first real chat UI/data tasks.</p>
 <pre><code class="language-text">Max                               Melanie
 --------------------------------  --------------------------------
 Choose provider + key path
@@ -50,7 +54,7 @@ Draft AiChatRepository
 Max implements real client         Melanie implements ChatScreen
         |
 Integration: fake -&gt; real repository binding</code></pre>
-<p>End of day 0 target: the Android scaffold compiles and both people agree on the repository contract and JSON schema.</p>
+<p>Current day-0 state: the Android scaffold compiles. The repository contract and JSON schema are still pending and should be the next coordination point.</p>
 <h2 id="3-component-ownership">3. Component Ownership</h2>
 <div class="table-wrap"><table><thead><tr><th>#</th><th>Item</th><th>Owner</th><th>Est. h</th></tr></thead><tbody><tr><td>0a</td><td>Android Compose scaffold in <code>Programa2/</code></td><td>Melanie</td><td>2</td></tr><tr><td>0b</td><td>Provider account/key setup and Gemini test curl</td><td>Max</td><td>1</td></tr><tr><td>0c</td><td>Prompt policy, JSON schema, repository contract</td><td>Max, reviewed by Melanie</td><td>1</td></tr><tr><td>1</td><td>Data models and fake <code>AiChatRepository</code></td><td>Max</td><td>1</td></tr><tr><td>2</td><td>Chat screen UI, message bubbles, input bar, loading state</td><td>Melanie</td><td>2</td></tr><tr><td>3</td><td>Gemini REST client and response parser</td><td>Max</td><td>2</td></tr><tr><td>4</td><td>ChatViewModel integration</td><td>Melanie, with Max support</td><td>1.5</td></tr><tr><td>5</td><td>Safety classifier and local fallback responses</td><td>Max</td><td>1.5</td></tr><tr><td>6</td><td>Manual test run CP2-01 through CP2-10</td><td>Both</td><td>1</td></tr><tr><td>7</td><td>Screenshots and final docs refresh</td><td>Melanie + Max</td><td>1.5</td></tr></tbody></table></div>
 <p><strong>Estimated total:</strong> Melanie ~5.5 h direct implementation, Max ~6.5 h direct implementation, both ~2.5 h shared verification/docs.</p>

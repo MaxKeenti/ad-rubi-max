@@ -43,7 +43,7 @@
 <p><strong>Negative</strong></p>
 <ul><li>A direct API key in a mobile app is not secret in a real deployment.</li><li>The app becomes dependent on one provider&#x27;s availability and quota.</li><li>If the professor expects a different provider, the team must implement an adapter swap.</li></ul>
 <h2 id="mitigations">Mitigations</h2>
-<ul><li>Store the key in <code>local.properties</code>; never commit it.</li><li>Keep provider code isolated in <code>data/ai/gemini/</code>.</li><li>Keep <code>AiChatRepository</code> provider-neutral.</li><li>Keep OpenRouter/Groq/Hugging Face as documented fallback options, not UI features.</li></ul>
+<ul><li>Store the key in <code>local.properties</code>; never commit it.</li><li>Restrict the demo key to the Gemini API before use. Google notes that unrestricted traffic keys stop working starting 2026-06-19, which overlaps the documented Program 2 delivery window.</li><li>Keep provider code isolated in <code>data/ai/gemini/</code>.</li><li>Keep <code>AiChatRepository</code> provider-neutral.</li><li>Keep OpenRouter/Groq/Hugging Face as documented fallback options, not UI features.</li></ul>
 <h2 id="alternatives-considered">Alternatives Considered</h2>
 <ul><li><strong>OpenRouter first</strong>: rejected for v1 because it adds routing/model choice complexity the assignment does not require.</li><li><strong>Groq first</strong>: plausible and fast, but the notes call Gemini the newer option.</li><li><strong>Hugging Face first</strong>: flexible, but provider/model selection adds setup overhead.</li><li><strong>Backend proxy first</strong>: better key security, but adds server work and moves away from the classroom Android -&gt; HTTP -&gt; AI API diagram.</li></ul>
 <h2 id="trigger-to-revisit">Trigger To Revisit</h2>

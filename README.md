@@ -27,12 +27,13 @@ See `Programa1/README.md` for the full project details and delivery docs.
 
 ## Programa2
 
-Program 2 is currently in planning. Its docs mirror the Program 1 planning
-conventions:
+Program 2 has a buildable Android Compose scaffold. No chat UI, AI provider,
+repository contract, safety classifier, manual runbook, or screenshots have
+been implemented yet. Its docs mirror the Program 1 planning conventions:
 
 ```sh
 ls Programa2/docs
 ```
 
-See `Programa2/README.md` and `Programa2/docs/implementation_plan.md` for the
-current Program 2 plan.
+See `Programa2/README.html` and `Programa2/docs/implementation_plan.html` for
+the current Program 2 plan and scaffold-only implementation status.
