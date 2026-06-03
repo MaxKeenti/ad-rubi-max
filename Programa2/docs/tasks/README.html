@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tasks - agent-executable work units | Programa2</title>
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="Programa2 index">
+      <span class="brand-mark">AC</span>
+      <span>
+        <strong>AnimoChat</strong>
+        <small>Programa2 documentation</small>
+      </span>
+    </a>
+    <a class="index-link" href="../../index.html">Index</a>
+  </header>
+
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="Documentation navigation">
+      <section class="nav-group"><h2>Overview</h2><ul><li><a class="nav-link" href="../../README.html">AnimoChat - Student Motivational AI Chat</a></li></ul></section><section class="nav-group"><h2>Planning Docs</h2><ul><li><a class="nav-link" href="../CONTEXT.html">AnimoChat - Domain Context</a></li><li><a class="nav-link" href="../implementation_plan.html">AnimoChat - Implementation Plan</a></li><li><a class="nav-link" href="../source-notes-2026-06-02.html">Source Notes - 2026-06-02</a></li><li><a class="nav-link" href="../work-division.html">Work Division - Max + Melanie</a></li></ul></section><section class="nav-group"><h2>Architecture Decisions</h2><ul><li><a class="nav-link" href="../adr/0001-gemini-first-ai-provider.html">ADR-0001 - Gemini-first AI provider</a></li><li><a class="nav-link" href="../adr/0002-safety-boundary-and-negative-prompts.html">ADR-0002 - Safety boundary and negative prompts</a></li></ul></section><section class="nav-group"><h2>Execution Tasks</h2><ul><li><a class="nav-link" href="00-max-provider-and-prompt-contract.html">Task 00 - Max - Provider and prompt contract</a></li><li><a class="nav-link" href="00-melanie-bootstrap-android.html">Task 00 - Melanie - Bootstrap Android project</a></li><li><a class="nav-link" href="01-max-ai-client-and-json-models.html">Task 01 - Max - AI client and JSON models</a></li><li><a class="nav-link" href="02-melanie-chat-ui.html">Task 02 - Melanie - Chat UI</a></li><li><a class="nav-link" href="03-max-safety-and-fallbacks.html">Task 03 - Max - Safety classifier and fallbacks</a></li><li><a class="nav-link" href="04-melanie-viewmodel-wireup.html">Task 04 - Melanie - ViewModel wire-up</a></li><li><a class="nav-link" href="05-max-tests-and-demo-script.html">Task 05 - Max - Tests and demo script</a></li><li><a class="nav-link" href="06-melanie-final-docs-and-screenshots.html">Task 06 - Melanie - Final docs and screenshots</a></li><li><a class="nav-link current" href="README.html">Tasks - agent-executable work units</a></li></ul></section>
+    </aside>
+    <main class="content">
+      <article class="document">
+        <h1 id="tasks-agent-executable-work-units">Tasks - agent-executable work units</h1>
+<p>Each <code>.html</code> file in this directory is one Program 2 task. The naming convention matches Program 1:</p>
+<pre><code class="language-text">NN-&lt;owner&gt;-&lt;short-name&gt;.html</code></pre>
+<ul><li><code>NN</code> is the sequence prefix.</li><li><code>&lt;owner&gt;</code> is <code>max</code> or <code>melanie</code>.</li><li><code>&lt;short-name&gt;</code> is a kebab-case summary.</li></ul>
+<h2 id="how-to-use-a-task-file">How To Use A Task File</h2>
+<p>From a fresh Codex/Claude session:</p>
+<pre><code class="language-text">@docs/tasks/02-melanie-chat-ui.html
+
+Please execute this task. Stop and ask if anything is ambiguous.</code></pre>
+<p>The agent should read the task file, follow the input links, create or modify only the listed outputs, and verify the acceptance criteria.</p>
+<h2 id="task-file-structure">Task File Structure</h2>
+<p>Every task file has:</p>
+<ul><li>owner,</li><li>estimated effort,</li><li>prerequisites,</li><li>day,</li><li>goal,</li><li>inputs,</li><li>outputs,</li><li>acceptance criteria,</li><li>pitfalls/notes.</li></ul>
+<h2 id="order-of-execution">Order Of Execution</h2>
+<p>Day-0 tasks must happen first:</p>
+<pre><code class="language-text">00-melanie-bootstrap-android
+00-max-provider-and-prompt-contract
+        |
+        v
+01-max-ai-client-and-json-models
+02-melanie-chat-ui
+        |
+        v
+03-max-safety-and-fallbacks
+04-melanie-viewmodel-wireup
+        |
+        v
+05-max-tests-and-demo-script
+06-melanie-final-docs-and-screenshots</code></pre>
+<p>Max and Melanie can work in parallel after the day-0 contract review.</p>
+<h2 id="status-tracking">Status Tracking</h2>
+<p>Status lives in git. A task is done when its acceptance criteria are satisfied and the commit lands on <code>main</code>.</p>
+<p>Do not turn this directory into a project management system. It is a set of execution specs.</p>
+      </article>
+      <p class="source">Page: <code>docs/tasks/README.html</code></p>
+    </main>
+  </div>
+</body>
+</html>

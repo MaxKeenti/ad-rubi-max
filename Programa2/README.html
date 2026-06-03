@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnimoChat - Student Motivational AI Chat | Programa2</title>
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Programa2 index">
+      <span class="brand-mark">AC</span>
+      <span>
+        <strong>AnimoChat</strong>
+        <small>Programa2 documentation</small>
+      </span>
+    </a>
+    <a class="index-link" href="index.html">Index</a>
+  </header>
+
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="Documentation navigation">
+      <section class="nav-group"><h2>Overview</h2><ul><li><a class="nav-link current" href="README.html">AnimoChat - Student Motivational AI Chat</a></li></ul></section><section class="nav-group"><h2>Planning Docs</h2><ul><li><a class="nav-link" href="docs/CONTEXT.html">AnimoChat - Domain Context</a></li><li><a class="nav-link" href="docs/implementation_plan.html">AnimoChat - Implementation Plan</a></li><li><a class="nav-link" href="docs/source-notes-2026-06-02.html">Source Notes - 2026-06-02</a></li><li><a class="nav-link" href="docs/work-division.html">Work Division - Max + Melanie</a></li></ul></section><section class="nav-group"><h2>Architecture Decisions</h2><ul><li><a class="nav-link" href="docs/adr/0001-gemini-first-ai-provider.html">ADR-0001 - Gemini-first AI provider</a></li><li><a class="nav-link" href="docs/adr/0002-safety-boundary-and-negative-prompts.html">ADR-0002 - Safety boundary and negative prompts</a></li></ul></section><section class="nav-group"><h2>Execution Tasks</h2><ul><li><a class="nav-link" href="docs/tasks/00-max-provider-and-prompt-contract.html">Task 00 - Max - Provider and prompt contract</a></li><li><a class="nav-link" href="docs/tasks/00-melanie-bootstrap-android.html">Task 00 - Melanie - Bootstrap Android project</a></li><li><a class="nav-link" href="docs/tasks/01-max-ai-client-and-json-models.html">Task 01 - Max - AI client and JSON models</a></li><li><a class="nav-link" href="docs/tasks/02-melanie-chat-ui.html">Task 02 - Melanie - Chat UI</a></li><li><a class="nav-link" href="docs/tasks/03-max-safety-and-fallbacks.html">Task 03 - Max - Safety classifier and fallbacks</a></li><li><a class="nav-link" href="docs/tasks/04-melanie-viewmodel-wireup.html">Task 04 - Melanie - ViewModel wire-up</a></li><li><a class="nav-link" href="docs/tasks/05-max-tests-and-demo-script.html">Task 05 - Max - Tests and demo script</a></li><li><a class="nav-link" href="docs/tasks/06-melanie-final-docs-and-screenshots.html">Task 06 - Melanie - Final docs and screenshots</a></li><li><a class="nav-link" href="docs/tasks/README.html">Tasks - agent-executable work units</a></li></ul></section>
+    </aside>
+    <main class="content">
+      <article class="document">
+        <h1 id="animochat-student-motivational-ai-chat">AnimoChat - Student Motivational AI Chat</h1>
+<p>Planning workspace for Programa2 in 6NM61 Programacion Movil. The app concept comes from the attached classroom notes: an Android chat where a student writes academic fears or worries and receives motivational feedback from an AI API.</p>
+<h2 id="current-status">Current Status</h2>
+<p>Program 2 is in the planning phase. There is no Android scaffold yet. The canonical source and execution docs are under <code>docs/</code>.</p>
+<h2 id="planned-scope">Planned Scope</h2>
+<ul><li>Android app built with Kotlin and Jetpack Compose.</li><li>Chat UI for student concerns and AI motivational feedback.</li><li>HTTP call to one AI provider, planned as Google Gemini API for v1.</li><li>JSON response parsing before rendering in Compose.</li><li>Negative prompt/safety policy for killing, self-harm, suicide, and violence cases.</li><li>Manual CP2 test runbook before delivery.</li></ul>
+<h2 id="documentation">Documentation</h2>
+<div class="table-wrap"><table><thead><tr><th>Need</th><th>File</th></tr></thead><tbody><tr><td>Classroom-note source</td><td><code>docs/source-notes-2026-06-02.html</code></td></tr><tr><td>Domain context</td><td><code>docs/CONTEXT.html</code></td></tr><tr><td>Implementation plan</td><td><code>docs/implementation_plan.html</code></td></tr><tr><td>Work split</td><td><code>docs/work-division.html</code></td></tr><tr><td>Architecture decisions</td><td><code>docs/adr/</code></td></tr><tr><td>Agent task specs</td><td><code>docs/tasks/</code></td></tr></tbody></table></div>
+<h2 id="planned-build-commands">Planned Build Commands</h2>
+<p>After the Android scaffold exists:</p>
+<pre><code class="language-sh">cd Programa2
+./gradlew :app:assembleDebug
+./gradlew :app:testDebugUnitTest</code></pre>
+<h2 id="team">Team</h2>
+<ul><li>Gonzalez Calzada Maximiliano</li><li>Sosa Montoya Melanie Rubi</li></ul>
+<p>Course: 6NM61 Programacion Movil, UPIICSA.</p>
+      </article>
+      <p class="source">Page: <code>README.html</code></p>
+    </main>
+  </div>
+</body>
+</html>

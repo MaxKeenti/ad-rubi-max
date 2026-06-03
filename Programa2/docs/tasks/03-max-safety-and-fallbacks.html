@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task 03 - Max - Safety classifier and fallbacks | Programa2</title>
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="Programa2 index">
+      <span class="brand-mark">AC</span>
+      <span>
+        <strong>AnimoChat</strong>
+        <small>Programa2 documentation</small>
+      </span>
+    </a>
+    <a class="index-link" href="../../index.html">Index</a>
+  </header>
+
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="Documentation navigation">
+      <section class="nav-group"><h2>Overview</h2><ul><li><a class="nav-link" href="../../README.html">AnimoChat - Student Motivational AI Chat</a></li></ul></section><section class="nav-group"><h2>Planning Docs</h2><ul><li><a class="nav-link" href="../CONTEXT.html">AnimoChat - Domain Context</a></li><li><a class="nav-link" href="../implementation_plan.html">AnimoChat - Implementation Plan</a></li><li><a class="nav-link" href="../source-notes-2026-06-02.html">Source Notes - 2026-06-02</a></li><li><a class="nav-link" href="../work-division.html">Work Division - Max + Melanie</a></li></ul></section><section class="nav-group"><h2>Architecture Decisions</h2><ul><li><a class="nav-link" href="../adr/0001-gemini-first-ai-provider.html">ADR-0001 - Gemini-first AI provider</a></li><li><a class="nav-link" href="../adr/0002-safety-boundary-and-negative-prompts.html">ADR-0002 - Safety boundary and negative prompts</a></li></ul></section><section class="nav-group"><h2>Execution Tasks</h2><ul><li><a class="nav-link" href="00-max-provider-and-prompt-contract.html">Task 00 - Max - Provider and prompt contract</a></li><li><a class="nav-link" href="00-melanie-bootstrap-android.html">Task 00 - Melanie - Bootstrap Android project</a></li><li><a class="nav-link" href="01-max-ai-client-and-json-models.html">Task 01 - Max - AI client and JSON models</a></li><li><a class="nav-link" href="02-melanie-chat-ui.html">Task 02 - Melanie - Chat UI</a></li><li><a class="nav-link current" href="03-max-safety-and-fallbacks.html">Task 03 - Max - Safety classifier and fallbacks</a></li><li><a class="nav-link" href="04-melanie-viewmodel-wireup.html">Task 04 - Melanie - ViewModel wire-up</a></li><li><a class="nav-link" href="05-max-tests-and-demo-script.html">Task 05 - Max - Tests and demo script</a></li><li><a class="nav-link" href="06-melanie-final-docs-and-screenshots.html">Task 06 - Melanie - Final docs and screenshots</a></li><li><a class="nav-link" href="README.html">Tasks - agent-executable work units</a></li></ul></section>
+    </aside>
+    <main class="content">
+      <article class="document">
+        <h1 id="task-03-max-safety-classifier-and-fallbacks">Task 03 - Max - Safety classifier and fallbacks</h1>
+<p><strong>Owner:</strong> Max<br>
+<strong>Estimated effort:</strong> ~1.5 hours<br>
+<strong>Prerequisites:</strong> task 00 contract, task 01 client optional<br>
+<strong>Day:</strong> 1-2<br>
+<strong>Blocks:</strong> CP2 negative-case acceptance</p>
+<h2 id="goal">Goal</h2>
+<p>Add local guardrails for obvious unsafe/crisis input and deterministic fallback responses for provider failures.</p>
+<h2 id="inputs">Inputs</h2>
+<ul><li><code>docs/CONTEXT.html</code> sections &quot;Negative Prompting And Safety Boundary&quot; and &quot;Crisis Response&quot;</li><li><code>docs/implementation_plan.html</code> sections 6, 8, 9</li><li><code>docs/adr/0002-safety-boundary-and-negative-prompts.html</code></li></ul>
+<h2 id="outputs">Outputs</h2>
+<p>Create or update:</p>
+<ul><li><code>data/ai/SafetyClassifier.kt</code></li><li><code>data/ai/LocalFallbackResponses.kt</code></li><li>Unit tests for classifier categories</li></ul>
+<p>Classifier categories should map to:</p>
+<ul><li>normal motivational input,</li><li>crisis or self-harm,</li><li>violence/killing request,</li><li>out-of-scope.</li></ul>
+<h2 id="acceptance-criteria">Acceptance Criteria</h2>
+<ul><li class="task-item"><input type="checkbox" disabled><span>CP2-07 returns no harm instructions.</span></li><li class="task-item"><input type="checkbox" disabled><span>CP2-08 returns Linea de la Vida and 911 resources.</span></li><li class="task-item"><input type="checkbox" disabled><span>Ordinary academic fear is not over-blocked.</span></li><li class="task-item"><input type="checkbox" disabled><span>Provider failure still produces a useful local response.</span></li><li class="task-item"><input type="checkbox" disabled><span>Unit tests cover representative positive and negative cases.</span></li></ul>
+<h2 id="pitfalls-notes">Pitfalls / Notes</h2>
+<ul><li>Keyword matching is intentionally conservative but should not classify every mention of &quot;miedo&quot; or &quot;estres&quot; as crisis.</li><li>Do not write graphic examples into test names or UI strings.</li><li>The classifier is a course guardrail, not a real clinical triage system.</li></ul>
+      </article>
+      <p class="source">Page: <code>docs/tasks/03-max-safety-and-fallbacks.html</code></p>
+    </main>
+  </div>
+</body>
+</html>

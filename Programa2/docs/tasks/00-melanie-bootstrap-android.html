@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Task 00 - Melanie - Bootstrap Android project | Programa2</title>
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="Programa2 index">
+      <span class="brand-mark">AC</span>
+      <span>
+        <strong>AnimoChat</strong>
+        <small>Programa2 documentation</small>
+      </span>
+    </a>
+    <a class="index-link" href="../../index.html">Index</a>
+  </header>
+
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="Documentation navigation">
+      <section class="nav-group"><h2>Overview</h2><ul><li><a class="nav-link" href="../../README.html">AnimoChat - Student Motivational AI Chat</a></li></ul></section><section class="nav-group"><h2>Planning Docs</h2><ul><li><a class="nav-link" href="../CONTEXT.html">AnimoChat - Domain Context</a></li><li><a class="nav-link" href="../implementation_plan.html">AnimoChat - Implementation Plan</a></li><li><a class="nav-link" href="../source-notes-2026-06-02.html">Source Notes - 2026-06-02</a></li><li><a class="nav-link" href="../work-division.html">Work Division - Max + Melanie</a></li></ul></section><section class="nav-group"><h2>Architecture Decisions</h2><ul><li><a class="nav-link" href="../adr/0001-gemini-first-ai-provider.html">ADR-0001 - Gemini-first AI provider</a></li><li><a class="nav-link" href="../adr/0002-safety-boundary-and-negative-prompts.html">ADR-0002 - Safety boundary and negative prompts</a></li></ul></section><section class="nav-group"><h2>Execution Tasks</h2><ul><li><a class="nav-link" href="00-max-provider-and-prompt-contract.html">Task 00 - Max - Provider and prompt contract</a></li><li><a class="nav-link current" href="00-melanie-bootstrap-android.html">Task 00 - Melanie - Bootstrap Android project</a></li><li><a class="nav-link" href="01-max-ai-client-and-json-models.html">Task 01 - Max - AI client and JSON models</a></li><li><a class="nav-link" href="02-melanie-chat-ui.html">Task 02 - Melanie - Chat UI</a></li><li><a class="nav-link" href="03-max-safety-and-fallbacks.html">Task 03 - Max - Safety classifier and fallbacks</a></li><li><a class="nav-link" href="04-melanie-viewmodel-wireup.html">Task 04 - Melanie - ViewModel wire-up</a></li><li><a class="nav-link" href="05-max-tests-and-demo-script.html">Task 05 - Max - Tests and demo script</a></li><li><a class="nav-link" href="06-melanie-final-docs-and-screenshots.html">Task 06 - Melanie - Final docs and screenshots</a></li><li><a class="nav-link" href="README.html">Tasks - agent-executable work units</a></li></ul></section>
+    </aside>
+    <main class="content">
+      <article class="document">
+        <h1 id="task-00-melanie-bootstrap-android-project">Task 00 - Melanie - Bootstrap Android project</h1>
+<p><strong>Owner:</strong> Melanie<br>
+<strong>Estimated effort:</strong> ~2 hours<br>
+<strong>Prerequisites:</strong> none<br>
+<strong>Day:</strong> 0<br>
+<strong>Blocks:</strong> all implementation work</p>
+<h2 id="goal">Goal</h2>
+<p>Create a buildable Android Compose project under <code>Programa2/</code> with a placeholder screen. No real AI logic yet.</p>
+<h2 id="inputs">Inputs</h2>
+<ul><li><code>docs/implementation_plan.html</code> sections 1-4</li><li>Current <code>Programa1/</code> Gradle conventions, only as a reference</li></ul>
+<h2 id="outputs">Outputs</h2>
+<p>Create the standard Android project files under <code>Programa2/</code>.</p>
+<p>Recommended package root:</p>
+<pre><code class="language-text">com.example.animochat</code></pre>
+<p>Create package directories:</p>
+<pre><code class="language-text">data/ai/
+data/ai/gemini/
+data/model/
+data/repository/
+ui/chat/
+ui/theme/</code></pre>
+<p>The placeholder screen can show:</p>
+<pre><code class="language-text">AnimoChat - bootstrap OK</code></pre>
+<h2 id="acceptance-criteria">Acceptance Criteria</h2>
+<ul><li class="task-item"><input type="checkbox" disabled><span><code>cd Programa2 &amp;&amp; ./gradlew :app:assembleDebug</code> succeeds.</span></li><li class="task-item"><input type="checkbox" disabled><span>App launches on emulator with a Compose placeholder.</span></li><li class="task-item"><input type="checkbox" disabled><span>No Gemini/API dependency is required for the placeholder to run.</span></li><li class="task-item"><input type="checkbox" disabled><span>No API key is committed.</span></li><li class="task-item"><input type="checkbox" disabled><span>Max can pull the branch and add model/repository files.</span></li></ul>
+<h2 id="pitfalls-notes">Pitfalls / Notes</h2>
+<ul><li>Keep the initial scaffold small.</li><li>Do not copy Program 1 Firebase setup unless this Program 2 rubric actually needs Firebase.</li><li>If adding HTTP dependencies now, prefer versions that compile cleanly with the Gradle/Kotlin setup.</li></ul>
+      </article>
+      <p class="source">Page: <code>docs/tasks/00-melanie-bootstrap-android.html</code></p>
+    </main>
+  </div>
+</body>
+</html>
