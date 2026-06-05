@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AnimoChat - Domain Context | Programa2</title>
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../index.html" aria-label="Programa2 index">
+      <span class="brand-mark">AC</span>
+      <span>
+        <strong>AnimoChat</strong>
+        <small>Programa2 documentation</small>
+      </span>
+    </a>
+    <a class="index-link" href="../index.html">Index</a>
+  </header>
+
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="Documentation navigation">
+      <section class="nav-group"><h2>Overview</h2><ul><li><a class="nav-link" href="../README.html">AnimoChat - Student Motivational AI Chat</a></li></ul></section><section class="nav-group"><h2>Planning Docs</h2><ul><li><a class="nav-link current" href="CONTEXT.html">AnimoChat - Domain Context</a></li><li><a class="nav-link" href="implementation_plan.html">AnimoChat - Implementation Plan</a></li><li><a class="nav-link" href="source-notes-2026-06-02.html">Source Notes - 2026-06-02</a></li><li><a class="nav-link" href="work-division.html">Work Division - Max + Melanie</a></li></ul></section><section class="nav-group"><h2>Architecture Decisions</h2><ul><li><a class="nav-link" href="adr/0001-gemini-first-ai-provider.html">ADR-0001 - Gemini-first AI provider</a></li><li><a class="nav-link" href="adr/0002-safety-boundary-and-negative-prompts.html">ADR-0002 - Safety boundary and negative prompts</a></li></ul></section><section class="nav-group"><h2>Execution Tasks</h2><ul><li><a class="nav-link" href="tasks/00-max-provider-and-prompt-contract.html">Task 00 - Max - Provider and prompt contract</a></li><li><a class="nav-link" href="tasks/00-melanie-bootstrap-android.html">Task 00 - Melanie - Bootstrap Android project</a></li><li><a class="nav-link" href="tasks/01-max-ai-client-and-json-models.html">Task 01 - Max - AI client and JSON models</a></li><li><a class="nav-link" href="tasks/02-melanie-chat-ui.html">Task 02 - Melanie - Chat UI</a></li><li><a class="nav-link" href="tasks/03-max-safety-and-fallbacks.html">Task 03 - Max - Safety classifier and fallbacks</a></li><li><a class="nav-link" href="tasks/04-melanie-viewmodel-wireup.html">Task 04 - Melanie - ViewModel wire-up</a></li><li><a class="nav-link" href="tasks/05-max-tests-and-demo-script.html">Task 05 - Max - Tests and demo script</a></li><li><a class="nav-link" href="tasks/06-melanie-final-docs-and-screenshots.html">Task 06 - Melanie - Final docs and screenshots</a></li><li><a class="nav-link" href="tasks/README.html">Tasks - agent-executable work units</a></li></ul></section>
+    </aside>
+    <main class="content">
+      <article class="document">
+        <h1 id="animochat-domain-context">AnimoChat - Domain Context</h1>
+<p>Canonical domain language for Programa2. Implementation details belong in <code>implementation_plan.html</code>; this file defines what the app is and is not.</p>
+<p>The current source of truth is <code>source-notes-2026-06-02.html</code>, transcribed from the two attached classroom-note images.</p>
+<hr>
+<h2 id="working-name">Working Name</h2>
+<p><strong>AnimoChat</strong> is the working name for the case-practical app. The final app name can change without changing the domain model.</p>
+<h2 id="case-practical-2">Case Practical 2</h2>
+<p>The classroom case asks for a chat application where a student can explain their fears, worries, and academic concerns, then receive motivational feedback.</p>
+<p>The problem frame is educational, not clinical: high rates of failing grades and student discouragement can affect academic performance. The app supports the student with encouragement, study-oriented reflection, and small next steps.</p>
+<h2 id="student">Student</h2>
+<p>A student is the person using the chat. The app does not need a school account or identity system for v1. The student can use the app anonymously during the demo.</p>
+<h2 id="motivational-feedback">Motivational Feedback</h2>
+<p>A motivational response is a short AI-generated answer that:</p>
+<ul><li>acknowledges the student&#x27;s concern,</li><li>avoids judgement,</li><li>reframes the situation in a realistic way,</li><li>suggests one to three small academic actions,</li><li>asks at most one follow-up question when useful.</li></ul>
+<p>It is not therapy, diagnosis, emergency counseling, grading advice, or a replacement for school staff, family, teachers, counselors, psychologists, or medical professionals.</p>
+<h2 id="chat-message">Chat Message</h2>
+<p>A chat message is one piece of conversation shown in the Compose UI. Messages have a role:</p>
+<ul><li><code>student</code> for user input,</li><li><code>assistant</code> for motivational feedback,</li><li><code>system</code> only inside the AI request and never shown as a normal chat bubble.</li></ul>
+<p>The UI can keep the conversation in memory for v1. Persistence is optional and should not block the core delivery.</p>
+<h2 id="ai-response">AI Response</h2>
+<p>The AI provider returns JSON, not free-form UI text. The app parses that JSON into an <code>AiFeedback</code> model and renders it in Compose.</p>
+<p>Canonical response fields:</p>
+<ul><li><code>category</code>: <code>motivational</code>, <code>academic_stress</code>, <code>crisis_or_unsafe</code>, or <code>out_of_scope</code>.</li><li><code>message</code>: the main supportive response.</li><li><code>nextSteps</code>: zero to three concrete student actions.</li><li><code>followUpQuestion</code>: optional one-question continuation prompt.</li><li><code>resources</code>: optional crisis/support resources for unsafe or crisis cases.</li></ul>
+<p>If parsing fails, the app shows a local fallback response instead of exposing raw JSON or crashing.</p>
+<h2 id="negative-prompting-and-safety-boundary">Negative Prompting And Safety Boundary</h2>
+<p>The classroom notes explicitly require each request to be conditioned with negative cases and say the response must not have anything to do with killing.</p>
+<p>For this app, &quot;negative prompting&quot; means every AI request includes a safety instruction that rejects or safely redirects content involving:</p>
+<ul><li>killing, murder, or harming another person,</li><li>self-harm or suicide,</li><li>instructions for violence,</li><li>graphic violent detail,</li><li>medical or psychological diagnosis,</li><li>definitive treatment plans.</li></ul>
+<p>The assistant may still respond supportively when the student mentions fear, stress, sadness, failure, or anxiety. It must not provide methods, plans, instructions, or encouragement for harm.</p>
+<h2 id="crisis-response">Crisis Response</h2>
+<p>If a student&#x27;s message clearly suggests immediate danger, self-harm, suicide, or harm to someone else, the app must not continue as an ordinary motivational chat. It should:</p>
+<ul><li>acknowledge the situation briefly and calmly,</li><li>say the app cannot handle emergencies,</li><li>encourage contacting a trusted person nearby,</li><li>show Mexico&#x27;s <code>Linea de la Vida: 800 911 2000</code>,</li><li>show emergency services <code>911</code>,</li><li>optionally show U.S. <code>988</code> only when the app is configured for U.S. demo users.</li></ul>
+<p>The response must avoid giving harm-related details.</p>
+<h2 id="ai-provider">AI Provider</h2>
+<p>The classroom notes list these possible providers:</p>
+<ul><li>Google Gemini API,</li><li>OpenRouter,</li><li>Groq,</li><li>Hugging Face.</li></ul>
+<p>For v1, the plan uses Google Gemini API as the primary provider because the notes mark it as the newer option and current official docs support text generation, system instructions, REST calls, and structured JSON output.</p>
+<p>The implementation should still hide the provider behind an <code>AiChatRepository</code> interface so OpenRouter, Groq, or Hugging Face can replace Gemini later without rewriting the UI.</p>
+<h2 id="architecture">Architecture</h2>
+<p>The classroom-note architecture is:</p>
+<pre><code class="language-text">Android app -&gt; HTTP -&gt; AI API -&gt; JSON -&gt; Compose UI</code></pre>
+<p>Program 2 should preserve that shape:</p>
+<pre><code class="language-text">Compose screen
+    |
+ViewModel
+    |
+AiChatRepository
+    |
+GeminiRestClient
+    |
+HTTP request to AI API
+    |
+JSON response parsed into AiFeedback
+    |
+Compose renders bubbles, next steps, and resource cards</code></pre>
+<h2 id="api-key">API Key</h2>
+<p>The API key is a development secret. It must not be committed.</p>
+<p>For the course prototype, the key can be read from <code>local.properties</code> and injected into <code>BuildConfig</code>. If a real deployment is pursued, the key should move behind a backend or serverless proxy because mobile app binaries cannot keep API keys secret.</p>
+<h2 id="course-topics">Course Topics</h2>
+<p>The notes also mention:</p>
+<ul><li>multiplatform,</li><li>PWA,</li><li>Backend as a Service,</li><li>offline-first.</li></ul>
+<p>These are treated as related course vocabulary. They are not required v1 scope unless the professor explicitly asks for them in the Program 2 rubric.</p>
+      </article>
+      <p class="source">Page: <code>docs/CONTEXT.html</code></p>
+    </main>
+  </div>
+  <script src="../assets/theme.js"></script>
+</body>
+</html>

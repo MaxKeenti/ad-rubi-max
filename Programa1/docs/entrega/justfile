@@ -1,0 +1,55 @@
+# Build entregables. Run from this directory.
+#   just              # default: build single final PDF
+#   just bundle       # build single final PDF
+#   just build        # build all standalone PDFs
+#   just one 03-arquitectura   # build one
+#   just clean        # remove all generated PDFs
+
+default: bundle
+
+# --root .. makes the entrega/ directory the Typst project root so that
+# main.typ files can import /shared/style.typ (absolute path).
+
+# Compile every entregable's main.typ to PDF.
+build:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    ROOT="$(pwd)"
+    for dir in 0*/; do
+      if [ -f "$dir/main.typ" ]; then
+        echo "→ Compilando $dir"
+        (cd "$dir" && typst compile --root "$ROOT" main.typ)
+      fi
+    done
+    echo "✓ Listo. Revisa los main.pdf en cada subcarpeta."
+
+# Compile a single entregable: `just one 03-arquitectura`
+one DIR:
+    cd {{DIR}} && typst compile --root "$(cd .. && pwd)" main.typ
+
+# Watch one entregable, recompile on save: `just watch 03-arquitectura`
+watch DIR:
+    cd {{DIR}} && typst watch --root "$(cd .. && pwd)" main.typ
+
+# Compile the complete entrega as one Typst document.
+bundle:
+    typst compile --root "$(pwd)" main.typ entrega-completa.pdf
+    echo "✓ entrega-completa.pdf generado"
+
+# Render all Mermaid sources in shared/diagrams to SVG. Requires mmdc.
+diagrams:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if ! command -v mmdc >/dev/null; then
+      echo "mmdc no instalado. npm install -g @mermaid-js/mermaid-cli"
+      echo "Alternativa: pegar el .mmd en https://mermaid.live y exportar SVG manualmente."
+      exit 1
+    fi
+    for mmd in shared/diagrams/*.mmd; do
+      svg="${mmd%.mmd}.svg"
+      echo "→ $mmd → $svg"
+      mmdc -i "$mmd" -o "$svg" -b transparent
+    done
+
+clean:
+    rm -f 0*/main.pdf entrega-completa.pdf
