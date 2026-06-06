@@ -31,6 +31,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,15 +48,34 @@ import com.example.animochat.data.model.ChatRole
 import com.example.animochat.ui.theme.AnimochatTheme
 
 @Composable
-fun ChatScreen(
+fun ChatRoute(
+    viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
-    initialState: ChatUiState = fakeChatUiState(),
+) {
+    val state by viewModel.uiState.collectAsState()
+
+    ChatScreen(
+        state = state,
+        onSendMessage = viewModel::sendMessage,
+        onRetry = viewModel::retryLastMessage,
+        onClear = viewModel::clearChat,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun ChatScreen(
+    state: ChatUiState,
+    onSendMessage: (String) -> Unit,
+    onRetry: () -> Unit,
+    onClear: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var input by rememberSaveable { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(initialState.errorMessage) {
-        initialState.errorMessage?.let { snackbarHostState.showSnackbar(it) }
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { snackbarHostState.showSnackbar(it) }
     }
 
     Scaffold(
@@ -63,8 +83,11 @@ fun ChatScreen(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             ChatTopBar(
-                onClear = { input = "" },
-                clearEnabled = initialState.messages.isNotEmpty() || input.isNotBlank()
+                onClear = {
+                    input = ""
+                    onClear()
+                },
+                clearEnabled = state.messages.isNotEmpty() || input.isNotBlank()
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -72,17 +95,20 @@ fun ChatScreen(
             ChatInputBar(
                 value = input,
                 onValueChange = { input = it },
-                isLoading = initialState.isLoading,
-                onSend = { input = "" }
+                isLoading = state.isLoading,
+                onSend = {
+                    onSendMessage(input)
+                    input = ""
+                }
             )
         }
     ) { innerPadding ->
         ChatContent(
-            state = initialState,
+            state = state,
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize(),
-            onRetry = {}
+            onRetry = onRetry
         )
     }
 }
@@ -284,6 +310,11 @@ private fun ChatInputBar(
 @Composable
 private fun ChatScreenPreview() {
     AnimochatTheme {
-        ChatScreen()
+        ChatScreen(
+            state = fakeChatUiState(),
+            onSendMessage = {},
+            onRetry = {},
+            onClear = {}
+        )
     }
 }
