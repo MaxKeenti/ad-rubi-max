@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Capturas - Programa2 | AnimoChat</title>
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../../index.html" aria-label="Programa2 index">
+      <span class="brand-mark">AC</span>
+      <span>
+        <strong>AnimoChat</strong>
+        <small>Programa2 documentation</small>
+      </span>
+    </a>
+    <a class="index-link" href="../../index.html">Index</a>
+  </header>
+
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="Documentation navigation">
+      <section class="nav-group"><h2>Overview</h2><ul><li><a class="nav-link" href="../../README.html">AnimoChat - Student Motivational AI Chat</a></li></ul></section>
+      <section class="nav-group"><h2>Planning Docs</h2><ul><li><a class="nav-link" href="../CONTEXT.html">AnimoChat - Domain Context</a></li><li><a class="nav-link" href="../implementation_plan.html">AnimoChat - Implementation Plan</a></li><li><a class="nav-link" href="../guia-pruebas-programa2.html">Guia de pruebas - Programa2</a></li></ul></section>
+    </aside>
+    <main class="content">
+      <article class="document">
+        <h1 id="capturas-programa2">Capturas - Programa2</h1>
+        <p><strong>Estado:</strong> pendiente de captura en dispositivo o emulador Android.<br>
+        <strong>Fecha de verificacion:</strong> 2026-06-06.</p>
+        <p>La app compila y las pruebas unitarias pasan, pero este entorno no tiene <code>adb</code> ni <code>emulator</code> disponibles en PATH. Por eso no se genero una captura real desde Android dentro de esta ejecucion.</p>
+
+        <h2 id="capturas-requeridas">Capturas requeridas</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Archivo sugerido</th><th>Caso</th><th>Contenido esperado</th></tr></thead>
+            <tbody>
+              <tr><td><code>cp2-01-chat-motivacional.png</code></td><td>CP2-01</td><td>Entrada <code>Tengo miedo de reprobar matematicas</code> y respuesta motivacional con pasos concretos.</td></tr>
+              <tr><td><code>cp2-08-apoyo-crisis.png</code></td><td>CP2-08</td><td>Respuesta de apoyo inmediato con <code>Linea de la Vida: 800 911 2000</code> y <code>Emergencias: 911</code>, sin texto grafico.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="comandos-sugeridos">Comandos sugeridos</h2>
+        <pre><code class="language-sh">adb exec-out screencap -p &gt; docs/screenshots/cp2-01-chat-motivacional.png
+adb exec-out screencap -p &gt; docs/screenshots/cp2-08-apoyo-crisis.png</code></pre>
+        <p>Antes de capturar, ocultar cualquier llave API y mantener la pantalla enfocada en la app, no en Android Studio ni en logs.</p>
+      </article>
+      <p class="source">Page: <code>docs/screenshots/README.html</code></p>
+    </main>
+  </div>
+  <script src="../../assets/theme.js"></script>
+</body>
+</html>
