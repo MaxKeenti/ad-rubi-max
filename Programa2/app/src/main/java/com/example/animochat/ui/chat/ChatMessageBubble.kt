@@ -3,6 +3,7 @@ package com.example.animochat.ui.chat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -102,6 +103,7 @@ private fun FeedbackDetails(feedback: AiFeedback) {
 }
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun CrisisSupportCard(feedback: AiFeedback) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,

@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.android)
 }
 
 val localProperties = Properties().apply {
@@ -15,12 +16,12 @@ val localProperties = Properties().apply {
 
 android {
     namespace = "com.example.animochat"
-    compileSdk = 36
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.animochat"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -43,6 +44,9 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    kotlinOptions {
+        jvmTarget = "11"
     }
 
     defaultConfig {
