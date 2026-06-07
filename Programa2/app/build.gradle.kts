@@ -14,6 +14,13 @@ val localProperties = Properties().apply {
     }
 }
 
+fun findSecretProperty(name: String): String {
+    return localProperties.getProperty(name)
+        ?: providers.gradleProperty(name).orNull
+        ?: providers.environmentVariable(name).orNull
+        ?: ""
+}
+
 android {
     namespace = "com.example.animochat"
     compileSdk = 35
@@ -53,7 +60,7 @@ android {
         buildConfigField(
             "String",
             "GEMINI_API_KEY",
-            "\"${localProperties.getProperty("GEMINI_API_KEY", "")}\""
+            "\"${findSecretProperty("GEMINI_API_KEY")}\""
         )
     }
 }
