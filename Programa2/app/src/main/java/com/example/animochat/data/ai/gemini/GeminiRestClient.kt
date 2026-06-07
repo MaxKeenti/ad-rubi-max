@@ -11,7 +11,12 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -35,12 +40,20 @@ class GeminiRestClient(
 
         val request = Request.Builder()
             .url(buildEndpointUrl(config))
+            .addHeader("X-goog-api-key", config.apiKey)
             .post(buildRequestJson(studentPrompt).toRequestBody(JSON_MEDIA_TYPE))
             .build()
 
         try {
+            val startedAtMillis = System.currentTimeMillis()
+            println("AnimoChatGemini request=POST model=${config.model} apiKeyPresent=true")
             httpClient.newCall(request).execute().use { response ->
                 val body = response.body?.string().orEmpty()
+                val elapsedMillis = System.currentTimeMillis() - startedAtMillis
+                println(
+                    "AnimoChatGemini response=httpStatus=${response.code} " +
+                        "successful=${response.isSuccessful} bodyBytes=${body.length} elapsedMs=$elapsedMillis"
+                )
                 if (!response.isSuccessful) {
                     return@withContext Result.failure(
                         GeminiClientException.HttpError(response.code, body)
@@ -49,6 +62,8 @@ class GeminiRestClient(
                 parseGenerateContentResponse(body)
             }
         } catch (exception: IOException) {
+            Result.failure(GeminiClientException.NetworkError(exception))
+        } catch (exception: SecurityException) {
             Result.failure(GeminiClientException.NetworkError(exception))
         }
     }
@@ -66,8 +81,9 @@ class GeminiRestClient(
             ),
             generationConfig = GeminiGenerationConfig(
                 responseMimeType = "application/json",
+                thinkingConfig = GeminiThinkingConfig(thinkingBudget = 0),
                 temperature = 0.4,
-                maxOutputTokens = 600,
+                maxOutputTokens = 1024,
             ),
         )
 
@@ -81,7 +97,8 @@ class GeminiRestClient(
                 .firstOrNull()
                 ?.content
                 ?.parts
-                ?.firstNotNullOfOrNull { it.text }
+                ?.mapNotNull { it.text }
+                ?.joinToString(separator = "")
                 .orEmpty()
 
             parseFeedbackJson(providerText)
@@ -111,15 +128,7 @@ class GeminiRestClient(
                     message = message,
                     nextSteps = dto.nextSteps.map { it.trim() }.filter { it.isNotBlank() }.take(3),
                     followUpQuestion = dto.followUpQuestion?.trim()?.takeIf { it.isNotBlank() },
-                    resources = dto.resources.mapNotNull { resource ->
-                        val label = resource.label.trim()
-                        val value = resource.value.trim()
-                        if (label.isBlank() || value.isBlank()) {
-                            null
-                        } else {
-                            SupportResource(label = label, value = value)
-                        }
-                    },
+                    resources = dto.resources.mapNotNull { resource -> resource.toSupportResource() },
                 )
             )
         } catch (exception: SerializationException) {
@@ -129,8 +138,7 @@ class GeminiRestClient(
 
     private fun buildEndpointUrl(config: GeminiConfig): String {
         val encodedModel = URLEncoder.encode(config.model, StandardCharsets.UTF_8.name())
-        val encodedKey = URLEncoder.encode(config.apiKey, StandardCharsets.UTF_8.name())
-        return "${config.endpointBaseUrl}/models/$encodedModel:generateContent?key=$encodedKey"
+        return "${config.endpointBaseUrl}/models/$encodedModel:generateContent"
     }
 
     private fun String.extractJsonObject(): String? {
@@ -138,6 +146,28 @@ class GeminiRestClient(
         val end = lastIndexOf('}')
         return if (start >= 0 && end > start) substring(start, end + 1) else null
     }
+
+    private fun JsonElement.toSupportResource(): SupportResource? =
+        when (this) {
+            is JsonObject -> {
+                val label = this["label"]?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
+                val value = this["value"]?.jsonPrimitive?.contentOrNull?.trim().orEmpty()
+                if (label.isBlank() || value.isBlank()) {
+                    null
+                } else {
+                    SupportResource(label = label, value = value)
+                }
+            }
+            is JsonPrimitive -> {
+                val value = contentOrNull?.trim().orEmpty()
+                if (value.isBlank()) {
+                    null
+                } else {
+                    SupportResource(label = value, value = value)
+                }
+            }
+            else -> null
+        }
 
     companion object {
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
@@ -165,7 +195,7 @@ sealed class GeminiClientException(message: String, cause: Throwable? = null) : 
     ) : GeminiClientException("Gemini HTTP request failed with status $statusCode.")
 
     data class NetworkError(
-        override val cause: IOException,
+        override val cause: Throwable,
     ) : GeminiClientException("Gemini network request failed.", cause)
 
     data class MalformedProviderResponse(
@@ -196,9 +226,17 @@ private data class GeminiTextPart(
 private data class GeminiGenerationConfig(
     @SerialName("responseMimeType")
     val responseMimeType: String,
+    @SerialName("thinkingConfig")
+    val thinkingConfig: GeminiThinkingConfig,
     val temperature: Double,
     @SerialName("maxOutputTokens")
     val maxOutputTokens: Int,
+)
+
+@Serializable
+private data class GeminiThinkingConfig(
+    @SerialName("thinkingBudget")
+    val thinkingBudget: Int,
 )
 
 @Serializable
@@ -227,11 +265,5 @@ private data class AiFeedbackDto(
     val message: String,
     val nextSteps: List<String> = emptyList(),
     val followUpQuestion: String? = null,
-    val resources: List<SupportResourceDto> = emptyList(),
-)
-
-@Serializable
-private data class SupportResourceDto(
-    val label: String,
-    val value: String,
+    val resources: List<JsonElement> = emptyList(),
 )

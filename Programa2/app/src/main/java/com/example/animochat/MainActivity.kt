@@ -24,9 +24,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             AnimochatTheme {
                 val repository = remember {
-                    if (GeminiConfig.fromBuildConfig().hasApiKey) {
+                    val config = GeminiConfig.fromBuildConfig()
+                    if (config.hasApiKey) {
+                        println("AnimoChatGemini repository=gemini model=${config.model} apiKeyPresent=true")
                         GeminiAiChatRepository()
                     } else {
+                        println("AnimoChatGemini repository=fake apiKeyPresent=false")
                         FakeAiChatRepository()
                     }
                 }
