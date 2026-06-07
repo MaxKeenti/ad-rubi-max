@@ -11,7 +11,7 @@ data class GeminiConfig(
         get() = apiKey.isNotBlank()
 
     companion object {
-        const val DEFAULT_MODEL = "gemini-2.0-flash"
+        const val DEFAULT_MODEL = "gemini-flash-latest"
         const val DEFAULT_ENDPOINT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
 
         fun fromBuildConfig(): GeminiConfig = GeminiConfig(
