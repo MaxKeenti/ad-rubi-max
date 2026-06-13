@@ -5,11 +5,11 @@
 **Prerequisites:** none
 **Day:** 1 (Jun 11)
 **Blocks:** 06 (real repository), 07 (map), 14 (distribution)
-**Status:** in progress (2026-06-12) — step 1 done via CLI (project
+**Status:** done enough for release handoff (2026-06-12) — project
 `bachewatch-upiicsa`, app `1:1008157923999:android:2a6d136350f1b16bcee0aa`,
-`app/google-services.json` committed-ready). Steps 2–6 are console-only
-and still pending: Anonymous Auth, Firestore (API not yet enabled),
-Storage/Blaze, Maps SDK + API key.
+`app/google-services.json`, Anonymous Auth, Firestore, Storage, deployed
+rules/indexes, and restricted Maps Android key are in place. Final proof
+is Melanie's device run from task 16.
 
 ## Goal
 

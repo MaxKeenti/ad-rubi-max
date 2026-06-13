@@ -5,6 +5,12 @@
 **Prerequisites:** 00; app feature-complete enough to hand over (08–10)
 **Day:** 4 (Jun 14)
 **Blocks:** 16 (Melanie needs the distributed build)
+**Status:** ready for Melanie (2026-06-12) — signed APK staged at
+`docs/entrega/app-release.apk`, App Distribution release
+`31cvis3ha3p2o` uploaded to group `testers`, live rules deployed,
+Anonymous Auth verified, Maps release SHA-1 added. Pending external
+input: Melanie's Google email must be added to `testers` if she does
+not already have access.
 
 ## Goal
 

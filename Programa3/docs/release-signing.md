@@ -57,6 +57,16 @@ Restriction values:
 - Package name: `com.example.bachewatch`
 - Certificate fingerprint: release SHA-1 from the command above
 
+Current release key fingerprint (created 2026-06-12):
+
+```text
+C3:B3:33:A7:CC:FE:36:41:B3:41:13:D8:7D:9F:18:91:B7:25:54:BF
+```
+
+The Google API key named `apikey bachewatch` is restricted to
+`maps-android-backend.googleapis.com` and now has both the debug SHA-1
+and the release SHA-1 above for package `com.example.bachewatch`.
+
 ## Build and smoke test
 
 ```bash
@@ -87,6 +97,24 @@ firebase appdistribution:distribute \
 
 Copy the same signed APK to `docs/entrega/app-release.apk` for the final
 delivery fallback after the map is verified in the release build.
+
+Current App Distribution release (use this one, not the earlier
+same-version upload):
+
+- Release ID: `31cvis3ha3p2o`
+- Console:
+  `https://console.firebase.google.com/project/bachewatch-upiicsa/appdistribution/app/android:com.example.bachewatch/releases/31cvis3ha3p2o?utm_source=firebase-tools`
+- Tester link:
+  `https://appdistribution.firebase.google.com/testerapps/1:1008157923999:android:2a6d136350f1b16bcee0aa/releases/31cvis3ha3p2o?utm_source=firebase-tools`
+
+If Melanie is not already a tester, add her Google account to the
+existing group:
+
+```bash
+firebase appdistribution:testers:add MELANIE_GOOGLE_EMAIL \
+  --group-alias testers \
+  --project bachewatch-upiicsa
+```
 
 Known tester gotcha: if the App Distribution install stays stuck at
 "downloading", Melanie must accept the invite with the same Google
