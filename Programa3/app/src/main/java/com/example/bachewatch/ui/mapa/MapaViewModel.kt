@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
@@ -21,14 +22,20 @@ class MapaViewModel @Inject constructor(
 
     private val viewport = MutableStateFlow(GeoBounds.CDMX)
 
+    private val _cargando = MutableStateFlow(true)
+    val cargando: StateFlow<Boolean> = _cargando
+
     // flatMapLatest cancels the previous viewport's listeners on pan —
-    // the intended lifecycle (task 07 wires camera-idle to this).
+    // the intended lifecycle (the screen wires camera-idle to this).
     @OptIn(ExperimentalCoroutinesApi::class)
     val reportes: StateFlow<List<Reporte>> = viewport
         .flatMapLatest(repository::observarViewport)
+        .onEach { _cargando.value = false }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     fun onViewportChanged(bounds: GeoBounds) {
+        if (bounds == viewport.value) return
+        _cargando.value = true
         viewport.value = bounds
     }
 }

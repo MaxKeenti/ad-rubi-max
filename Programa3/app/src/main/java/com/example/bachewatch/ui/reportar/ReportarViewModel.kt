@@ -15,9 +15,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ReportarUiState(
-    // TODO(task 04): real Uri from TakePicture + FileProvider; until
-    // then a simulated photo keeps the Day-1 flow demoable end-to-end.
-    val fotoLista: Boolean = false,
+    /** Content Uri of the captured photo (FileProvider, cacheDir). */
+    val fotoUri: Uri? = null,
     val fix: LocationFix? = null,
     val buscandoFix: Boolean = false,
     val fixError: String? = null,
@@ -27,8 +26,10 @@ data class ReportarUiState(
     val enviado: Boolean = false,
     val envioError: String? = null,
 ) {
-    // TODO(task 04): also gate on fotoLista once the camera is real.
-    val puedeEnviar: Boolean get() = fix != null && !enviando && !enviado
+    val fotoLista: Boolean get() = fotoUri != null
+
+    /** Foto + fix are both mandatory (Q3); severidad/descripción never gate. */
+    val puedeEnviar: Boolean get() = fotoUri != null && fix != null && !enviando && !enviado
 }
 
 @HiltViewModel
@@ -40,12 +41,11 @@ class ReportarViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ReportarUiState())
     val uiState: StateFlow<ReportarUiState> = _uiState
 
-    init {
-        // Warm-up trick (Q4): the fix request starts as soon as the
-        // screen opens, hiding its latency behind the camera time.
-        obtenerFix()
-    }
-
+    /**
+     * Warm-up trick (Q4): the screen calls this *as the camera launches*,
+     * so the fix resolves during the 5–15 s the user spends framing the
+     * shot. Also the "Reintentar" handler on the fix card.
+     */
     fun obtenerFix() {
         _uiState.update { it.copy(buscandoFix = true, fixError = null) }
         viewModelScope.launch {
@@ -64,8 +64,8 @@ class ReportarViewModel @Inject constructor(
         }
     }
 
-    fun simularFoto() {
-        _uiState.update { it.copy(fotoLista = true) }
+    fun onFotoCapturada(uri: Uri) {
+        _uiState.update { it.copy(fotoUri = uri) }
     }
 
     /** Re-tap deselects: null severidad must stay reachable (Q6). */
@@ -81,18 +81,20 @@ class ReportarViewModel @Inject constructor(
 
     fun enviar() {
         val estado = _uiState.value
+        val fotoUri = estado.fotoUri ?: return
         val fix = estado.fix ?: return
         _uiState.update { it.copy(enviando = true, envioError = null) }
         viewModelScope.launch {
             repository.crearReporte(
-                fotoUri = Uri.EMPTY, // TODO(task 04): captured photo Uri
+                fotoUri = fotoUri,
                 fix = fix,
                 severidad = estado.severidad,
                 descripcion = estado.descripcion.ifBlank { null },
             )
                 .onSuccess { _uiState.update { it.copy(enviando = false, enviado = true) } }
                 .onFailure { e ->
-                    // In-place retry (Q7): the composed report stays on screen.
+                    // In-place retry (Q7): the composed report stays on screen,
+                    // nothing survives process death by design.
                     _uiState.update {
                         it.copy(
                             enviando = false,

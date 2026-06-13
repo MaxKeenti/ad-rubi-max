@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Camera photos live in cacheDir only (task 04): no storage permission,
+  no gallery. The system camera writes straight to this FileProvider Uri.
+-->
+<paths>
+    <cache-path name="fotos" path="." />
+</paths>

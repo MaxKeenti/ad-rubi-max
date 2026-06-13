@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.geofire.android.common)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.exifinterface)
 
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)

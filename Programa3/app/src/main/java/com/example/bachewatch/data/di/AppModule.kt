@@ -1,11 +1,11 @@
 package com.example.bachewatch.data.di
 
-import com.example.bachewatch.data.auth.FakeSesionAnonima
 import com.example.bachewatch.data.auth.SesionAnonima
-import com.example.bachewatch.data.location.FakeLocationProvider
+import com.example.bachewatch.data.auth.SesionAnonimaFirebase
+import com.example.bachewatch.data.location.FusedLocationProvider
 import com.example.bachewatch.data.location.LocationProvider
 import com.example.bachewatch.data.repository.ReporteRepository
-import com.example.bachewatch.data.repository.fake.FakeReporteRepository
+import com.example.bachewatch.data.repository.firestore.ReporteRepositoryFirestore
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,9 +13,9 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 /**
- * Fakes bound while the app runs without Firebase (Day-1 checkpoint).
- * Real bindings flip in task 05 (location) and task 06 (repository +
- * sesión) — P1's commented-binding pattern.
+ * Real bindings (tasks 05–06). The Fake* implementations stay compiled for
+ * unit tests but are no longer bound — P1's commented-binding pattern, so
+ * flipping back to fakes for a desk demo is a one-line change.
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -23,16 +23,16 @@ abstract class AppModule {
 
     @Binds
     @Singleton
-    abstract fun bindReporteRepository(impl: FakeReporteRepository): ReporteRepository
-    // task 06: abstract fun bindReporteRepository(impl: ReporteRepositoryFirestore): ReporteRepository
+    abstract fun bindReporteRepository(impl: ReporteRepositoryFirestore): ReporteRepository
+    // desk-demo fallback: abstract fun bindReporteRepository(impl: FakeReporteRepository): ReporteRepository
 
     @Binds
     @Singleton
-    abstract fun bindLocationProvider(impl: FakeLocationProvider): LocationProvider
-    // task 05: abstract fun bindLocationProvider(impl: FusedLocationProvider): LocationProvider
+    abstract fun bindLocationProvider(impl: FusedLocationProvider): LocationProvider
+    // desk-demo fallback: abstract fun bindLocationProvider(impl: FakeLocationProvider): LocationProvider
 
     @Binds
     @Singleton
-    abstract fun bindSesionAnonima(impl: FakeSesionAnonima): SesionAnonima
-    // task 06: abstract fun bindSesionAnonima(impl: SesionAnonimaFirebase): SesionAnonima
+    abstract fun bindSesionAnonima(impl: SesionAnonimaFirebase): SesionAnonima
+    // desk-demo fallback: abstract fun bindSesionAnonima(impl: FakeSesionAnonima): SesionAnonima
 }
