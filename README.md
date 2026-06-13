@@ -8,7 +8,8 @@ Firebase backend, tests, and documentation.
 ```text
 .
 |-- Programa1/  # Mangos USA mobile purchase tracking app
-`-- Programa2/  # AnimoChat student motivational AI chat planning
+|-- Programa2/  # AnimoChat student motivational AI chat planning
+`-- Programa3/  # BacheWatch citizen pothole reporting
 ```
 
 Future work should be added as sibling directories with their own `docs/`, app
@@ -37,3 +38,12 @@ ls Programa2/docs
 
 See `Programa2/README.html` and `Programa2/docs/implementation_plan.html` for
 the current Program 2 plan and scaffold-only implementation status.
+
+## Programa3
+
+BacheWatch: citizen pothole reporting with photo evidence, automatic
+geolocation, and a severity-weighted incidence heatmap. Planning was
+completed in the 2026-06-11 grilling session; development runs June 11–15.
+Entrega deliverables will be HTML (mirroring Programa2's format).
+
+See `Programa3/README.md` and `Programa3/docs/implementation_plan.md`.
