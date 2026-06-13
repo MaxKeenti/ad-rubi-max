@@ -17,6 +17,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageMetadata
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.channels.awaitClose
@@ -52,7 +53,10 @@ class ReporteRepositoryFirestore @Inject constructor(
         // orphan photo on partial failure is the accepted artifact.
         val jpeg = compressor.comprimir(fotoUri)
         val ref = storage.reference.child(fotoPath)
-        ref.putBytes(jpeg).await()
+        val metadata = StorageMetadata.Builder()
+            .setContentType("image/jpeg")
+            .build()
+        ref.putBytes(jpeg, metadata).await()
         val fotoUrl = ref.downloadUrl.await().toString()
 
         val geohash = GeoFireUtils.getGeoHashForLocation(GeoLocation(fix.lat, fix.lng))
@@ -70,8 +74,6 @@ class ReporteRepositoryFirestore @Inject constructor(
             put("createdBy", uid)
             put("confirmCount", 0L)
             put("serverWrittenAt", FieldValue.serverTimestamp())
-            put("deletedAt", null)
-            put("deletedBy", null)
         }
         coleccion.document(id).set(data).await()
         id

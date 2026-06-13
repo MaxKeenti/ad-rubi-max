@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.AddAPhoto
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -28,16 +29,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.bachewatch.data.model.GeoBounds
+import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.ui.detalle.DetalleReporteSheet
+import com.example.bachewatch.ui.detalle.DetalleViewModel
 import com.example.bachewatch.ui.theme.colorDeSeveridad
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -47,8 +53,12 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.TileOverlay
+import com.google.maps.android.compose.rememberTileOverlayState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
+import com.google.maps.android.heatmaps.HeatmapTileProvider
+import com.google.maps.android.heatmaps.WeightedLatLng
 
 private val CDMX_CENTRO = LatLng(19.4326, -99.1332)
 
@@ -62,9 +72,11 @@ fun MapaScreen(
     onReportar: () -> Unit,
     onRecientes: () -> Unit,
     viewModel: MapaViewModel = hiltViewModel(),
+    detalleViewModel: DetalleViewModel = hiltViewModel(),
 ) {
     val reportes by viewModel.reportes.collectAsState()
     val cargando by viewModel.cargando.collectAsState()
+    val modoHeatmap by viewModel.modoHeatmap.collectAsState()
     val context = LocalContext.current
 
     // The map never prompts (task 05) — it only reflects an existing grant.
@@ -80,6 +92,7 @@ fun MapaScreen(
     }
     val snackbarHostState = remember { SnackbarHostState() }
     var seleccionId by remember { mutableStateOf<String?>(null) }
+    val reporteSeleccionado = reportes.firstOrNull { it.id == seleccionId }
 
     // Query on idle, not on every frame — no query storm while panning.
     LaunchedEffect(cameraPositionState.isMoving) {
@@ -90,11 +103,14 @@ fun MapaScreen(
         }
     }
 
-    // Detail sheet lands in task 09; until then a snackbar with the id.
-    LaunchedEffect(seleccionId) {
-        seleccionId?.let {
-            snackbarHostState.showSnackbar("Reporte $it")
-            seleccionId = null
+    LaunchedEffect(seleccionId, reporteSeleccionado) {
+        when {
+            seleccionId == null -> detalleViewModel.cerrar()
+            reporteSeleccionado == null -> {
+                detalleViewModel.cerrar()
+                seleccionId = null
+            }
+            else -> detalleViewModel.mostrar(reporteSeleccionado)
         }
     }
 
@@ -131,34 +147,57 @@ fun MapaScreen(
                 cameraPositionState = cameraPositionState,
                 properties = MapProperties(isMyLocationEnabled = permisoUbicacion),
             ) {
-                // Cache one BitmapDescriptor per severity; built lazily after the
-                // map is ready (BitmapDescriptorFactory needs Maps initialized).
-                val iconos = remember { mutableMapOf<Severidad?, BitmapDescriptor>() }
-                reportes.forEach { reporte ->
-                    key(reporte.id) {
-                        Marker(
-                            state = rememberMarkerState(
-                                key = reporte.id,
-                                position = LatLng(reporte.lat, reporte.lng),
-                            ),
-                            icon = iconos.getOrPut(reporte.severidad) {
-                                iconoMarcador(colorDeSeveridad(reporte.severidad).toArgb())
-                            },
-                            title = reporte.descripcion ?: "Bache",
-                            snippet = "✓ ${reporte.confirmCount}",
-                            tag = reporte.id,
-                            onClick = {
-                                seleccionId = reporte.id
-                                false // keep default behavior (info window + recenter)
-                            },
-                        )
+                if (modoHeatmap) {
+                    HeatmapReportes(reportes)
+                } else {
+                    // Cache one BitmapDescriptor per severity; built lazily after the
+                    // map is ready (BitmapDescriptorFactory needs Maps initialized).
+                    val iconos = remember { mutableMapOf<Severidad?, BitmapDescriptor>() }
+                    reportes.forEach { reporte ->
+                        key(reporte.id) {
+                            Marker(
+                                state = rememberMarkerState(
+                                    key = reporte.id,
+                                    position = LatLng(reporte.lat, reporte.lng),
+                                ),
+                                icon = iconos.getOrPut(reporte.severidad) {
+                                    iconoMarcador(colorDeSeveridad(reporte.severidad).toArgb())
+                                },
+                                title = reporte.descripcion ?: "Bache",
+                                snippet = "✓ ${reporte.confirmCount}",
+                                tag = reporte.id,
+                                onClick = {
+                                    seleccionId = reporte.id
+                                    true
+                                },
+                            )
+                        }
                     }
                 }
             }
 
+            FilterChip(
+                selected = modoHeatmap,
+                onClick = viewModel::toggleModoHeatmap,
+                label = { Text("Zonas") },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(16.dp),
+            )
+
             // Subtle progress while the first snapshot resolves.
             if (cargando) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+
+            if (reporteSeleccionado != null) {
+                DetalleReporteSheet(
+                    viewModel = detalleViewModel,
+                    onDismissRequest = {
+                        seleccionId = null
+                        detalleViewModel.cerrar()
+                    },
+                )
             }
         }
     }
@@ -171,6 +210,49 @@ private fun LatLngBounds.toGeoBounds() = GeoBounds(
     neLat = northeast.latitude,
     neLng = northeast.longitude,
 )
+
+@Composable
+private fun HeatmapReportes(reportes: List<Reporte>) {
+    val weighted = remember(reportes) {
+        reportes.map { reporte ->
+            WeightedLatLng(
+                LatLng(reporte.lat, reporte.lng),
+                reporte.severidad?.peso ?: Severidad.PESO_SIN_SEVERIDAD,
+            )
+        }
+    }
+    val overlayState = rememberTileOverlayState()
+    var provider by remember { mutableStateOf<HeatmapTileProvider?>(null) }
+    var heatmapConDatos by remember { mutableStateOf(false) }
+    val providerActual by rememberUpdatedState(provider)
+
+    LaunchedEffect(weighted) {
+        if (weighted.isEmpty()) {
+            heatmapConDatos = false
+            return@LaunchedEffect
+        }
+        val actual = providerActual
+        if (actual == null) {
+            provider = HeatmapTileProvider.Builder()
+                .weightedData(weighted)
+                .radius(36)
+                .build()
+        } else {
+            actual.setWeightedData(weighted)
+            overlayState.clearTileCache()
+        }
+        heatmapConDatos = true
+    }
+
+    if (weighted.isNotEmpty() && heatmapConDatos) {
+        provider?.let {
+            TileOverlay(
+                tileProvider = it,
+                state = overlayState,
+            )
+        }
+    }
+}
 
 /** A filled dot in the severity color (matches the Recientes chips) with a white ring. */
 private fun iconoMarcador(colorArgb: Int): BitmapDescriptor {

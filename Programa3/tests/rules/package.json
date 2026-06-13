@@ -1,0 +1,13 @@
+{
+  "name": "bachewatch-rules-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test --test-reporter=spec *.test.mjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.1",
+    "firebase": "12.14.0",
+    "firebase-tools": "15.19.0"
+  }
+}

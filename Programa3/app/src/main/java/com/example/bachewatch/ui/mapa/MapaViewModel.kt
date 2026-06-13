@@ -25,6 +25,9 @@ class MapaViewModel @Inject constructor(
     private val _cargando = MutableStateFlow(true)
     val cargando: StateFlow<Boolean> = _cargando
 
+    private val _modoHeatmap = MutableStateFlow(false)
+    val modoHeatmap: StateFlow<Boolean> = _modoHeatmap
+
     // flatMapLatest cancels the previous viewport's listeners on pan —
     // the intended lifecycle (the screen wires camera-idle to this).
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -37,5 +40,9 @@ class MapaViewModel @Inject constructor(
         if (bounds == viewport.value) return
         _cargando.value = true
         viewport.value = bounds
+    }
+
+    fun toggleModoHeatmap() {
+        _modoHeatmap.value = !_modoHeatmap.value
     }
 }

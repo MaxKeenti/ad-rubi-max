@@ -1,0 +1,31 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function jpgReporteValido(fileName) {
+      return fileName.matches('^[^/]+\\.jpg$');
+    }
+
+    function writeJpegValido(fileName) {
+      return isSignedIn()
+        && jpgReporteValido(fileName)
+        && request.resource != null
+        && request.resource.contentType == 'image/jpeg'
+        && request.resource.size < 1572864;
+    }
+
+    match /reportes/{fileName} {
+      allow read: if isSignedIn() && jpgReporteValido(fileName);
+      allow create, update: if writeJpegValido(fileName);
+      allow delete: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

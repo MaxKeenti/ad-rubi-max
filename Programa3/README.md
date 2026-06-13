@@ -18,5 +18,13 @@ window June 11–15.
 - `docs/work-division.md` — Max: dev + automated tests; Melanie: manual
   runbook + delivery evidence
 
+## Rules Suite
+
+Run Firestore + Storage security rules tests with:
+
+```bash
+firebase emulators:exec --only firestore,storage "npm --prefix tests/rules test"
+```
+
 Entrega deliverables will be HTML (mirroring Programa2), derived from
 these working docs at the end of the window.

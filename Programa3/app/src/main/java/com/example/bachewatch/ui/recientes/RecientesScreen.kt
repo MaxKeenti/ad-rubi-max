@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
@@ -23,8 +25,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +41,8 @@ import coil.compose.AsyncImage
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
 import com.example.bachewatch.data.util.tiempoRelativo
+import com.example.bachewatch.ui.detalle.DetalleReporteSheet
+import com.example.bachewatch.ui.detalle.DetalleViewModel
 import com.example.bachewatch.ui.theme.colorDeSeveridad
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,8 +50,22 @@ import com.example.bachewatch.ui.theme.colorDeSeveridad
 fun RecientesScreen(
     onBack: () -> Unit,
     viewModel: RecientesViewModel = hiltViewModel(),
+    detalleViewModel: DetalleViewModel = hiltViewModel(),
 ) {
-    val reportes by viewModel.reportes.collectAsState()
+    val state by viewModel.uiState.collectAsState()
+    var seleccionId by remember { mutableStateOf<String?>(null) }
+    val reporteSeleccionado = state.reportes.firstOrNull { it.id == seleccionId }
+
+    LaunchedEffect(seleccionId, reporteSeleccionado) {
+        when {
+            seleccionId == null -> detalleViewModel.cerrar()
+            reporteSeleccionado == null -> {
+                detalleViewModel.cerrar()
+                seleccionId = null
+            }
+            else -> detalleViewModel.mostrar(reporteSeleccionado)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -57,8 +79,34 @@ fun RecientesScreen(
             )
         },
     ) { padding ->
-        if (reportes.isEmpty()) {
-            Box(
+        when {
+            state.cargando -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+
+            state.error != null -> {
+                val error = state.error.orEmpty()
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        error,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
+            }
+
+            state.reportes.isEmpty() -> Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
@@ -66,26 +114,45 @@ fun RecientesScreen(
             ) {
                 Text("Aún no hay reportes")
             }
-        } else {
-            LazyColumn(
+
+            else -> LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(reportes, key = { it.id }) { reporte ->
-                    // TODO(task 09): tap opens the shared detail bottom sheet.
-                    ReporteRow(reporte)
+                items(state.reportes, key = { it.id }) { reporte ->
+                    ReporteRow(
+                        reporte = reporte,
+                        onClick = { seleccionId = reporte.id },
+                    )
                 }
             }
+        }
+
+        if (reporteSeleccionado != null) {
+            DetalleReporteSheet(
+                viewModel = detalleViewModel,
+                onDismissRequest = {
+                    seleccionId = null
+                    detalleViewModel.cerrar()
+                },
+            )
         }
     }
 }
 
 @Composable
-private fun ReporteRow(reporte: Reporte) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+private fun ReporteRow(
+    reporte: Reporte,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
