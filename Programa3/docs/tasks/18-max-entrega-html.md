@@ -4,6 +4,10 @@
 **Estimated effort:** ~3 h
 **Prerequisites:** 16, 17 (evidencia lista); todo lo demás congelado
 **Day:** 5 (Jun 15)
+**Status:** drafted (2026-06-12) — Spanish HTML shell and all ten
+sections are generated under `docs/entrega/html/`, with portada at
+`index.html` and APK link wired. Pending final pass after Melanie adds
+manual screenshots and release-gate evidence.
 
 ## Goal
 

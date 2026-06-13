@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Glosario | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a><a class="index-link" href="../../../index.html">Indice</a></header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link current" href="06-glosario.html">Glosario</a></li><li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/CONTEXT.md -->
+        <p class="eyebrow">06 - Glosario</p>
+        <h1>Lenguaje de dominio</h1>
+        <p>
+          Este glosario fija los terminos usados en la app y en la documentacion.
+          La meta es evitar ambiguedades: BacheWatch registra observaciones
+          ciudadanas, no casos administrativos.
+        </p>
+
+        <h2>Terminos principales</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Termino</th><th>Definicion</th></tr></thead>
+            <tbody>
+              <tr><td>Reporte</td><td>Observacion de un bache tomada por un ciudadano en sitio, con foto y GPS capturados en ese momento.</td></tr>
+              <tr><td>Bache</td><td>Desperfecto vial objetivo de v1. Coladeras, grietas u otros danos quedan fuera de alcance.</td></tr>
+              <tr><td>Confirmacion</td><td>Accion de un usuario que indica que el bache sigue ahi. Se guarda una vez por uid.</td></tr>
+              <tr><td>Ciudadano</td><td>Usuario de la app identificado por Firebase Anonymous Auth, sin cuenta visible.</td></tr>
+              <tr><td>Severidad</td><td>Etiqueta opcional: leve, moderado o severo. Se usa para color de marcador y peso de heatmap.</td></tr>
+              <tr><td>Zonas</td><td>Vista de heatmap que concentra reportes y pondera por severidad.</td></tr>
+              <tr><td>Recientes</td><td>Lista de los ultimos reportes activos ordenados por <code>serverWrittenAt</code>.</td></tr>
+              <tr><td>Borrado logico</td><td>Actualizacion de <code>deletedAt</code> y <code>deletedBy</code>; el cliente no elimina fisicamente documentos.</td></tr>
+              <tr><td>Soft accuracy gate</td><td>Advertencia cuando el GPS tiene baja precision. No bloquea guardar, pero registra <code>accuracyMeters</code>.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Reglas de lenguaje</h2>
+        <ul>
+          <li>Un reporte no es una orden de reparacion.</li>
+          <li>Los duplicados son validos: varias observaciones del mismo bache alimentan la densidad del mapa.</li>
+          <li>La ubicacion es capturada por el dispositivo, no escrita a mano.</li>
+          <li>La foto se captura desde la camara, no desde galeria.</li>
+          <li>La app no afirma que un bache fue reparado; solo muestra reportes activos y confirmaciones.</li>
+        </ul>
+
+        <h2>Privacidad de ubicacion</h2>
+        <p>
+          La app solicita ubicacion precisa solo para reportar. No usa ubicacion
+          de fondo ni seguimiento continuo. Si el usuario niega ubicacion,
+          conserva un modo de consulta: mapa, zonas, recientes y detalle.
+        </p>
+
+        <p class="source">Fuente: <code>docs/CONTEXT.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

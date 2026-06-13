@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Distribucion | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a><a class="index-link" href="../../../index.html">Indice</a></header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link" href="06-glosario.html">Glosario</a></li><li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link current" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/release-signing.md, docs/handoff-melanie-2026-06-12.md, docs/tasks/14-max-keystore-app-distribution.md -->
+        <p class="eyebrow">10 - Distribucion</p>
+        <h1>APK firmado y App Distribution</h1>
+        <p>
+          La distribucion se hizo con Firebase App Distribution. El mismo APK
+          firmado que Melanie instala se conserva como respaldo en la entrega
+          para que el evaluador pueda instalarlo si no usa el canal de Firebase.
+        </p>
+
+        <h2>Artefactos</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Artefacto</th><th>Valor</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>Proyecto Firebase</td><td><code>bachewatch-upiicsa</code></td><td><span class="status ok">Activo</span></td></tr>
+              <tr><td>Android App ID</td><td><code>1:1008157923999:android:2a6d136350f1b16bcee0aa</code></td><td><span class="status ok">Activo</span></td></tr>
+              <tr><td>Release App Distribution</td><td><code>31cvis3ha3p2o</code></td><td><span class="status ok">Subido</span></td></tr>
+              <tr><td>Grupo</td><td><code>testers</code></td><td><span class="status ok">Creado</span></td></tr>
+              <tr><td>APK firmado</td><td><a href="../app-release.apk"><code>docs/entrega/app-release.apk</code></a></td><td><span class="status ok">Adjunto</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Links de distribucion</h2>
+        <p>
+          Link de tester para el release actual:
+        </p>
+        <pre><code>https://appdistribution.firebase.google.com/testerapps/1:1008157923999:android:2a6d136350f1b16bcee0aa/releases/31cvis3ha3p2o?utm_source=firebase-tools</code></pre>
+        <p>
+          Consola del release:
+        </p>
+        <pre><code>https://console.firebase.google.com/project/bachewatch-upiicsa/appdistribution/app/android:com.example.bachewatch/releases/31cvis3ha3p2o?utm_source=firebase-tools</code></pre>
+
+        <h2>Firma</h2>
+        <p>
+          El APK esta firmado con el keystore local de release. La huella SHA-1
+          de release fue agregada a la restriccion Android de la API key de
+          Google Maps para evitar mapas en blanco en el build distribuido.
+        </p>
+        <pre><code>Package: com.example.bachewatch
+Release SHA-1:
+C3:B3:33:A7:CC:FE:36:41:B3:41:13:D8:7D:9F:18:91:B7:25:54:BF</code></pre>
+
+        <h2>Comandos usados</h2>
+        <pre><code class="language-sh">cd Programa3
+./gradlew clean assembleRelease
+cp app/build/outputs/apk/release/app-release.apk docs/entrega/app-release.apk
+firebase deploy --only firestore:rules,firestore:indexes,storage --project bachewatch-upiicsa
+firebase appdistribution:distribute docs/entrega/app-release.apk \
+  --app 1:1008157923999:android:2a6d136350f1b16bcee0aa \
+  --project bachewatch-upiicsa \
+  --groups testers \
+  --release-notes "BacheWatch release candidate"</code></pre>
+
+        <div class="callout">
+          <strong>Nota para Melanie.</strong>
+          Si la instalacion queda en "downloading", debe aceptar la invitacion
+          con la misma cuenta Google que usa Google Play Services en el telefono.
+        </div>
+
+        <p class="source">Fuentes: <code>docs/release-signing.md</code>, <code>docs/handoff-melanie-2026-06-12.md</code>, <code>docs/tasks/14-max-keystore-app-distribution.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

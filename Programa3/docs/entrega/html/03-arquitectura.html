@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Arquitectura | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a><a class="index-link" href="../../../index.html">Indice</a></header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link current" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link" href="06-glosario.html">Glosario</a></li><li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/implementation_plan.md seccion 4, docs/adr/*.md -->
+        <p class="eyebrow">03 - Arquitectura</p>
+        <h1>MVVM Compose con contratos testeables</h1>
+        <p>
+          BacheWatch usa una arquitectura MVVM con Compose. Las pantallas
+          observan estados de ViewModel y los ViewModels dependen de interfaces
+          de repositorio, ubicacion y sesion. Hilt decide si se usan fakes o
+          implementaciones reales, lo que permite pruebas unitarias sin Firebase
+          y una app real con servicios remotos.
+        </p>
+
+        <h2>Diagrama de componentes</h2>
+        <pre><code>UI Compose
+  MapaScreen       ReportarScreen       RecientesScreen       DetalleReporteSheet
+      |                 |                    |                       |
+      v                 v                    v                       v
+  MapaViewModel    ReportarViewModel    RecientesViewModel      estado compartido
+      |                 |                    |
+      +-----------------+--------------------+
+                        |
+                        v
+               ReporteRepository
+                        |
+        +---------------+----------------+
+        |                                |
+  Firestore reportes              Firebase Storage fotos
+        |
+  Geohash viewport queries
+
+Servicios transversales:
+  SesionAnonima -> Firebase Anonymous Auth
+  LocationProvider -> Fused Location Provider
+  FotoCompressor -> JPEG max 1600 px</code></pre>
+
+        <h2>Contratos principales</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Contrato</th><th>Responsabilidad</th><th>Implementaciones</th></tr></thead>
+            <tbody>
+              <tr><td><code>ReporteRepository</code></td><td>Crear reporte, observar viewport, recientes, confirmar y eliminar.</td><td>Fake en memoria y Firestore/Storage real.</td></tr>
+              <tr><td><code>LocationProvider</code></td><td>Obtener una ubicacion actual precisa para reportar.</td><td>Fake y Fused Location Provider.</td></tr>
+              <tr><td><code>SesionAnonima</code></td><td>Asegurar uid anonimo y exponer identidad para reglas.</td><td>Fake y Firebase Auth anonimo.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Flujo de reporte</h2>
+        <ol>
+          <li>El usuario abre <strong>Reportar</strong>.</li>
+          <li>La app toma una foto con intent de camara del sistema.</li>
+          <li>Se solicita ubicacion precisa con Fused Location Provider.</li>
+          <li>La foto se comprime a JPEG de maximo 1600 px.</li>
+          <li>Se sube la foto a Storage.</li>
+          <li>Si la subida fue exitosa, se escribe el documento en Firestore con geohash y timestamp de servidor.</li>
+          <li>El mapa y recientes actualizan por observacion de repositorio.</li>
+        </ol>
+
+        <h2>Por que existen fakes si Max desarrolla todo</h2>
+        <p>
+          Las interfaces no se conservaron por paralelismo, sino por
+          testabilidad. Los fakes permiten probar ViewModels, estados de UI y
+          filtros sin depender de red, Firebase, GPS o camara. Tambien permiten
+          una demo deterministica con datos sembrados de CDMX.
+        </p>
+
+        <h2>Escalabilidad del mapa</h2>
+        <p>
+          El mapa no descarga todos los reportes. Cada reporte guarda un
+          <code>geohash</code>; al mover el viewport se calculan rangos geohash,
+          se ejecutan consultas por rango y se filtran falsos positivos en el
+          cliente. Asi el costo de lectura escala con la zona visible, no con el
+          tamano total de la base.
+        </p>
+
+        <p class="source">Fuentes: <code>docs/implementation_plan.md</code>, <code>docs/adr/0001-anonymous-auth.md</code>, <code>docs/adr/0002-geohash-viewport-queries.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

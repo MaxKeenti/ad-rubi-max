@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Requerimientos | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a>
+    <a class="index-link" href="../../../index.html">Indice</a>
+  </header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link current" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link" href="06-glosario.html">Glosario</a></li><li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/implementation_plan.md seccion 1, docs/CONTEXT.md -->
+        <p class="eyebrow">02 - Requerimientos y suposiciones</p>
+        <h1>Alcance funcional</h1>
+        <p>
+          La version 1 se enfoca en reportar baches de forma rapida y consultar
+          los reportes en un mapa. Las decisiones de alcance buscan cubrir la
+          rubrica de geolocalizacion, mapas, camara y almacenamiento en Firebase
+          sin introducir flujos de cuenta o moderacion que no son esenciales para
+          la entrega.
+        </p>
+
+        <h2>Requerimientos funcionales</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Requerimiento</th><th>Prioridad</th></tr></thead>
+            <tbody>
+              <tr><td>RF-REP-01</td><td>Crear un reporte con foto tomada desde la camara del sistema.</td><td>Alta</td></tr>
+              <tr><td>RF-REP-02</td><td>Capturar ubicacion precisa al momento de crear el reporte.</td><td>Alta</td></tr>
+              <tr><td>RF-REP-03</td><td>Permitir severidad opcional: leve, moderado o severo.</td><td>Media</td></tr>
+              <tr><td>RF-REP-04</td><td>Permitir descripcion opcional de hasta 200 caracteres.</td><td>Media</td></tr>
+              <tr><td>RF-MAP-01</td><td>Mostrar reportes activos como marcadores de color por severidad.</td><td>Alta</td></tr>
+              <tr><td>RF-MAP-02</td><td>Consultar reportes por viewport usando geohash y filtro de falsos positivos.</td><td>Alta</td></tr>
+              <tr><td>RF-MAP-03</td><td>Alternar vista de zonas con heatmap ponderado por severidad.</td><td>Alta</td></tr>
+              <tr><td>RF-DET-01</td><td>Mostrar detalle con foto, severidad, descripcion, fecha relativa y confirmaciones.</td><td>Alta</td></tr>
+              <tr><td>RF-DET-02</td><td>Confirmar un reporte una vez por usuario anonimo.</td><td>Media</td></tr>
+              <tr><td>RF-DET-03</td><td>Permitir borrado logico del propio reporte durante 24 horas.</td><td>Media</td></tr>
+              <tr><td>RF-LIS-01</td><td>Mostrar lista de recientes ordenada por fecha de servidor.</td><td>Media</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Requerimientos no funcionales</h2>
+        <ul>
+          <li>Los secretos locales, Maps API key y credenciales de firma no se commitean.</li>
+          <li>Las reglas de Firestore y Storage deben bloquear escrituras fuera de contrato.</li>
+          <li>La app debe poder leerse sin permiso de ubicacion: mapa, zonas, recientes y detalle siguen funcionando.</li>
+          <li>La imagen se comprime antes de subirla para reducir costo y tiempo de envio.</li>
+          <li>El APK de entrega debe ser firmado y distribuido por Firebase App Distribution.</li>
+        </ul>
+
+        <h2>Suposiciones explicitas</h2>
+        <ol>
+          <li>El uso objetivo ocurre en contexto urbano con datos moviles disponibles.</li>
+          <li>La ubicacion se toma una sola vez en el momento del reporte; no hay rastreo en segundo plano.</li>
+          <li>No existe actor de autoridad dentro del sistema; la moderacion se hace desde Firebase Console.</li>
+          <li>El margen de error GPS de 5 a 15 metros en ciudad es aceptable y se registra como <code>accuracyMeters</code>.</li>
+        </ol>
+
+        <h2>Fuera de alcance v1</h2>
+        <p>
+          No se implementan reportes offline persistentes, categorias distintas
+          de bache, edicion de reportes, retiro de confirmaciones, cuentas
+          durables, moderacion in-app, ajuste manual de pin, clustering en
+          servidor ni estado de reparacion.
+        </p>
+
+        <p class="source">Fuentes: <code>docs/implementation_plan.md</code>, <code>docs/CONTEXT.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

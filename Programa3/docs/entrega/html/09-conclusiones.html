@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conclusiones | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a><a class="index-link" href="../../../index.html">Indice</a></header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link" href="06-glosario.html">Glosario</a></li><li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link current" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/implementation_plan.md, docs/grilling-session-2026-06-11.md, docs/work-division.md -->
+        <p class="eyebrow">09 - Conclusiones</p>
+        <h1>Resultado de la implementacion</h1>
+        <p>
+          BacheWatch demuestra una aplicacion movil con camara, geolocalizacion,
+          mapas, almacenamiento remoto y reglas de seguridad. El valor principal
+          esta en capturar datos confiables desde el lugar del bache: foto,
+          coordenada, precision GPS y hora de servidor.
+        </p>
+
+        <h2>Logros</h2>
+        <ul>
+          <li>Se implemento un flujo de reporte completo con foto, ubicacion, severidad, descripcion y envio remoto.</li>
+          <li>El mapa usa marcadores por severidad y una capa de zonas ponderada.</li>
+          <li>La consulta de reportes usa geohash para evitar lecturas de toda la coleccion.</li>
+          <li>Las reglas de Firestore y Storage estan probadas con emuladores y desplegadas.</li>
+          <li>El release esta firmado, subido a App Distribution y disponible como APK de respaldo.</li>
+        </ul>
+
+        <h2>Limites aceptados</h2>
+        <ul>
+          <li>No hay reportes offline persistentes; si falla la red, el usuario reintenta desde la pantalla.</li>
+          <li>No hay moderacion dentro de la app; se asume administracion manual desde Firebase Console.</li>
+          <li>Anonymous Auth identifica instalaciones, no personas.</li>
+          <li>La app no maneja estados de reparacion ni comunicacion con autoridades.</li>
+        </ul>
+
+        <h2>Trabajo futuro</h2>
+        <ul>
+          <li>Agregar categorias de desperfectos viales.</li>
+          <li>Permitir vinculacion de cuenta anonima a Google o correo.</li>
+          <li>Crear moderacion in-app y reporte de abuso.</li>
+          <li>Agregar clustering o tiles de servidor cuando el volumen sea alto.</li>
+          <li>Generar thumbnails server-side para listados mas ligeros.</li>
+          <li>Agregar flujo de "reparado" si aparece un actor institucional.</li>
+        </ul>
+
+        <h2>Evaluacion del enfoque</h2>
+        <p>
+          La decision mas importante fue mantener el alcance cerrado. En lugar de
+          construir una plataforma civica completa, la app resuelve el nucleo:
+          evidencia, coordenada, mapa y consulta. Esa separacion hace que el
+          proyecto sea verificable, testeable y defendible dentro del calendario.
+        </p>
+
+        <p class="source">Fuentes: <code>docs/implementation_plan.md</code>, <code>docs/grilling-session-2026-06-11.md</code>, <code>docs/work-division.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

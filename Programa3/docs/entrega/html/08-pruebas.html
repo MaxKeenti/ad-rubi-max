@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Plan y resultados de pruebas | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a><a class="index-link" href="../../../index.html">Indice</a></header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link" href="06-glosario.html">Glosario</a></li><li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link current" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/implementation_plan.md seccion 6, docs/guia-pruebas-melanie.md, docs/tasks/12-max-rules-emulator-suite.md, docs/tasks/13-max-unit-tests.md, docs/tasks/17-melanie-release-gate.md -->
+        <p class="eyebrow">08 - Plan y resultados de pruebas</p>
+        <h1>Automatizacion y prueba de campo</h1>
+        <p>
+          La estrategia separa lo que puede probar Max con codigo de lo que debe
+          validar Melanie en un telefono real. Las reglas de seguridad y los
+          ViewModels se prueban automaticamente; GPS, camara, datos moviles y
+          distribucion se prueban manualmente.
+        </p>
+
+        <h2>Resultados actuales</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Suite</th><th>Comando</th><th>Resultado</th></tr></thead>
+            <tbody>
+              <tr><td>Unit tests Android</td><td><code>./gradlew testDebugUnitTest</code></td><td><span class="status ok">Pasa</span></td></tr>
+              <tr><td>Rules emulator</td><td><code>firebase emulators:exec --only firestore,storage "npm --prefix tests/rules test"</code></td><td><span class="status ok">Pasa 16/16</span></td></tr>
+              <tr><td>Release build</td><td><code>./gradlew clean assembleRelease</code></td><td><span class="status ok">Pasa</span></td></tr>
+              <tr><td>Firma APK</td><td><code>apksigner verify --print-certs docs/entrega/app-release.apk</code></td><td><span class="status ok">V2 verificada</span></td></tr>
+              <tr><td>Guia de campo</td><td><code>docs/guia-pruebas-melanie.md</code></td><td><span class="status todo">Pendiente Melanie</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Cobertura automatica</h2>
+        <ul>
+          <li>Filtro de viewport y falsos positivos de geohash.</li>
+          <li>Estados de ViewModel para mapa y reporte contra fakes.</li>
+          <li>Crear reporte con forma valida y denegar formas invalidas.</li>
+          <li>Denegar <code>createdBy</code> distinto de <code>auth.uid</code>.</li>
+          <li>Confirmacion uid-keyed; update/delete denegados.</li>
+          <li>Incrementar <code>confirmCount</code> en 1 permitido; en 2 denegado.</li>
+          <li>Borrado logico solo por autor y antes de 24 horas.</li>
+          <li>Storage solo acepta JPEG autenticado dentro del limite.</li>
+        </ul>
+
+        <h2>Guia de campo de Melanie</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Caso</th><th>Objetivo</th><th>Estado</th></tr></thead>
+            <tbody>
+              <tr><td>Instalacion App Distribution</td><td>Probar invitacion, cuenta Google correcta e instalacion.</td><td><span class="status todo">Pendiente</span></td></tr>
+              <tr><td>Flujo completo en calle</td><td>Camara, GPS, datos moviles, envio y marcador nuevo.</td><td><span class="status todo">Pendiente</span></td></tr>
+              <tr><td>Soft accuracy gate</td><td>Ver advertencia por baja precision sin bloquear guardado.</td><td><span class="status todo">Pendiente</span></td></tr>
+              <tr><td>Modo avion y retry</td><td>Error, conservar formulario y reenviar sin duplicados.</td><td><span class="status todo">Pendiente</span></td></tr>
+              <tr><td>Permisos</td><td>Modo solo lectura y tratamiento de ubicacion aproximada.</td><td><span class="status todo">Pendiente</span></td></tr>
+              <tr><td>Confirmar</td><td>Contador +1, boton bloqueado y persistencia.</td><td><span class="status todo">Pendiente</span></td></tr>
+              <tr><td>Eliminar propio</td><td>Reporte propio menor a 24 h desaparece de mapa y recientes.</td><td><span class="status todo">Pendiente</span></td></tr>
+              <tr><td>Heatmap</td><td>Zonas severas pesan mas que zonas leves.</td><td><span class="status todo">Pendiente</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Evidencia pendiente de capturas</h2>
+        <p>
+          No se insertan imagenes inexistentes. Cuando Melanie guarde las
+          capturas en <code>docs/screenshots/</code>, esta seccion debe cambiar
+          los marcadores pendientes por imagenes embebidas.
+        </p>
+        <div class="evidence-grid">
+          <div class="evidence-placeholder">Pendiente: <code>release-gate-unit.png</code></div>
+          <div class="evidence-placeholder">Pendiente: <code>release-gate-rules.png</code></div>
+          <div class="evidence-placeholder">Pendiente: resultados completos de <code>guia-pruebas-melanie.md</code></div>
+        </div>
+
+        <p class="source">Fuentes: <code>docs/implementation_plan.md</code>, <code>docs/guia-pruebas-melanie.md</code>, <code>docs/tasks/12-max-rules-emulator-suite.md</code>, <code>docs/tasks/13-max-unit-tests.md</code>, <code>docs/tasks/17-melanie-release-gate.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

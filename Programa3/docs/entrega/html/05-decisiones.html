@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Decisiones arquitectonicas | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a><a class="index-link" href="../../../index.html">Indice</a></header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link current" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link" href="06-glosario.html">Glosario</a></li><li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/adr/0001-anonymous-auth.md, docs/adr/0002-geohash-viewport-queries.md -->
+        <p class="eyebrow">05 - Decisiones arquitectonicas</p>
+        <h1>ADR resumidos</h1>
+        <p>
+          Las decisiones principales se documentaron como ADR para explicar por
+          que el diseno usa identidad anonima y consultas geoespaciales por
+          geohash en lugar de soluciones mas simples pero menos escalables.
+        </p>
+
+        <h2>ADR-0001: Firebase Anonymous Auth</h2>
+        <p>
+          Se eligio autenticacion anonima porque el reporte debe ser sencillo y
+          no debe exigir registro. Aun asi, las reglas de seguridad necesitan un
+          <code>auth.uid</code> para restringir acciones: crear reportes propios,
+          borrar solo lo propio dentro de 24 horas y confirmar una vez por uid.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Alternativa</th><th>Resultado</th></tr></thead>
+            <tbody>
+              <tr><td>Correo y contrasena</td><td>Identidad durable, pero demasiada friccion para reportar un bache.</td></tr>
+              <tr><td>Google Sign-In</td><td>Menos friccion, pero agrega OAuth/SHA-1 y dependencia externa innecesaria para v1.</td></tr>
+              <tr><td>Sin autenticacion</td><td>Rechazada: abre Firestore/Storage a escrituras sin control.</td></tr>
+              <tr><td>Anonymous Auth</td><td>Aceptada: uid estable por instalacion, cero pantallas de login.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>ADR-0002: consultas por geohash</h2>
+        <p>
+          Firestore no permite filtrar nativamente por rangos simultaneos de
+          latitud y longitud. La app guarda un geohash por reporte y consulta
+          rangos por viewport. Despues filtra falsos positivos en cliente.
+        </p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Alternativa</th><th>Resultado</th></tr></thead>
+            <tbody>
+              <tr><td>Fetch-all</td><td>Trivial, pero no escalable: cada apertura del mapa lee toda la coleccion.</td></tr>
+              <tr><td>Geohash viewport</td><td>Aceptada: el costo crece con la zona visible y no con todo el dataset.</td></tr>
+              <tr><td>Tiles o clustering en servidor</td><td>Opcion v2 para escala ciudad completa; excesiva para la entrega.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Consecuencias asumidas</h2>
+        <ul>
+          <li>Un usuario que reinstala pierde el uid anterior y no puede borrar reportes pasados.</li>
+          <li>El mapa ejecuta varias consultas de rango por viewport, con debounce y filtro posterior.</li>
+          <li>El esquema queda preparado para migrar a cuentas reales o clustering sin rehacer los reportes.</li>
+        </ul>
+
+        <p class="source">Fuentes: <code>docs/adr/0001-anonymous-auth.md</code>, <code>docs/adr/0002-geohash-viewport-queries.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

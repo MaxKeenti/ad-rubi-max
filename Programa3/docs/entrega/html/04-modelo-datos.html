@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Modelo de datos | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a><a class="index-link" href="../../../index.html">Indice</a></header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link current" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link" href="06-glosario.html">Glosario</a></li><li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/implementation_plan.md secciones 2 y 3, docs/CONTEXT.md -->
+        <p class="eyebrow">04 - Modelo de datos</p>
+        <h1>Firestore y Storage</h1>
+        <p>
+          El modelo conserva solo lo necesario para una observacion de bache:
+          evidencia visual, coordenadas, severidad opcional, descripcion
+          opcional, identidad anonima y metadatos de confirmacion/borrado.
+        </p>
+
+        <h2>Coleccion principal</h2>
+        <pre><code>reportes/{reporteId}
+  lat, lng: Double
+  geohash: String
+  accuracyMeters: Double
+  severidad: String?        # leve | moderado | severo
+  descripcion: String?      # max 200 caracteres
+  fotoPath: String          # reportes/{reporteId}.jpg
+  fotoUrl: String
+  createdBy: String         # Firebase anonymous uid
+  confirmCount: Long
+  serverWrittenAt: Timestamp
+  deletedAt: Timestamp?
+  deletedBy: String?</code></pre>
+
+        <h2>Subcoleccion de confirmaciones</h2>
+        <pre><code>reportes/{reporteId}/confirmaciones/{uid}
+  confirmedAt: Timestamp</code></pre>
+        <p>
+          El documento usa el uid como ID. Esto impide confirmar dos veces desde
+          la misma instalacion y evita una consulta adicional solo para saber si
+          el usuario ya confirmo.
+        </p>
+
+        <h2>Storage</h2>
+        <p>
+          Cada foto se guarda como <code>reportes/{reporteId}.jpg</code>. La app
+          comprime a JPEG con lado largo maximo de 1600 px antes de subir. El
+          orden de escritura es intencional: primero Storage, despues Firestore.
+          Asi no se crea un reporte que apunte a una foto inexistente.
+        </p>
+
+        <h2>Reglas principales</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Recurso</th><th>Regla</th><th>Motivo</th></tr></thead>
+            <tbody>
+              <tr><td><code>reportes</code> create</td><td>Solo firmado y <code>createdBy == auth.uid</code>, con forma valida.</td><td>Evita crear reportes a nombre de otro uid.</td></tr>
+              <tr><td><code>reportes</code> update</td><td>Solo borrar logicamente por autor dentro de 24 h, o incrementar <code>confirmCount</code> exactamente en 1.</td><td>Reportes inmutables salvo operaciones permitidas.</td></tr>
+              <tr><td><code>reportes</code> delete</td><td>Denegado al cliente.</td><td>No hay borrado fisico desde app.</td></tr>
+              <tr><td><code>confirmaciones</code></td><td>Create si el doc ID es <code>auth.uid</code>; update/delete denegados.</td><td>Una confirmacion es historica.</td></tr>
+              <tr><td><code>Storage</code></td><td>Write firmado, JPEG y tamano controlado; lectura firmada.</td><td>Protege costo y evita archivos arbitrarios.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout warn">
+          <strong>Brecha residual aceptada.</strong>
+          Las reglas permiten incrementar <code>confirmCount</code> sin validar
+          con <code>getAfter()</code> que exista la confirmacion del mismo batch.
+          Se documento como riesgo menor porque el impacto seria inflar un
+          contador, no tomar control de datos sensibles.
+        </div>
+
+        <p class="source">Fuentes: <code>docs/implementation_plan.md</code>, <code>docs/CONTEXT.md</code>, <code>firestore.rules</code>, <code>storage.rules</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

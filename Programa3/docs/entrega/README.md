@@ -1,7 +1,13 @@
-# Entrega staging
+# Entrega HTML
 
-Put the verified signed APK here as `app-release.apk` after task 14's
-Firebase App Distribution upload succeeds.
+Entrega HTML for Programa3 lives in `html/`, with `../../index.html` as
+the portada/navigation page.
 
-Do not stage an unsigned APK or a release whose Maps API key has not
-been restricted with the release SHA-1.
+Current artifacts:
+
+- `app-release.apk` - signed release APK uploaded to App Distribution
+  release `31cvis3ha3p2o`.
+- `html/` - Spanish delivery sections derived from the canonical docs.
+
+Do not replace the APK after Melanie runs the release gate; the delivery
+APK must be the same build she tested.

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resumen ejecutivo | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../../../index.html" aria-label="Indice Programa3">
+      <span class="brand-mark">BW</span>
+      <span><strong>BacheWatch</strong><small>Entrega Programa3</small></span>
+    </a>
+    <a class="index-link" href="../../../index.html">Indice</a>
+  </header>
+  <div class="site-layout">
+    <aside class="sidebar" aria-label="Navegacion de entrega">
+      <section class="nav-group"><h2>Entrega</h2><ul>
+        <li><a class="nav-link" href="../../../index.html">Portada</a></li>
+        <li><a class="nav-link current" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li>
+        <li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li>
+        <li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li>
+        <li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li>
+        <li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li>
+        <li><a class="nav-link" href="06-glosario.html">Glosario</a></li>
+        <li><a class="nav-link" href="07-manual-usuario.html">Manual de usuario</a></li>
+        <li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li>
+        <li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li>
+        <li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+      </ul></section>
+    </aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/implementation_plan.md, Programa3/README.md, docs/work-division.md -->
+        <p class="eyebrow">01 - Resumen ejecutivo</p>
+        <h1>BacheWatch</h1>
+        <p>
+          BacheWatch es una aplicacion Android ciudadana para registrar baches
+          con evidencia fotografica y ubicacion GPS automatica. El objetivo no
+          es crear ordenes de trabajo ni sustituir a una autoridad vial, sino
+          capturar observaciones verificables y mostrarlas en un mapa util para
+          consultar puntos y zonas de mayor incidencia.
+        </p>
+        <div class="metric-grid">
+          <div class="metric"><strong>Reporte</strong><span>Foto + GPS + severidad opcional</span></div>
+          <div class="metric"><strong>Mapa</strong><span>Marcadores por severidad y heatmap</span></div>
+          <div class="metric"><strong>Consulta</strong><span>Recientes, detalle y confirmaciones</span></div>
+          <div class="metric"><strong>Entrega</strong><span>APK firmado y App Distribution</span></div>
+        </div>
+
+        <h2>Problema</h2>
+        <p>
+          Los baches se reportan de forma dispersa y muchas veces sin evidencia
+          visual o coordenadas confiables. En una aplicacion movil, pedir que el
+          usuario escriba una direccion o ajuste manualmente un pin agrega
+          friccion y reduce la calidad del dato.
+        </p>
+
+        <h2>Solucion propuesta</h2>
+        <p>
+          La app solicita una foto con la camara del sistema, captura una
+          ubicacion precisa en ese momento, comprime la imagen y guarda el
+          reporte en Firebase Storage y Firestore. Otros usuarios pueden ver el
+          reporte en el mapa, confirmar que sigue ahi, revisar reportes recientes
+          o alternar una vista de zonas con mayor incidencia.
+        </p>
+
+        <h2>Stack tecnico</h2>
+        <ul>
+          <li>Kotlin, Jetpack Compose, Material 3 y Navigation Compose.</li>
+          <li>Hilt para inyeccion de dependencias y ViewModels testeables.</li>
+          <li>Firebase Anonymous Auth, Firestore y Storage.</li>
+          <li>Google Maps SDK, maps-compose, android-maps-utils y geohash.</li>
+          <li>Pruebas unitarias de ViewModels/filtros y suite de reglas con emuladores Firebase.</li>
+        </ul>
+
+        <h2>Estado del proyecto</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Area</th><th>Estado</th><th>Evidencia</th></tr></thead>
+            <tbody>
+              <tr><td>Aplicacion Android</td><td><span class="status ok">Lista</span></td><td><code>./gradlew clean assembleRelease</code> pasa.</td></tr>
+              <tr><td>Reglas Firebase</td><td><span class="status ok">Desplegadas</span></td><td>Firestore/Storage rules e indices fueron desplegados a <code>bachewatch-upiicsa</code>.</td></tr>
+              <tr><td>APK firmado</td><td><span class="status ok">Listo</span></td><td><code>docs/entrega/app-release.apk</code>.</td></tr>
+              <tr><td>Pruebas automaticas</td><td><span class="status ok">Verdes</span></td><td>Unit tests y reglas Firebase pasan.</td></tr>
+              <tr><td>Pruebas en calle</td><td><span class="status todo">Melanie</span></td><td>Se ejecutan con telefono real desde la guia manual.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p class="source">Fuentes: <code>docs/implementation_plan.md</code>, <code>Programa3/README.md</code>, <code>docs/work-division.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual de usuario | BacheWatch</title>
+  <link rel="stylesheet" href="../../../assets/site.css">
+</head>
+<body>
+  <header class="site-header"><a class="brand" href="../../../index.html"><span class="brand-mark">BW</span><span><strong>BacheWatch</strong><small>Entrega Programa3</small></span></a><a class="index-link" href="../../../index.html">Indice</a></header>
+  <div class="site-layout">
+    <aside class="sidebar"><section class="nav-group"><h2>Entrega</h2><ul>
+      <li><a class="nav-link" href="../../../index.html">Portada</a></li><li><a class="nav-link" href="01-resumen-ejecutivo.html">Resumen ejecutivo</a></li><li><a class="nav-link" href="02-requerimientos.html">Requerimientos</a></li><li><a class="nav-link" href="03-arquitectura.html">Arquitectura</a></li><li><a class="nav-link" href="04-modelo-datos.html">Modelo de datos</a></li><li><a class="nav-link" href="05-decisiones.html">Decisiones</a></li><li><a class="nav-link" href="06-glosario.html">Glosario</a></li><li><a class="nav-link current" href="07-manual-usuario.html">Manual de usuario</a></li><li><a class="nav-link" href="08-pruebas.html">Pruebas</a></li><li><a class="nav-link" href="09-conclusiones.html">Conclusiones</a></li><li><a class="nav-link" href="10-distribucion.html">Distribucion</a></li>
+    </ul></section></aside>
+    <main class="content">
+      <article class="document">
+        <!-- Fuente canonical: docs/guia-pruebas-melanie.md, docs/CONTEXT.md -->
+        <p class="eyebrow">07 - Manual de usuario</p>
+        <h1>Uso de BacheWatch</h1>
+        <p>
+          Este manual describe el flujo normal de instalacion, reporte y consulta
+          para un usuario final. Las capturas se integran desde
+          <code>docs/screenshots/</code> cuando Melanie termine la prueba en
+          telefono real.
+        </p>
+
+        <h2>Instalacion</h2>
+        <ol>
+          <li>Abrir el enlace de Firebase App Distribution enviado al correo de prueba.</li>
+          <li>Aceptar la invitacion con la misma cuenta Google usada por Google Play Services en el telefono.</li>
+          <li>Instalar BacheWatch y abrir la app.</li>
+          <li>Confirmar que aparece el mapa con acciones <strong>Reportar</strong>, <strong>Recientes</strong> y <strong>Zonas</strong>.</li>
+        </ol>
+
+        <h2>Crear un reporte</h2>
+        <ol>
+          <li>En el mapa, tocar <strong>Reportar</strong>.</li>
+          <li>Conceder ubicacion precisa si Android la solicita.</li>
+          <li>Tocar <strong>Tomar foto</strong>, fotografiar el bache y aceptar la foto.</li>
+          <li>Esperar la tarjeta de ubicacion capturada. Si la precision es baja, la app advierte pero permite guardar.</li>
+          <li>Elegir severidad si se desea: leve, moderado o severo.</li>
+          <li>Agregar una descripcion opcional de maximo 200 caracteres.</li>
+          <li>Tocar <strong>Enviar reporte</strong>. Al terminar, la app regresa al mapa y muestra el nuevo marcador.</li>
+        </ol>
+
+        <h2>Consultar reportes</h2>
+        <ul>
+          <li>En el mapa, los marcadores muestran color segun severidad.</li>
+          <li>Al tocar un marcador, se abre el detalle con foto, descripcion, fecha relativa y confirmaciones.</li>
+          <li>En <strong>Recientes</strong> se ven los ultimos reportes activos con foto y contador.</li>
+          <li>El chip <strong>Zonas</strong> alterna el heatmap de mayor incidencia.</li>
+        </ul>
+
+        <h2>Confirmar y eliminar</h2>
+        <p>
+          En el detalle, tocar <strong>Confirmar</strong> registra que el bache
+          sigue ahi. Despues el boton queda bloqueado para ese usuario. Si el
+          reporte fue creado en la misma instalacion y tiene menos de 24 horas,
+          aparece <strong>Eliminar</strong>; al confirmar, desaparece de mapa y
+          recientes.
+        </p>
+
+        <h2>Permisos</h2>
+        <p>
+          Si el usuario niega ubicacion, la app sigue funcionando como consulta.
+          Para reportar, debe conceder ubicacion precisa; ubicacion aproximada se
+          trata como insuficiente porque no sirve para ubicar un bache.
+        </p>
+
+        <h2>Capturas de la entrega</h2>
+        <div class="evidence-grid">
+          <div class="evidence-placeholder">Pendiente: mapa con marcadores<br><code>10-mapa-marcadores.png</code></div>
+          <div class="evidence-placeholder">Pendiente: heatmap Zonas<br><code>10-heatmap.png</code></div>
+          <div class="evidence-placeholder">Pendiente: flujo Reportar<br><code>10-reportar-flow.png</code></div>
+          <div class="evidence-placeholder">Pendiente: detalle Confirmar<br><code>10-detalle-confirmar.png</code></div>
+          <div class="evidence-placeholder">Pendiente: Recientes<br><code>10-recientes.png</code></div>
+          <div class="evidence-placeholder">Pendiente: permisos<br><code>10-permisos.png</code></div>
+        </div>
+
+        <p class="source">Fuentes: <code>docs/guia-pruebas-melanie.md</code>, <code>docs/CONTEXT.md</code>.</p>
+      </article>
+    </main>
+  </div>
+  <script src="../../../assets/theme.js"></script>
+</body>
+</html>
