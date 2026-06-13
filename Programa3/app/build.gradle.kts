@@ -1,3 +1,4 @@
+import java.io.File
 import java.util.Properties
 
 plugins {
@@ -20,6 +21,24 @@ val localProps = Properties().apply {
     if (f.exists()) f.inputStream().use { load(it) }
 }
 
+val releaseStoreFile = localProps.getProperty("RELEASE_STORE_FILE")
+val releaseStorePassword = localProps.getProperty("RELEASE_STORE_PASSWORD")
+val releaseKeyAlias = localProps.getProperty("RELEASE_KEY_ALIAS")
+val releaseKeyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD")
+val releaseSigningReady = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
+
+fun localFile(path: String): File =
+    if (path.startsWith("~/")) {
+        File(System.getProperty("user.home"), path.removePrefix("~/"))
+    } else {
+        rootProject.file(path)
+    }
+
 android {
     namespace = "com.example.bachewatch"
     compileSdk = 36
@@ -35,8 +54,22 @@ android {
         manifestPlaceholders["MAPS_API_KEY"] = localProps.getProperty("MAPS_API_KEY", "")
     }
 
+    signingConfigs {
+        if (releaseSigningReady) {
+            create("release") {
+                storeFile = localFile(releaseStoreFile!!)
+                storePassword = releaseStorePassword!!
+                keyAlias = releaseKeyAlias!!
+                keyPassword = releaseKeyPassword!!
+            }
+        }
+    }
+
     buildTypes {
         release {
+            if (releaseSigningReady) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -92,6 +125,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockito.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
