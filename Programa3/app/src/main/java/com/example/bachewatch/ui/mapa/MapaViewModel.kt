@@ -2,7 +2,9 @@ package com.example.bachewatch.ui.mapa
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.bachewatch.data.location.LocationProvider
 import com.example.bachewatch.data.model.GeoBounds
+import com.example.bachewatch.data.model.LocationFix
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.repository.ReporteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,10 +16,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MapaViewModel @Inject constructor(
     repository: ReporteRepository,
+    private val locationProvider: LocationProvider,
 ) : ViewModel() {
 
     private val viewport = MutableStateFlow(GeoBounds.CDMX)
@@ -27,6 +31,12 @@ class MapaViewModel @Inject constructor(
 
     private val _modoHeatmap = MutableStateFlow(false)
     val modoHeatmap: StateFlow<Boolean> = _modoHeatmap
+
+    private val _ubicacion = MutableStateFlow<LocationFix?>(null)
+    val ubicacion: StateFlow<LocationFix?> = _ubicacion
+
+    private val _ubicacionError = MutableStateFlow<String?>(null)
+    val ubicacionError: StateFlow<String?> = _ubicacionError
 
     // flatMapLatest cancels the previous viewport's listeners on pan —
     // the intended lifecycle (the screen wires camera-idle to this).
@@ -44,5 +54,18 @@ class MapaViewModel @Inject constructor(
 
     fun toggleModoHeatmap() {
         _modoHeatmap.value = !_modoHeatmap.value
+    }
+
+    fun obtenerUbicacion() {
+        viewModelScope.launch {
+            locationProvider.fixActual()
+                .onSuccess {
+                    _ubicacion.value = it
+                    _ubicacionError.value = null
+                }
+                .onFailure { e ->
+                    _ubicacionError.value = e.message ?: "No se pudo obtener tu ubicacion"
+                }
+        }
     }
 }
