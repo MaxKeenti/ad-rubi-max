@@ -1,7 +1,7 @@
 /*
  * Traceability to implementation_plan.md §3 / task 12:
  * - reportes create: signed-in caller, createdBy == uid, confirmCount == 0,
- *   server timestamp, geo/photo fields, severidad enum, descripcion <= 200.
+ *   server timestamp, geo/photo fields, tipo enum, severidad enum, descripcion <= 200.
  * - reportes update: exactly confirmCount +1, or creator soft-delete within 24 h.
  * - reportes delete: denied; unauthenticated reads: denied.
  * - confirmaciones/{uid}: uid must equal auth.uid, confirmedAt is server time,
@@ -52,6 +52,7 @@ function validCreate(overrides = {}) {
     lng: -99.0907,
     geohash: "9g3w81",
     accuracyMeters: 9.5,
+    tipo: "bache",
     severidad: "severo",
     descripcion: "Hundimiento grande frente a UPIICSA",
     fotoPath: "reportes/reporte-1.jpg",
@@ -69,6 +70,7 @@ function validSeed(overrides = {}) {
     lng: -99.0907,
     geohash: "9g3w81",
     accuracyMeters: 9.5,
+    tipo: "bache",
     severidad: "moderado",
     descripcion: "Bache junto al tope",
     fotoPath: "reportes/reporte-1.jpg",
@@ -114,6 +116,12 @@ describe("reportes create shape", () => {
     );
     await assertFails(
       setDoc(
+        doc(db("alice"), "reportes/bad-tipo"),
+        validCreate({ tipo: "fuga" }),
+      ),
+    );
+    await assertFails(
+      setDoc(
         doc(db("alice"), "reportes/bad-severidad"),
         validCreate({ severidad: "profundo" }),
       ),
@@ -133,6 +141,13 @@ describe("reportes create shape", () => {
         validCreate({ deletedAt: null }),
       ),
     );
+  });
+
+  test("tipo is optional for backwards-compatible bache documents", async () => {
+    const legacy = validCreate();
+    delete legacy.tipo;
+
+    await assertSucceeds(setDoc(doc(db("alice"), "reportes/legacy"), legacy));
   });
 });
 

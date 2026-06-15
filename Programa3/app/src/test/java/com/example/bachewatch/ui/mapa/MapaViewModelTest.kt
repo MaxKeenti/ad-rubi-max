@@ -5,6 +5,7 @@ import com.example.bachewatch.data.model.GeoBounds
 import com.example.bachewatch.data.model.LocationFix
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.example.bachewatch.data.repository.ReporteRepository
 import com.example.bachewatch.test.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -70,6 +71,7 @@ class MapaViewModelTest {
         override suspend fun crearReporte(
             fotoUri: Uri,
             fix: LocationFix,
+            tipo: TipoIncidencia,
             severidad: Severidad?,
             descripcion: String?,
         ): Result<String> = throw AssertionError("crearReporte is not used by MapaViewModel")

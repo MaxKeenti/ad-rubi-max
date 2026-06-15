@@ -1,12 +1,16 @@
 package com.example.bachewatch.data.repository.fake
 
+import android.net.Uri
 import com.example.bachewatch.data.auth.FakeSesionAnonima
+import com.example.bachewatch.data.model.LocationFix
+import com.example.bachewatch.data.model.TipoIncidencia
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.mockito.Mockito.mock
 
 class FakeReporteRepositoryTest {
 
@@ -38,5 +42,21 @@ class FakeReporteRepositoryTest {
         assertFalse("seed-01" in visibleIds)
         assertTrue(notOwnResult.exceptionOrNull() is SecurityException)
         assertTrue(ownExpiredResult.exceptionOrNull() is IllegalStateException)
+    }
+
+    @Test
+    fun `crearReporte stores the selected tipo`() = runTest {
+        val repository = FakeReporteRepository(FakeSesionAnonima())
+
+        val id = repository.crearReporte(
+            fotoUri = mock(Uri::class.java),
+            fix = LocationFix(lat = 19.40, lng = -99.10, accuracyMeters = 10.0),
+            tipo = TipoIncidencia.OTRO,
+            severidad = null,
+            descripcion = "Coladera sin tapa",
+        ).getOrThrow()
+
+        val created = repository.recientes().first().first { it.id == id }
+        assertEquals(TipoIncidencia.OTRO, created.tipo)
     }
 }

@@ -57,6 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.bachewatch.data.model.LocationFix
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.example.bachewatch.ui.theme.SeveridadModerado
 import java.io.File
 
@@ -113,7 +114,7 @@ fun ReportarScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reportar bache") },
+                title = { Text("Reportar problema") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
@@ -144,6 +145,17 @@ fun ReportarScreen(
                     onConceder = { permisoLauncher.launch(PERMISOS_UBICACION) },
                     onAjustes = { abrirAjustes(context) },
                 )
+            }
+
+            Text("Tipo de problema", style = MaterialTheme.typography.titleSmall)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TipoIncidencia.entries.forEach { tipo ->
+                    FilterChip(
+                        selected = state.tipo == tipo,
+                        onClick = { viewModel.onTipo(tipo) },
+                        label = { Text(tipo.etiqueta) },
+                    )
+                }
             }
 
             Text("Severidad (opcional)", style = MaterialTheme.typography.titleSmall)
@@ -202,7 +214,7 @@ private fun FotoCard(fotoUri: Uri?, onTomarFoto: () -> Unit) {
             if (fotoUri != null) {
                 AsyncImage(
                     model = fotoUri,
-                    contentDescription = "Foto del bache",
+                    contentDescription = "Foto del reporte",
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(4f / 3f)
@@ -316,7 +328,7 @@ private fun tienePermisoFino(context: Context): Boolean =
 
 /** A fresh cacheDir Uri the system camera can write to (no storage perms). */
 private fun crearUriFoto(context: Context): Uri {
-    val archivo = File.createTempFile("bache_", ".jpg", context.cacheDir)
+    val archivo = File.createTempFile("reporte_", ".jpg", context.cacheDir)
     return FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)
 }
 

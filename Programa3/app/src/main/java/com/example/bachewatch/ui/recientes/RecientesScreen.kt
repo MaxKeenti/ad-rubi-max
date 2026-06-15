@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.example.bachewatch.data.util.tiempoRelativo
 import com.example.bachewatch.ui.detalle.DetalleReporteSheet
 import com.example.bachewatch.ui.detalle.DetalleViewModel
@@ -161,7 +162,7 @@ private fun ReporteRow(
         ) {
             AsyncImage(
                 model = reporte.fotoUrl,
-                contentDescription = "Foto del bache",
+                contentDescription = "Foto del reporte",
                 modifier = Modifier
                     .size(72.dp)
                     .clip(RoundedCornerShape(8.dp)),
@@ -172,6 +173,7 @@ private fun ReporteRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    TipoBadge(reporte.tipo)
                     SeveridadBadge(reporte.severidad)
                     Text(
                         tiempoRelativo(reporte.serverWrittenAt),
@@ -190,6 +192,21 @@ private fun ReporteRow(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun TipoBadge(tipo: TipoIncidencia) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = RoundedCornerShape(6.dp),
+    ) {
+        Text(
+            tipo.etiqueta,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelMedium,
+        )
     }
 }
 

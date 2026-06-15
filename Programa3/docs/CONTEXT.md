@@ -22,22 +22,22 @@ photographed it and captured the device's GPS fix at that moment. It is
 
 ### Required vs optional fields
 
-Photo and coordinates are required — they are captured, not typed.
-`severidad` (leve / moderado / severo, one-tap chips, no default) and
-`descripcion` (≤200 chars) are optional and nullable; they never block
-save. Same philosophy as Programa1's optional price.
-
-"Otros desperfectos" (coladeras, grietas) are **out of scope for v1**.
-The schema is forward-compatible via a future `category` field where
-absent = bache.
+Photo, coordinates, and `tipo` are required — photo/coordinates are
+captured, while `tipo` is selected from one-tap chips (`bache` default,
+`otro` for other street issues). `severidad` (leve / moderado / severo,
+one-tap chips, no default) and `descripcion` (≤200 chars) are optional
+and nullable; they never block save. Same philosophy as Programa1's
+optional price. Older documents without `tipo` are interpreted as
+`bache`.
 
 ### Where and when it gets created
 
-**At the pothole, live.** The flow is: open app → system camera captures
-the photo → the GPS fix taken at that same visit is attached → save.
+**At the problem location, live.** The flow is: open app → system camera
+captures the photo → the GPS fix taken at that same visit is attached →
+save.
 There is no gallery picker and no pin-drop; a coordinate on a Reporte was
 always measured by a device standing at the pothole. "I remember a
-pothole on my street" is explicitly unsupported.
+problem on my street" is explicitly unsupported.
 
 **Reporting requires connectivity.** The target context is urban streets
 with mobile data. A failed submit keeps the composed report on screen

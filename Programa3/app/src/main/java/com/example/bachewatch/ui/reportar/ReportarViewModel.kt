@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.bachewatch.data.location.LocationProvider
 import com.example.bachewatch.data.model.LocationFix
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.example.bachewatch.data.repository.ReporteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -20,6 +21,7 @@ data class ReportarUiState(
     val fix: LocationFix? = null,
     val buscandoFix: Boolean = false,
     val fixError: String? = null,
+    val tipo: TipoIncidencia = TipoIncidencia.BACHE,
     val severidad: Severidad? = null,
     val descripcion: String = "",
     val enviando: Boolean = false,
@@ -28,7 +30,7 @@ data class ReportarUiState(
 ) {
     val fotoLista: Boolean get() = fotoUri != null
 
-    /** Foto + fix are both mandatory (Q3); severidad/descripción never gate. */
+    /** Foto + fix are both mandatory (Q3); tipo/severidad/descripción never gate. */
     val puedeEnviar: Boolean get() = fotoUri != null && fix != null && !enviando && !enviado
 }
 
@@ -68,6 +70,10 @@ class ReportarViewModel @Inject constructor(
         _uiState.update { it.copy(fotoUri = uri) }
     }
 
+    fun onTipo(tipo: TipoIncidencia) {
+        _uiState.update { it.copy(tipo = tipo) }
+    }
+
     /** Re-tap deselects: null severidad must stay reachable (Q6). */
     fun onSeveridad(severidad: Severidad) {
         _uiState.update {
@@ -88,6 +94,7 @@ class ReportarViewModel @Inject constructor(
             repository.crearReporte(
                 fotoUri = fotoUri,
                 fix = fix,
+                tipo = estado.tipo,
                 severidad = estado.severidad,
                 descripcion = estado.descripcion.ifBlank { null },
             )

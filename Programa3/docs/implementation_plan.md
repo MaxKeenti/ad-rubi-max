@@ -35,7 +35,7 @@ mirroring Programa2's scaffold.
 ### Explicitly out of scope (named v2 items)
 
 - Offline reporting (online-required; in-place retry only — Q7).
-- Categories beyond bache; edit flows; un-confirm; "Mis reportes";
+- Edit flows; un-confirm; "Mis reportes";
   in-app moderation; pin-adjust; thumbnails (Resize extension);
   server-side clustering; durable accounts (anonymous-link upgrade).
 
@@ -51,10 +51,11 @@ mirroring Programa2's scaffold.
 
 ---
 
-## 2. Data model (frozen 2026-06-11)
+## 2. Data model (updated 2026-06-15)
 
 ```text
 reportes/{reporteId}
+  tipo: String               # "bache" | "otro"; absent legacy = bache
   lat, lng: Double           # machine-measured at capture, immutable
   geohash: String            # ADR-0002; written once
   accuracyMeters: Double     # soft gate: flagged, not rejected

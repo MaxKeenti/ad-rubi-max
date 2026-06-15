@@ -5,6 +5,7 @@ import com.example.bachewatch.data.model.GeoBounds
 import com.example.bachewatch.data.model.LocationFix
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -23,6 +24,7 @@ interface ReporteRepository {
     suspend fun crearReporte(
         fotoUri: Uri,
         fix: LocationFix,
+        tipo: TipoIncidencia,
         severidad: Severidad?,
         descripcion: String?,
     ): Result<String>

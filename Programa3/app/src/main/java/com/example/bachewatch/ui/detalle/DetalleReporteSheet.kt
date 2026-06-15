@@ -45,6 +45,7 @@ import coil.compose.AsyncImage
 import com.example.bachewatch.data.auth.SesionAnonima
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.example.bachewatch.data.repository.ReporteRepository
 import com.example.bachewatch.data.util.tiempoRelativo
 import com.example.bachewatch.ui.theme.colorDeSeveridad
@@ -242,7 +243,7 @@ fun DetalleReporteSheet(
         ) {
             AsyncImage(
                 model = reporte.fotoUrl,
-                contentDescription = "Foto del bache",
+                contentDescription = "Foto del reporte",
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(4f / 3f)
@@ -255,6 +256,7 @@ fun DetalleReporteSheet(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                TipoBadge(reporte.tipo)
                 SeveridadBadge(reporte.severidad)
                 Text(
                     tiempoRelativo(reporte.serverWrittenAt),
@@ -345,6 +347,21 @@ fun DetalleReporteSheet(
                     Text("Cancelar")
                 }
             },
+        )
+    }
+}
+
+@Composable
+private fun TipoBadge(tipo: TipoIncidencia) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = RoundedCornerShape(6.dp),
+    ) {
+        Text(
+            tipo.etiqueta,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelMedium,
         )
     }
 }

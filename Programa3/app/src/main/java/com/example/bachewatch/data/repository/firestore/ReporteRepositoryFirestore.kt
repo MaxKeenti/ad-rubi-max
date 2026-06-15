@@ -7,6 +7,7 @@ import com.example.bachewatch.data.model.GeoBounds
 import com.example.bachewatch.data.model.LocationFix
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.example.bachewatch.data.repository.ReporteRepository
 import com.example.bachewatch.data.util.FotoCompressor
 import com.firebase.geofire.GeoFireUtils
@@ -41,6 +42,7 @@ class ReporteRepositoryFirestore @Inject constructor(
     override suspend fun crearReporte(
         fotoUri: Uri,
         fix: LocationFix,
+        tipo: TipoIncidencia,
         severidad: Severidad?,
         descripcion: String?,
     ): Result<String> = runCatching {
@@ -62,6 +64,7 @@ class ReporteRepositoryFirestore @Inject constructor(
         val geohash = GeoFireUtils.getGeoHashForLocation(GeoLocation(fix.lat, fix.lng))
 
         val data = buildMap<String, Any?> {
+            put("tipo", tipo.valor)
             put("lat", fix.lat)
             put("lng", fix.lng)
             put("geohash", geohash)
@@ -181,6 +184,7 @@ class ReporteRepositoryFirestore @Inject constructor(
         val lng = getDouble("lng") ?: return null
         return Reporte(
             id = id,
+            tipo = TipoIncidencia.fromValor(getString("tipo")),
             lat = lat,
             lng = lng,
             geohash = getString("geohash").orEmpty(),

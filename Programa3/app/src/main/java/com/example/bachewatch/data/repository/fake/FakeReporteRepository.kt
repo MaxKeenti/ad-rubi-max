@@ -7,6 +7,7 @@ import com.example.bachewatch.data.model.GeoBounds
 import com.example.bachewatch.data.model.LocationFix
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.example.bachewatch.data.repository.ReporteRepository
 import com.google.firebase.Timestamp
 import java.util.UUID
@@ -36,6 +37,7 @@ class FakeReporteRepository @Inject constructor(
     override suspend fun crearReporte(
         fotoUri: Uri,
         fix: LocationFix,
+        tipo: TipoIncidencia,
         severidad: Severidad?,
         descripcion: String?,
     ): Result<String> {
@@ -43,6 +45,7 @@ class FakeReporteRepository @Inject constructor(
         val id = UUID.randomUUID().toString()
         val nuevo = Reporte(
             id = id,
+            tipo = tipo,
             lat = fix.lat,
             lng = fix.lng,
             geohash = "",

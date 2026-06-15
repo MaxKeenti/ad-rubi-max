@@ -7,6 +7,7 @@ import com.example.bachewatch.data.model.GeoBounds
 import com.example.bachewatch.data.model.LocationFix
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.example.bachewatch.data.repository.ReporteRepository
 import com.example.bachewatch.test.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred
@@ -65,6 +66,17 @@ class ReportarViewModelTest {
     }
 
     @Test
+    fun `tipo defaults to bache and can switch to otro`() {
+        val viewModel = ReportarViewModel(RecordingReporteRepository(), ControlledLocationProvider())
+
+        assertEquals(TipoIncidencia.BACHE, viewModel.uiState.value.tipo)
+
+        viewModel.onTipo(TipoIncidencia.OTRO)
+
+        assertEquals(TipoIncidencia.OTRO, viewModel.uiState.value.tipo)
+    }
+
+    @Test
     fun `severity can be deselected and description is truncated at two hundred characters`() {
         val viewModel = ReportarViewModel(RecordingReporteRepository(), ControlledLocationProvider())
 
@@ -92,14 +104,17 @@ class ReportarViewModelTest {
         locationProvider.complete(Result.success(fix))
         advanceUntilIdle()
         viewModel.onSeveridad(Severidad.MODERADO)
+        viewModel.onTipo(TipoIncidencia.OTRO)
         viewModel.onDescripcion("Frente a la entrada")
 
         viewModel.enviar()
         advanceUntilIdle()
 
         assertEquals(1, repository.crearCalls.size)
+        assertEquals(TipoIncidencia.OTRO, repository.crearCalls.single().tipo)
         assertEquals(fotoUri, viewModel.uiState.value.fotoUri)
         assertEquals(fix, viewModel.uiState.value.fix)
+        assertEquals(TipoIncidencia.OTRO, viewModel.uiState.value.tipo)
         assertEquals(Severidad.MODERADO, viewModel.uiState.value.severidad)
         assertEquals("Frente a la entrada", viewModel.uiState.value.descripcion)
         assertFalse(viewModel.uiState.value.enviando)
@@ -126,6 +141,7 @@ class ReportarViewModelTest {
         advanceUntilIdle()
 
         assertEquals(1, repository.crearCalls.size)
+        assertEquals(TipoIncidencia.BACHE, repository.crearCalls.single().tipo)
         assertFalse(viewModel.uiState.value.enviando)
         assertTrue(viewModel.uiState.value.enviado)
         assertFalse(viewModel.uiState.value.puedeEnviar)
@@ -148,6 +164,7 @@ class ReportarViewModelTest {
     private data class CrearCall(
         val fotoUri: Uri,
         val fix: LocationFix,
+        val tipo: TipoIncidencia,
         val severidad: Severidad?,
         val descripcion: String?,
     )
@@ -161,10 +178,11 @@ class ReportarViewModelTest {
         override suspend fun crearReporte(
             fotoUri: Uri,
             fix: LocationFix,
+            tipo: TipoIncidencia,
             severidad: Severidad?,
             descripcion: String?,
         ): Result<String> {
-            crearCalls += CrearCall(fotoUri, fix, severidad, descripcion)
+            crearCalls += CrearCall(fotoUri, fix, tipo, severidad, descripcion)
             return crearResult
         }
 

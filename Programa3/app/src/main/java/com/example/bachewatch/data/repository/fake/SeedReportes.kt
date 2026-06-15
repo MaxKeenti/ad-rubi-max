@@ -3,6 +3,7 @@ package com.example.bachewatch.data.repository.fake
 import com.example.bachewatch.data.auth.FakeSesionAnonima
 import com.example.bachewatch.data.model.Reporte
 import com.example.bachewatch.data.model.Severidad
+import com.example.bachewatch.data.model.TipoIncidencia
 import com.google.firebase.Timestamp
 import java.util.Date
 
@@ -25,10 +26,12 @@ internal fun seedReportes(): List<Reporte> {
         confirmaciones: Long,
         propio: Boolean = false,
         precision: Double = 12.0,
+        tipo: TipoIncidencia = TipoIncidencia.BACHE,
     ): Reporte {
         val id = "seed-%02d".format(n)
         return Reporte(
             id = id,
+            tipo = tipo,
             lat = lat,
             lng = lng,
             geohash = "", // fakes filter by lat/lng; the real impl writes one (task 06)
@@ -55,7 +58,7 @@ internal fun seedReportes(): List<Reporte> {
         reporte(5, 19.3556, -99.1626, Severidad.SEVERO,
             "Cráter en Av. Universidad, ya se llevó dos rines", 12.0, 7, precision = 6.0),
         reporte(6, 19.3960, -99.1530, null,
-            "Eje 5 Sur frente a la panadería", 5.0, 1),
+            "Coladera sin tapa en Eje 5 Sur", 5.0, 1, tipo = TipoIncidencia.OTRO),
         reporte(7, 19.4180, -99.1430, Severidad.MODERADO,
             null, 48.0, 3),
         reporte(8, 19.3570, -99.0550, Severidad.SEVERO,

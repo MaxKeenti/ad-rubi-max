@@ -12,9 +12,19 @@ service cloud.firestore {
         || severidad == "severo";
     }
 
+    function validTipo(tipo) {
+      return tipo == "bache"
+        || tipo == "otro";
+    }
+
     function descripcionValida(data) {
       return !data.keys().hasAny(["descripcion"])
         || (data.descripcion is string && data.descripcion.size() <= 200);
+    }
+
+    function tipoValido(data) {
+      return !data.keys().hasAny(["tipo"])
+        || (data.tipo is string && validTipo(data.tipo));
     }
 
     function severidadValida(data) {
@@ -29,6 +39,7 @@ service cloud.firestore {
           "lng",
           "geohash",
           "accuracyMeters",
+          "tipo",
           "severidad",
           "descripcion",
           "fotoPath",
@@ -57,6 +68,7 @@ service cloud.firestore {
         && data.createdBy == request.auth.uid
         && data.confirmCount == 0
         && data.serverWrittenAt == request.time
+        && tipoValido(data)
         && severidadValida(data)
         && descripcionValida(data);
     }

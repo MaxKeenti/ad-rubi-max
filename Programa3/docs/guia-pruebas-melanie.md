@@ -31,19 +31,20 @@ en la columna **Evidencia**. En **Resultado** marca `OK`, `Falla` o
 
 ## 2. Flujo de reporte completo en calle
 
-Prueba principal: hazla con datos móviles, parada junto a un bache real.
+Prueba principal: hazla con datos móviles, parada junto al problema real.
 Anota la precisión bajo cielo abierto y entre edificios si puedes.
 
 | # | Accion | Resultado esperado | Evidencia | Resultado / notas |
 |---|---|---|---|---|
-| 1 | En el mapa toca **Reportar**. | Abre la pantalla **Reportar bache**. | `02-reportar-bache.png` | |
+| 1 | En el mapa toca **Reportar**. | Abre la pantalla **Reportar problema**. | `02-reportar-problema.png` | |
 | 2 | Si Android pide ubicación, elige permiso preciso. | La app puede obtener ubicación; si Android ofrece precisa/aproximada, debe quedar en precisa. | `02-permiso-preciso.png` | |
-| 3 | Toca **Tomar foto** y fotografía el bache. | La cámara del sistema se abre y al aceptar vuelve una vista previa de la foto con **Volver a tomar**. | `02-foto-capturada.png` | |
+| 3 | Toca **Tomar foto** y fotografía el bache u otro problema. | La cámara del sistema se abre y al aceptar vuelve una vista previa de la foto con **Volver a tomar**. | `02-foto-capturada.png` | |
 | 4 | Espera la tarjeta de ubicación. | Debe mostrar **Ubicación capturada (±N m)**. Anota N bajo cielo abierto: `____ m`; entre edificios: `____ m`. | `02-ubicacion-capturada.png` | |
-| 5 | En **Severidad (opcional)** toca **Leve**, luego **Moderado**, luego **Severo**. | Cada chip se selecciona al tocarlo; dejar uno elegido no bloquea el envio. | `02-severidad.png` | |
-| 6 | En **Descripción (opcional)** escribe una nota corta del lugar. | El contador no rebasa `200/200`. | `02-descripcion.png` | |
-| 7 | Con datos móviles activos toca **Enviar reporte**. | El botón muestra **Enviando…** y regresa al mapa. El nuevo marcador aparece en la zona del bache. | `02-marcador-nuevo.png` | |
-| 8 | Abre **Recientes**. | El reporte nuevo aparece arriba con foto, severidad, descripción y contador de confirmaciones. | `02-recientes-nuevo.png` | |
+| 5 | En **Tipo de problema** toca **Otro** y vuelve a **Bache**. | El chip seleccionado cambia; **Bache** queda elegido por defecto si no se toca nada. | `02-tipo-problema.png` | |
+| 6 | En **Severidad (opcional)** toca **Leve**, luego **Moderado**, luego **Severo**. | Cada chip se selecciona al tocarlo; dejar uno elegido no bloquea el envio. | `02-severidad.png` | |
+| 7 | En **Descripción (opcional)** escribe una nota corta del lugar. | El contador no rebasa `200/200`. | `02-descripcion.png` | |
+| 8 | Con datos móviles activos toca **Enviar reporte**. | El botón muestra **Enviando…** y regresa al mapa. El nuevo marcador aparece en la zona del problema. | `02-marcador-nuevo.png` | |
+| 9 | Abre **Recientes**. | El reporte nuevo aparece arriba con tipo, foto, severidad, descripción y contador de confirmaciones. | `02-recientes-nuevo.png` | |
 
 ## 3. Soft accuracy gate
 
@@ -51,7 +52,7 @@ Esta prueba fuerza un fix malo. La app debe advertir, no bloquear.
 
 | # | Accion | Resultado esperado | Evidencia | Resultado / notas |
 |---|---|---|---|---|
-| 1 | Entra a un lugar techado o pegado a edificios altos y toca **Reportar**. | Abre **Reportar bache**. | `03-reportar-techado.png` | |
+| 1 | Entra a un lugar techado o pegado a edificios altos y toca **Reportar**. | Abre **Reportar problema**. | `03-reportar-techado.png` | |
 | 2 | Toca **Tomar foto** y acepta la foto. | La foto queda lista. | `03-foto-techado.png` | |
 | 3 | Espera el fix. | Si la precisión es baja, aparece **Precisión baja — puedes guardar de todos modos o reintentar**. | `03-precision-baja.png` | |
 | 4 | Toca **Enviar reporte** sin reintentar. | El reporte se guarda aunque la precisión sea baja. | `03-guardado-precision-baja.png` | |
@@ -80,7 +81,7 @@ Esta prueba fuerza un fix malo. La app debe advertir, no bloquear.
 | # | Accion | Resultado esperado | Evidencia | Resultado / notas |
 |---|---|---|---|---|
 | 1 | Toca **Reportar** y luego **Tomar foto**. | Se abre la cámara del sistema. | `06-camara-abierta.png` | |
-| 2 | Cancela la cámara con atrás/cancelar. | Regresa a **Reportar bache** sin error; **Tomar foto** sigue disponible. | `06-camara-cancelada.png` | |
+| 2 | Cancela la cámara con atrás/cancelar. | Regresa a **Reportar problema** sin error; **Tomar foto** sigue disponible. | `06-camara-cancelada.png` | |
 | 3 | Toca **Volver**. | Regresa al mapa; la app sigue usable. | `06-volver-mapa.png` | |
 
 ## 7. Confirmar un reporte de Max
@@ -118,7 +119,7 @@ Usa un reporte que no hayas creado tú en esta instalación.
 |---|---|---|---|---|
 | 1 | Captura el mapa normal con varios marcadores. | Se ve **BacheWatch**, **Reportar**, **Recientes** y marcadores. | `10-mapa-marcadores.png` | |
 | 2 | Captura el mapa con **Zonas** activo. | Se ve el heatmap. | `10-heatmap.png` | |
-| 3 | Captura el flujo **Reportar bache** con foto y ubicación. | Se ven foto, ubicación, severidad, descripción y **Enviar reporte**. | `10-reportar-flow.png` | |
+| 3 | Captura el flujo **Reportar problema** con foto y ubicación. | Se ven foto, ubicación, tipo, severidad, descripción y **Enviar reporte**. | `10-reportar-flow.png` | |
 | 4 | Captura un detalle de reporte. | Se ven foto, severidad, confirmaciones y **Confirmar** o **Confirmado**. | `10-detalle-confirmar.png` | |
 | 5 | Captura **Recientes**. | Se ve la lista con fotos y confirmaciones. | `10-recientes.png` | |
 | 6 | Captura el diálogo de permiso de Android o la tarjeta sin permiso. | Queda evidencia de la ruta de permisos. | `10-permisos.png` | |
